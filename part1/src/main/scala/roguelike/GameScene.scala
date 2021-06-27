@@ -5,16 +5,18 @@ import indigo.scenes._
 
 import roguelike.utils.{MapRenderer, TerminalText}
 import roguelike.utils.MapTile
+import roguelike.model.Model
+import roguelike.utils.ConsoleEmulator
 
-object GameScene extends Scene[Unit, Unit, Unit]:
+object GameScene extends Scene[Unit, Model, Unit]:
 
-  type SceneModel     = Unit
+  type SceneModel     = Model
   type SceneViewModel = Unit
 
   val name: SceneName =
     SceneName("game scene")
 
-  val modelLens: Lens[Unit, Unit] =
+  val modelLens: Lens[Model, Model] =
     Lens.keepLatest
 
   val viewModelLens: Lens[Unit, Unit] =
@@ -26,33 +28,42 @@ object GameScene extends Scene[Unit, Unit, Unit]:
   val subSystems: Set[SubSystem] =
     Set()
 
-  def updateModel(context: FrameContext[Unit], model: Unit): GlobalEvent => Outcome[Unit] =
-    case KeyboardEvent.KeyUp(Key.SPACE) =>
-      Outcome(model).addGlobalEvents(SceneEvent.JumpTo(StartScene.name))
+  def updateModel(context: FrameContext[Unit], model: Model): GlobalEvent => Outcome[Model] =
+    case KeyboardEvent.KeyUp(Key.UP_ARROW) =>
+      Outcome(model.copy(player = model.player.moveUp))
+
+    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) =>
+      Outcome(model.copy(player = model.player.moveDown))
+
+    case KeyboardEvent.KeyUp(Key.LEFT_ARROW) =>
+      Outcome(model.copy(player = model.player.moveLeft))
+
+    case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) =>
+      Outcome(model.copy(player = model.player.moveRight))
 
     case _ =>
       Outcome(model)
 
   def updateViewModel(
       context: FrameContext[Unit],
-      model: Unit,
+      model: Model,
       viewModel: Unit
   ): GlobalEvent => Outcome[Unit] =
     _ => Outcome(viewModel)
 
   val mapRenderer: MapRenderer =
-    MapRenderer(Assets.tileMap, Size(3, 3), Size(10, 10))
+    MapRenderer(Assets.tileMap, RogueLikeGame.screenSize, RogueLikeGame.charSize)
 
-  def present(context: FrameContext[Unit], model: Unit, viewModel: Unit): Outcome[SceneUpdateFragment] =
-    val surround = MapTile(DfTiles.Tile.`░`, RGB.Cyan, RGBA.Blue)
-    val hero     = MapTile(DfTiles.Tile.`@`, RGB.Magenta)
-    
+  val console: ConsoleEmulator =
+    ConsoleEmulator(RogueLikeGame.screenSize)
+
+  def present(context: FrameContext[Unit], model: Model, viewModel: Unit): Outcome[SceneUpdateFragment] =
     Outcome(
       SceneUpdateFragment(
         mapRenderer.withMap(
-          List(surround, surround, surround) ++
-            List(surround, hero, surround) ++
-            List(surround, surround, surround)
+          console
+            .put(model.player.position, DfTiles.Tile.`@`)
+            .draw(MapTile(DfTiles.Tile.SPACE))
         )
       )
     )

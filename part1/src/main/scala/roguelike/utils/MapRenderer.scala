@@ -114,7 +114,7 @@ object MapRenderer:
 final case class MapTile(char: DfTiles.Tile, foreground: RGB, background: RGBA)
 object MapTile:
   def apply(char: DfTiles.Tile): MapTile =
-    MapTile(char, RGB.White, RGBA.None)
+    MapTile(char, RGB.White, RGBA.Zero)
 
   def apply(char: DfTiles.Tile, foreground: RGB): MapTile =
     MapTile(char, foreground, RGBA.Zero)
