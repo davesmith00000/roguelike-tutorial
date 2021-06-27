@@ -39,8 +39,11 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, Unit]:
         )
     )
 
+  // Creating the map now means it cannot be random.
+  // The alternative is to "start the game", and then
+  // generate the map when the level starts.
   def initialModel(startupData: Unit): Outcome[Model] =
-    Outcome(Model.initial(screenSize))
+    Outcome(Model.initial(Dice.fromSeed(0), screenSize))
 
   def initialViewModel(startupData: Unit, model: Model): Outcome[Unit] =
     Outcome(())

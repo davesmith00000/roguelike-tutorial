@@ -1,25 +1,31 @@
 package roguelike.model
 
 import indigo._
-import roguelike.terminal.MapTile
-import roguelike.DfTiles
+
 import indigoextras.trees.QuadTree
 import indigoextras.trees.QuadTree.{QuadBranch, QuadEmpty, QuadLeaf}
 import indigoextras.geometry.Vertex
+
+import roguelike.terminal.MapTile
+import roguelike.DfTiles
+
 import scala.annotation.tailrec
 
 final case class Model(screen: Size, player: Player, entities: List[Entity], gameMap: GameMap):
   def entitiesList: List[Entity] =
     player :: entities
 object Model:
-  def initial(screenSize: Size): Model =
+  def initial(dice: Dice, screenSize: Size): Model =
+    val dungeon =
+      DungeonGen.makeMap(dice, 30, 6, 10, screenSize)
+
     Model(
       screenSize,
-      Player.initial(screenSize),
+      Player(dungeon.playerStart),
       List(
         NPC((screenSize.toPoint / 2) + Point(-5))
       ),
-      GameMap.initial(screenSize)
+      GameMap.initial(screenSize, dungeon)
     )
 
 sealed trait Entity:
@@ -36,7 +42,7 @@ final case class Player(position: Point) extends Entity:
   def moveBy(amount: Point, gameMap: GameMap): Player =
     gameMap.lookUp(position + amount) match
       case None =>
-        this.copy(position = position + amount)
+        this
 
       case Some(tile) if tile.isBlocked =>
         this
@@ -53,10 +59,6 @@ final case class Player(position: Point) extends Entity:
   def moveRight(gameMap: GameMap): Player =
     moveBy(Point(1, 0), gameMap)
 
-object Player:
-  def initial(screenSize: Size): Player =
-    Player(screenSize.toPoint / 2)
-
 final case class NPC(position: Point) extends Entity:
   val tile: MapTile = MapTile(DfTiles.Tile.WHITE_SMILING_FACE, RGB.Cyan)
 
@@ -71,7 +73,7 @@ sealed trait GameTile:
 
 object GameTile:
   case object DarkWall extends GameTile:
-    val mapTile: MapTile    = MapTile(DfTiles.Tile.DARK_SHADE, RGB(0.9, 0, 0.0))
+    val mapTile: MapTile    = MapTile(DfTiles.Tile.DARK_SHADE, RGB(0.5, 0.1, 0.1))
     val blocked: Boolean    = true
     val blockSight: Boolean = true
 
@@ -85,6 +87,13 @@ final case class GameMap(size: Size, tileMap: QuadTree[GameTile]):
     this.copy(
       tileMap = tileMap.insertElement(tile, Vertex.fromPoint(coords))
     )
+
+  def insert(tiles: List[(Point, GameTile)]): GameMap =
+    this.copy(
+      tileMap = tileMap.insertElements(tiles.map(p => (p._2, Vertex.fromPoint(p._1))))
+    )
+  def insert(tiles: (Point, GameTile)*): GameMap =
+    insert(tiles.toList)
 
   def lookUp(at: Point): Option[GameTile] =
     tileMap.fetchElementAt(Vertex.fromPoint(at))
@@ -120,10 +129,8 @@ final case class GameMap(size: Size, tileMap: QuadTree[GameTile]):
     rec(List(tileMap), Nil)
 
 object GameMap:
-  def initial(size: Size): GameMap =
+  def initial(size: Size, dungeon: Dungeon): GameMap =
     GameMap(
       size,
       QuadTree.empty(size.width, size.height)
-    ).insert(Point(30, 22), GameTile.DarkWall)
-      .insert(Point(31, 22), GameTile.DarkWall)
-      .insert(Point(32, 22), GameTile.DarkWall)
+    ).insert(dungeon.positionedTiles)
