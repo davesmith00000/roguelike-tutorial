@@ -10,7 +10,7 @@ import roguelike.model.Model
 @JSExportTopLevel("IndigoGame")
 object RogueLikeGame extends IndigoGame[Unit, Unit, Model, Unit]:
 
-  val screenSize: Size = Size(80, 50)
+  val screenSize: Size = Size(80, 45)
   val charSize: Size = Size(10, 10)
 
   def initialScene(bootData: Unit): Option[SceneName] =
