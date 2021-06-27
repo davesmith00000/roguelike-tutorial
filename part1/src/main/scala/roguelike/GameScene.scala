@@ -3,10 +3,11 @@ package roguelike
 import indigo._
 import indigo.scenes._
 
-import roguelike.utils.{MapRenderer, TerminalText}
-import roguelike.utils.MapTile
+import roguelike.terminal.TerminalText
+import roguelike.terminal.MapTile
+import roguelike.terminal.TerminalEmulator
+
 import roguelike.model.Model
-import roguelike.utils.ConsoleEmulator
 
 object GameScene extends Scene[Unit, Model, Unit]:
 
@@ -51,19 +52,14 @@ object GameScene extends Scene[Unit, Model, Unit]:
   ): GlobalEvent => Outcome[Unit] =
     _ => Outcome(viewModel)
 
-  val mapRenderer: MapRenderer =
-    MapRenderer(Assets.tileMap, RogueLikeGame.screenSize, RogueLikeGame.charSize)
-
-  val console: ConsoleEmulator =
-    ConsoleEmulator(RogueLikeGame.screenSize)
+  val terminal: TerminalEmulator =
+    TerminalEmulator(RogueLikeGame.screenSize)
 
   def present(context: FrameContext[Unit], model: Model, viewModel: Unit): Outcome[SceneUpdateFragment] =
     Outcome(
       SceneUpdateFragment(
-        mapRenderer.withMap(
-          console
-            .put(model.player.position, DfTiles.Tile.`@`)
-            .draw(MapTile(DfTiles.Tile.SPACE))
-        )
+        terminal
+          .put(model.player.position, DfTiles.Tile.`@`)
+          .draw(Assets.tileMap, RogueLikeGame.charSize, MapTile(DfTiles.Tile.SPACE))
       )
     )
