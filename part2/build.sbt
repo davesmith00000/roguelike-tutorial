@@ -19,7 +19,7 @@ lazy val roguelike =
       title := "Indigo Roguelike!",
       gameAssetsDirectory := "assets",
       windowStartWidth := 80 * 10,
-      windowStartHeight := 50 * 10,
+      windowStartHeight := 45 * 10,
       libraryDependencies ++= Seq(
         "io.indigoengine" %%% "indigo-json-circe" % "0.8.2",
         "io.indigoengine" %%% "indigo"            % "0.8.2",
