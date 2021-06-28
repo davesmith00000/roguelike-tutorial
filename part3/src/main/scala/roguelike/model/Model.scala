@@ -11,11 +11,14 @@ import roguelike.DfTiles
 
 import scala.annotation.tailrec
 
-final case class Model(screen: Size, player: Player, entities: List[Entity], gameMap: GameMap):
+final case class Model(screenSize: Size, player: Player, entities: List[Entity], gameMap: GameMap):
   def entitiesList: List[Entity] =
     player :: entities
 object Model:
-  def initial(dice: Dice, screenSize: Size): Model =
+  def initial(screenSize: Size): Model =
+    Model(screenSize, Player(Point.zero), Nil, GameMap(screenSize, QuadTree.empty(screenSize.width, screenSize.height)))
+
+  def gen(dice: Dice, screenSize: Size): Model =
     val dungeon =
       DungeonGen.makeMap(dice, 30, 6, 10, screenSize)
 

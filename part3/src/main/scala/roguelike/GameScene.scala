@@ -57,11 +57,20 @@ object GameScene extends Scene[Unit, Model, Unit]:
     TerminalEmulator(RogueLikeGame.screenSize)
 
   def present(context: FrameContext[Unit], model: Model, viewModel: Unit): Outcome[SceneUpdateFragment] =
-    Outcome(
-      SceneUpdateFragment(
-        terminal
-          .put(model.gameMap.toPositionedTiles)
-          .put(model.entitiesList.map(e => (e.position, e.tile)))
-          .draw(Assets.tileMap, RogueLikeGame.charSize, GameTile.DarkWall.mapTile)
+    if model.gameMap.tileMap.isEmpty then
+      Outcome(
+        SceneUpdateFragment(
+          TextBox("No level", 100, 30)
+            .withColor(RGBA.White)
+            .withFontFamily(FontFamily.monospace)
+        )
       )
-    )
+    else
+      Outcome(
+        SceneUpdateFragment(
+          terminal
+            .put(model.gameMap.toPositionedTiles)
+            .put(model.entitiesList.map(e => (e.position, e.tile)))
+            .draw(Assets.tileMap, RogueLikeGame.charSize, GameTile.DarkWall.mapTile)
+        )
+      )

@@ -11,7 +11,7 @@ import roguelike.model.Model
 object RogueLikeGame extends IndigoGame[Unit, Unit, Model, Unit]:
 
   val screenSize: Size = Size(80, 45)
-  val charSize: Size = Size(10, 10)
+  val charSize: Size   = Size(10, 10)
 
   def initialScene(bootData: Unit): Option[SceneName] =
     None
@@ -37,13 +37,10 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, Unit]:
           TerminalEntity.shader(Assets.Required.mapVertShader, Assets.Required.mapFragShader),
           TerminalText.shader(Assets.Required.textFragShader)
         )
-    )
+    ).addGlobalEvents(RegenerateLevel)
 
-  // Creating the map now means it cannot be random.
-  // The alternative is to "start the game", and then
-  // generate the map when the level starts.
   def initialModel(startupData: Unit): Outcome[Model] =
-    Outcome(Model.initial(Dice.fromSeed(0), screenSize))
+    Outcome(Model.initial(screenSize))
 
   def initialViewModel(startupData: Unit, model: Model): Outcome[Unit] =
     Outcome(())
@@ -52,10 +49,13 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, Unit]:
     Outcome(Startup.Success(()))
 
   def updateModel(context: FrameContext[Unit], model: Model): GlobalEvent => Outcome[Model] =
-    _ => Outcome(model)
+    case RegenerateLevel => Outcome(Model.gen(context.dice, model.screenSize))
+    case _               => Outcome(model)
 
   def updateViewModel(context: FrameContext[Unit], model: Model, viewModel: Unit): GlobalEvent => Outcome[Unit] =
     _ => Outcome(viewModel)
 
   def present(context: FrameContext[Unit], model: Model, viewModel: Unit): Outcome[SceneUpdateFragment] =
     Outcome(SceneUpdateFragment.empty)
+
+case object RegenerateLevel extends GlobalEvent
