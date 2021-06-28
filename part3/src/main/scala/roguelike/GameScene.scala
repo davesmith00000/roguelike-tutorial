@@ -6,14 +6,16 @@ import indigo.scenes._
 import roguelike.terminal.TerminalText
 import roguelike.terminal.MapTile
 import roguelike.terminal.TerminalEmulator
+import roguelike.terminal.TerminalEntity
 
 import roguelike.model.Model
+import roguelike.model.ViewModel
 import roguelike.model.GameTile
 
-object GameScene extends Scene[Unit, Model, Unit]:
+object GameScene extends Scene[Unit, Model, ViewModel]:
 
   type SceneModel     = Model
-  type SceneViewModel = Unit
+  type SceneViewModel = ViewModel
 
   val name: SceneName =
     SceneName("game scene")
@@ -21,7 +23,7 @@ object GameScene extends Scene[Unit, Model, Unit]:
   val modelLens: Lens[Model, Model] =
     Lens.keepLatest
 
-  val viewModelLens: Lens[Unit, Unit] =
+  val viewModelLens: Lens[ViewModel, ViewModel] =
     Lens.keepLatest
 
   val eventFilters: EventFilters =
@@ -43,20 +45,29 @@ object GameScene extends Scene[Unit, Model, Unit]:
     case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) =>
       Outcome(model.copy(player = model.player.moveRight(model.gameMap)))
 
+    case RegenerateLevel =>
+      Outcome(Model.gen(context.dice, model.screenSize))
+
     case _ =>
       Outcome(model)
 
   def updateViewModel(
       context: FrameContext[Unit],
       model: Model,
-      viewModel: Unit
-  ): GlobalEvent => Outcome[Unit] =
-    _ => Outcome(viewModel)
+      viewModel: ViewModel
+  ): GlobalEvent => Outcome[ViewModel] =
+    case RegenerateLevel =>
+      Outcome(
+        viewModel.copy(
+          background = TerminalEmulator(RogueLikeGame.screenSize)
+            .put(model.gameMap.toPositionedTiles)
+        )
+      )
 
-  val terminal: TerminalEmulator =
-    TerminalEmulator(RogueLikeGame.screenSize)
+    case _ =>
+      Outcome(viewModel)
 
-  def present(context: FrameContext[Unit], model: Model, viewModel: Unit): Outcome[SceneUpdateFragment] =
+  def present(context: FrameContext[Unit], model: Model, viewModel: ViewModel): Outcome[SceneUpdateFragment] =
     if model.gameMap.tileMap.isEmpty then
       Outcome(
         SceneUpdateFragment(
@@ -66,11 +77,14 @@ object GameScene extends Scene[Unit, Model, Unit]:
         )
       )
     else
+      val entities =
+        TerminalEmulator(model.screenSize)
+          .put(model.entitiesList.map(e => (e.position, e.tile)))
+
       Outcome(
         SceneUpdateFragment(
-          terminal
-            .put(model.gameMap.toPositionedTiles)
-            .put(model.entitiesList.map(e => (e.position, e.tile)))
+          viewModel.background
+            .combine(entities)
             .draw(Assets.tileMap, RogueLikeGame.charSize, GameTile.DarkWall.mapTile)
         )
       )

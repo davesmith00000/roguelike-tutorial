@@ -6,9 +6,10 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 
 import roguelike.terminal.{TerminalEntity, TerminalText}
 import roguelike.model.Model
+import roguelike.model.ViewModel
 
 @JSExportTopLevel("IndigoGame")
-object RogueLikeGame extends IndigoGame[Unit, Unit, Model, Unit]:
+object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
 
   val screenSize: Size = Size(80, 45)
   val charSize: Size   = Size(10, 10)
@@ -16,7 +17,7 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, Unit]:
   def initialScene(bootData: Unit): Option[SceneName] =
     None
 
-  def scenes(bootData: Unit): NonEmptyList[Scene[Unit, Model, Unit]] =
+  def scenes(bootData: Unit): NonEmptyList[Scene[Unit, Model, ViewModel]] =
     NonEmptyList(GameScene)
 
   val eventFilters: EventFilters =
@@ -42,20 +43,23 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, Unit]:
   def initialModel(startupData: Unit): Outcome[Model] =
     Outcome(Model.initial(screenSize))
 
-  def initialViewModel(startupData: Unit, model: Model): Outcome[Unit] =
-    Outcome(())
+  def initialViewModel(startupData: Unit, model: Model): Outcome[ViewModel] =
+    Outcome(ViewModel.initial(model.screenSize))
 
   def setup(bootData: Unit, assetCollection: AssetCollection, dice: Dice): Outcome[Startup[Unit]] =
     Outcome(Startup.Success(()))
 
   def updateModel(context: FrameContext[Unit], model: Model): GlobalEvent => Outcome[Model] =
-    case RegenerateLevel => Outcome(Model.gen(context.dice, model.screenSize))
-    case _               => Outcome(model)
+    _ => Outcome(model)
 
-  def updateViewModel(context: FrameContext[Unit], model: Model, viewModel: Unit): GlobalEvent => Outcome[Unit] =
+  def updateViewModel(
+      context: FrameContext[Unit],
+      model: Model,
+      viewModel: ViewModel
+  ): GlobalEvent => Outcome[ViewModel] =
     _ => Outcome(viewModel)
 
-  def present(context: FrameContext[Unit], model: Model, viewModel: Unit): Outcome[SceneUpdateFragment] =
+  def present(context: FrameContext[Unit], model: Model, viewModel: ViewModel): Outcome[SceneUpdateFragment] =
     Outcome(SceneUpdateFragment.empty)
 
 case object RegenerateLevel extends GlobalEvent
