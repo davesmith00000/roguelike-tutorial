@@ -1,3 +1,3 @@
-var indigo = require("/target/scala-3.0.0/roguelike-fastopt.js");
+var indigo = require("/target/indigoBuild/scripts/roguelike-fastopt.js");
 
 indigo.IndigoGame.launch({"width": window.innerWidth.toString(), "height": window.innerHeight.toString()})
