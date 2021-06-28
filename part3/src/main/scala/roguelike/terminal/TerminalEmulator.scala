@@ -34,6 +34,15 @@ final case class TerminalEmulator(screenSize: Size, charMap: QuadTree[MapTile]):
   def get(coords: Point): Option[MapTile] =
     charMap.fetchElementAt(Vertex.fromPoint(coords))
 
+  def delete(coords: Point): TerminalEmulator =
+    this.copy(charMap = charMap.removeElement(Vertex.fromPoint(coords)))
+
+  def clear: TerminalEmulator =
+    this.copy(charMap = QuadTree.empty[MapTile](screenSize.width.toDouble, screenSize.height.toDouble))
+
+  def optimise: TerminalEmulator =
+    this.copy(charMap = charMap.prune)
+
   def toTileList(default: MapTile): List[MapTile] =
     coordsList.map(pt => get(pt).getOrElse(default))
 
