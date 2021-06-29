@@ -1,3 +1,3 @@
-# Part 3 - Generating a dungeon
+# Part 4 - Field of View
 
-[Tutorial Part 3](http://rogueliketutorials.com/tutorials/tcod/v2/part-3/)
+[Tutorial Part 4](http://rogueliketutorials.com/tutorials/tcod/v2/part-4/)

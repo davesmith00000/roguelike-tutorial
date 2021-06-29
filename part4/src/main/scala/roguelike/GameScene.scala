@@ -34,16 +34,16 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
 
   def updateModel(context: FrameContext[Unit], model: Model): GlobalEvent => Outcome[Model] =
     case KeyboardEvent.KeyUp(Key.UP_ARROW) =>
-      Outcome(model.copy(player = model.player.moveUp(model.gameMap)))
+      Outcome(model.moveUp)
 
     case KeyboardEvent.KeyUp(Key.DOWN_ARROW) =>
-      Outcome(model.copy(player = model.player.moveDown(model.gameMap)))
+      Outcome(model.moveDown)
 
     case KeyboardEvent.KeyUp(Key.LEFT_ARROW) =>
-      Outcome(model.copy(player = model.player.moveLeft(model.gameMap)))
+      Outcome(model.moveLeft)
 
     case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) =>
-      Outcome(model.copy(player = model.player.moveRight(model.gameMap)))
+      Outcome(model.moveRight)
 
     case RegenerateLevel =>
       Outcome(Model.gen(context.dice, model.screenSize))
@@ -77,6 +77,10 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
         )
       )
     else
+      val visibleBg =
+        TerminalEmulator(model.screenSize)
+          .put(model.gameMap.visibleTiles)
+
       val entities =
         TerminalEmulator(model.screenSize)
           .put(model.entitiesList.map(e => (e.position, e.tile)))
@@ -84,7 +88,8 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       Outcome(
         SceneUpdateFragment(
           viewModel.background
+            .combine(visibleBg)
             .combine(entities)
-            .draw(Assets.tileMap, RogueLikeGame.charSize, GameTile.DarkWall.mapTile)
+            .draw(Assets.tileMap, RogueLikeGame.charSize, GameTile.Wall.darkMapTile)
         )
       )
