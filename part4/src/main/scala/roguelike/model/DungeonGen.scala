@@ -13,7 +13,7 @@ object DungeonGen:
   def createRoom(rect: Rectangle): List[(Point, GameTile)] =
     (rect.top + 1 until rect.bottom).flatMap { y =>
       (rect.left + 1 until rect.right).map { x =>
-        (Point(x, y), GameTile.Ground(false))
+        (Point(x, y), GameTile.Ground)
       }
     }.toList
   def createRoom(x: Int, y: Int, width: Int, height: Int): List[(Point, GameTile)] =
@@ -21,12 +21,12 @@ object DungeonGen:
 
   def createHorizontalTunnel(x1: Int, x2: Int, y: Int): List[(Point, GameTile)] =
     (Math.min(x1, x2) to Math.max(x1, x2)).map { x =>
-      (Point(x, y), GameTile.Ground(false))
+      (Point(x, y), GameTile.Ground)
     }.toList
 
   def createVerticalTunnel(y1: Int, y2: Int, x: Int): List[(Point, GameTile)] =
     (Math.min(y1, y2) to Math.max(y1, y2)).map { y =>
-      (Point(x, y), GameTile.Ground(false))
+      (Point(x, y), GameTile.Ground)
     }.toList
 
   def makeMap(dice: Dice, maxRooms: Int, roomMinSize: Int, roomMaxSize: Int, mapSize: Size): Dungeon =

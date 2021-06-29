@@ -39,7 +39,7 @@ object Model:
       screenSize,
       Player(Point.zero),
       Nil,
-      GameMap(screenSize, QuadTree.empty(screenSize.width, screenSize.height), Nil)
+      GameMap.initial(screenSize)
     )
 
   def gen(dice: Dice, screenSize: Size): Model =

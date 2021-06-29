@@ -11,7 +11,7 @@ import indigoextras.geometry.Vertex
 import scala.annotation.tailrec
 import indigoextras.geometry.BoundingBox
 
-final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[Point]):
+final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[Point], explored: Set[Point]):
 
   private def updateMap(tm: QuadTree[GameTile], coords: Point, f: GameTile => GameTile): QuadTree[GameTile] =
     val vtx = Vertex.fromPoint(coords)
@@ -22,8 +22,8 @@ final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[
   def update(playerPosition: Point): GameMap =
     val newVisible = GameMap.calculateFOV(15, playerPosition, tileMap)
     this.copy(
-      tileMap = newVisible.foldLeft(tileMap) { case (acc, pt) => updateMap(acc, pt, _.markExplored) },
-      visible = newVisible
+      visible = newVisible,
+      explored = explored ++ newVisible
     )
 
   def visibleTiles: List[(Point, MapTile)] =
@@ -46,7 +46,7 @@ final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[
   def lookUp(at: Point): Option[GameTile] =
     tileMap.fetchElementAt(Vertex.fromPoint(at))
 
-  def toPositionedTiles: List[(Point, MapTile)] =
+  def toExploredTiles: List[(Point, MapTile)] =
     @tailrec
     def rec(open: List[QuadTree[GameTile]], acc: List[(Point, MapTile)]): List[(Point, MapTile)] =
       open match
@@ -58,8 +58,11 @@ final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[
             case _: QuadEmpty[GameTile] =>
               rec(xs, acc)
 
-            case l: QuadLeaf[GameTile] =>
+            case l: QuadLeaf[GameTile] if explored.contains(l.exactPosition.toPoint) =>
               rec(xs, (l.exactPosition.toPoint, l.value.darkMapTile) :: acc)
+
+            case l: QuadLeaf[GameTile] =>
+              rec(xs, acc)
 
             case b: QuadBranch[GameTile] if b.isEmpty =>
               rec(xs, acc)
@@ -77,12 +80,16 @@ final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[
     rec(List(tileMap), Nil)
 
 object GameMap:
-  def gen(size: Size, dungeon: Dungeon): GameMap =
+  def initial(size: Size): GameMap =
     GameMap(
       size,
       QuadTree.empty(size.width, size.height),
-      Nil
-    ).insert(dungeon.positionedTiles)
+      Nil,
+      Set()
+    )
+
+  def gen(size: Size, dungeon: Dungeon): GameMap =
+    initial(size).insert(dungeon.positionedTiles)
 
   def calculateFOV(radius: Int, center: Point, tileMap: QuadTree[GameTile]): List[Point] =
     val bounds: Rectangle =
@@ -105,7 +112,7 @@ object GameMap:
 
           if lineOfSight.forall(tiles.contains) then
             visibleTiles(
-              pts, //.filterNot(lineOfSight.contains),
+              pts,
               pt :: acc
             )
           else visibleTiles(pts, acc)

@@ -56,16 +56,18 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       model: Model,
       viewModel: ViewModel
   ): GlobalEvent => Outcome[ViewModel] =
-    case RegenerateLevel =>
+    case KeyboardEvent.KeyUp(_) | RegenerateLevel =>
       Outcome(
         viewModel.copy(
           background = TerminalEmulator(RogueLikeGame.screenSize)
-            .put(model.gameMap.toPositionedTiles)
+            .put(model.gameMap.toExploredTiles)
         )
       )
 
     case _ =>
       Outcome(viewModel)
+
+  val shroud: MapTile = MapTile(DfTiles.Tile.SPACE)
 
   def present(context: FrameContext[Unit], model: Model, viewModel: ViewModel): Outcome[SceneUpdateFragment] =
     if model.gameMap.tileMap.isEmpty then
@@ -90,6 +92,6 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
           viewModel.background
             .combine(visibleBg)
             .combine(entities)
-            .draw(Assets.tileMap, RogueLikeGame.charSize, GameTile.Wall.darkMapTile)
+            .draw(Assets.tileMap, RogueLikeGame.charSize, shroud)
         )
       )

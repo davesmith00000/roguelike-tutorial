@@ -9,9 +9,7 @@ sealed trait GameTile:
   def darkMapTile: MapTile
   def blocked: Boolean
   def blockSight: Boolean
-  def explored: Boolean
   def isBlocked: Boolean = blocked
-  def markExplored: GameTile
 
 object GameTile:
   case object Wall extends GameTile:
@@ -19,12 +17,9 @@ object GameTile:
     val darkMapTile: MapTile    = MapTile(DfTiles.Tile.DARK_SHADE, RGB(0.4, 0.1, 0.1))
     val blocked: Boolean        = true
     val blockSight: Boolean     = true
-    val explored: Boolean       = false
-    def markExplored: GameTile = this
 
-  final case class Ground(explored: Boolean) extends GameTile:
+  case object Ground extends GameTile:
     val lightMapTile: MapTile = MapTile(DfTiles.Tile.LIGHT_SHADE, RGB(1.0, 1.0, 0.0), RGBA(0.75, 0.6, 0.3, 1.0))
-    val darkMapTile: MapTile  = MapTile(DfTiles.Tile.LIGHT_SHADE, RGB(0.1, 0.1, 0.4))
+    val darkMapTile: MapTile  = MapTile(DfTiles.Tile.LIGHT_SHADE, RGB(0.0, 0.4, 1.0), RGBA(0.0, 0.0, 0.5, 1.0))
     val blocked: Boolean      = false
     val blockSight: Boolean   = false
-    def markExplored: GameTile = this.copy(explored = true)
