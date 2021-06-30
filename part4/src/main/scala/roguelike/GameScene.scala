@@ -57,41 +57,36 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       viewModel: ViewModel
   ): GlobalEvent => Outcome[ViewModel] =
     case KeyboardEvent.KeyUp(_) | RegenerateLevel =>
+      val term =
+        TerminalEmulator(RogueLikeGame.screenSize)
+          .put(model.gameMap.toExploredTiles)
+          .put(model.gameMap.visibleTiles)
+          .put(model.entitiesList.map(e => (e.position, e.tile)))
+          .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
+
       Outcome(
         viewModel.copy(
-          background = TerminalEmulator(RogueLikeGame.screenSize)
-            .put(model.gameMap.toExploredTiles)
+          terminalEntity = Option(term)
         )
       )
 
     case _ =>
       Outcome(viewModel)
 
-  val shroud: MapTile = MapTile(DfTiles.Tile.SPACE)
-
   def present(context: FrameContext[Unit], model: Model, viewModel: ViewModel): Outcome[SceneUpdateFragment] =
-    if model.gameMap.tileMap.isEmpty then
-      Outcome(
-        SceneUpdateFragment(
-          TextBox("No level", 100, 30)
-            .withColor(RGBA.White)
-            .withFontFamily(FontFamily.monospace)
+    viewModel.terminalEntity match
+      case None =>
+        Outcome(
+          SceneUpdateFragment(
+            TextBox("No level", 100, 30)
+              .withColor(RGBA.White)
+              .withFontFamily(FontFamily.monospace)
+          )
         )
-      )
-    else
-      val visibleBg =
-        TerminalEmulator(model.screenSize)
-          .put(model.gameMap.visibleTiles)
 
-      val entities =
-        TerminalEmulator(model.screenSize)
-          .put(model.entitiesList.map(e => (e.position, e.tile)))
-
-      Outcome(
-        SceneUpdateFragment(
-          viewModel.background
-            .combine(visibleBg)
-            .combine(entities)
-            .draw(Assets.tileMap, RogueLikeGame.charSize, shroud)
+      case Some(entity) =>
+        Outcome(
+          SceneUpdateFragment(
+            entity
+          )
         )
-      )
