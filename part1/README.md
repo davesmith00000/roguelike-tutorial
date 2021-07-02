@@ -4,4 +4,4 @@
 
 [Tutorial Part 1](http://rogueliketutorials.com/tutorials/tcod/v2/part-1/)
 
-![Drawing the ‘@’ symbol and moving it around](/roguelike_part1.gif "Drawing the ‘@’ symbol and moving it around")
+![Drawing the ‘@’ symbol and moving it around](roguelike_part1.gif "Drawing the ‘@’ symbol and moving it around")
