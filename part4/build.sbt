@@ -22,9 +22,9 @@ lazy val roguelike =
       windowStartWidth := 80 * 10,
       windowStartHeight := 45 * 10,
       libraryDependencies ++= Seq(
-        "io.indigoengine" %%% "indigo-json-circe" % "0.8.2",
-        "io.indigoengine" %%% "indigo"            % "0.8.2",
-        "io.indigoengine" %%% "indigo-extras"     % "0.8.2"
+        "io.indigoengine" %%% "indigo-json-circe" % "0.9.0",
+        "io.indigoengine" %%% "indigo"            % "0.9.0",
+        "io.indigoengine" %%% "indigo-extras"     % "0.9.0"
       )
       // scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) } // required for parcel, but will break indigoRun & indigoBuild
     )

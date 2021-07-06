@@ -78,15 +78,21 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       case None =>
         Outcome(
           SceneUpdateFragment(
-            TextBox("No level", 100, 30)
-              .withColor(RGBA.White)
-              .withFontFamily(FontFamily.monospace)
+            Layer(
+              BindingKey("game"),
+              TextBox("No level", 100, 30)
+                .withColor(RGBA.White)
+                .withFontFamily(FontFamily.monospace)
+            )
           )
         )
 
       case Some(entity) =>
         Outcome(
           SceneUpdateFragment(
-            entity
+            Layer(
+              BindingKey("game"),
+              entity
+            )
           )
         )

@@ -7,6 +7,7 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 import roguelike.terminal.{TerminalEntity, TerminalText}
 import roguelike.model.Model
 import roguelike.model.ViewModel
+import indigoextras.subsystems.FPSCounter
 
 @JSExportTopLevel("IndigoGame")
 object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
@@ -35,8 +36,11 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
         .withFonts(DfTiles.Fonts.fontInfo)
         .withAssets(Assets.assets)
         .withShaders(
-          TerminalEntity.shader(Assets.Required.mapVertShader, Assets.Required.mapFragShader),
+          TerminalEntity.shader(Assets.Required.mapFragShader),
           TerminalText.shader(Assets.Required.textFragShader)
+        )
+        .withSubSystems(
+          FPSCounter(Point(5), 30, BindingKey("fps"))
         )
     ).addGlobalEvents(RegenerateLevel)
 
@@ -60,6 +64,11 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
     _ => Outcome(viewModel)
 
   def present(context: FrameContext[Unit], model: Model, viewModel: ViewModel): Outcome[SceneUpdateFragment] =
-    Outcome(SceneUpdateFragment.empty)
+    Outcome(
+      SceneUpdateFragment(
+        Layer(BindingKey("game")),
+        Layer(BindingKey("fps"))
+      )
+    )
 
 case object RegenerateLevel extends GlobalEvent
