@@ -11,7 +11,9 @@ import indigoextras.geometry.Vertex
 import scala.annotation.tailrec
 import indigoextras.geometry.BoundingBox
 
-final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[Point], explored: Set[Point]):
+final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[Point], explored: Set[Point], entities: List[Entity]):
+  def entitiesList: List[Entity] =
+    entities.filter(e => visible.contains(e.position))
 
   private def updateMap(tm: QuadTree[GameTile], coords: Point, f: GameTile => GameTile): QuadTree[GameTile] =
     val vtx = Vertex.fromPoint(coords)
@@ -85,7 +87,10 @@ object GameMap:
       size,
       QuadTree.empty(size.width, size.height),
       Nil,
-      Set()
+      Set(),
+      List(
+        NPC((size.toPoint / 2) + Point(-5))
+      )
     )
 
   def gen(size: Size, dungeon: Dungeon): GameMap =

@@ -4,9 +4,9 @@ import indigo._
 
 import indigoextras.trees.QuadTree
 
-final case class Model(screenSize: Size, player: Player, entities: List[Entity], gameMap: GameMap):
+final case class Model(screenSize: Size, player: Player, gameMap: GameMap):
   def entitiesList: List[Entity] =
-    player :: entities
+    player :: gameMap.entitiesList
 
   def moveUp: Model =
     val p = player.moveUp(gameMap)
@@ -38,7 +38,6 @@ object Model:
     Model(
       screenSize,
       Player(Point.zero),
-      Nil,
       GameMap.initial(screenSize)
     )
 
@@ -49,8 +48,5 @@ object Model:
     Model(
       screenSize,
       Player(dungeon.playerStart),
-      List(
-        NPC((screenSize.toPoint / 2) + Point(-5))
-      ),
       GameMap.gen(screenSize, dungeon).update(dungeon.playerStart)
     )
