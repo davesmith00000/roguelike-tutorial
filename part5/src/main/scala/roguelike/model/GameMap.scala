@@ -82,19 +82,17 @@ final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[
     rec(List(tileMap), Nil)
 
 object GameMap:
-  def initial(size: Size): GameMap =
+  def initial(size: Size, entities: List[Entity]): GameMap =
     GameMap(
       size,
       QuadTree.empty(size.width, size.height),
       Nil,
       Set(),
-      List(
-        NPC((size.toPoint / 2) + Point(-5))
-      )
+      entities
     )
 
   def gen(size: Size, dungeon: Dungeon): GameMap =
-    initial(size).insert(dungeon.positionedTiles)
+    initial(size, dungeon.entities).insert(dungeon.positionedTiles)
 
   def calculateFOV(radius: Int, center: Point, tileMap: QuadTree[GameTile]): List[Point] =
     val bounds: Rectangle =

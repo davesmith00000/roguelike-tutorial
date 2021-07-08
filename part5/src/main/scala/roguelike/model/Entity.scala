@@ -7,13 +7,22 @@ import roguelike.DfTiles
 sealed trait Entity:
   def position: Point
   def tile: MapTile
+  def blocksMovement: Boolean
+  def name: String
 
   def moveBy(amount: Point, gameMap: GameMap): Entity
   def moveBy(x: Int, y: Int, gameMap: GameMap): Entity =
     moveBy(Point(x, y), gameMap)
 
 final case class Player(position: Point) extends Entity:
-  val tile: MapTile = MapTile(DfTiles.Tile.`@`, RGB.Magenta)
+  val tile: MapTile           = MapTile(DfTiles.Tile.`@`, RGB.Magenta)
+  val blocksMovement: Boolean = false
+  val name: String            = "Player"
+
+  def bump(amount: Point, gameMap: GameMap): PlayerUpdate =
+    gameMap.entities.find(e => e.position == position + amount && e.blocksMovement) match
+      case None         => PlayerUpdate(moveBy(amount, gameMap), "")
+      case Some(target) => PlayerUpdate(this, s"You kick the ${target.name}, much to its annoyance!")
 
   def moveBy(amount: Point, gameMap: GameMap): Player =
     gameMap.lookUp(position + amount) match
@@ -26,17 +35,22 @@ final case class Player(position: Point) extends Entity:
       case Some(tile) =>
         this.copy(position = position + amount)
 
-  def moveUp(gameMap: GameMap): Player =
-    moveBy(Point(0, -1), gameMap)
-  def moveDown(gameMap: GameMap): Player =
-    moveBy(Point(0, 1), gameMap)
-  def moveLeft(gameMap: GameMap): Player =
-    moveBy(Point(-1, 0), gameMap)
-  def moveRight(gameMap: GameMap): Player =
-    moveBy(Point(1, 0), gameMap)
+final case class Orc(position: Point) extends Entity:
+  val tile: MapTile           = MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63))
+  val blocksMovement: Boolean = true
+  val name: String            = "Orc"
 
-final case class NPC(position: Point) extends Entity:
-  val tile: MapTile = MapTile(DfTiles.Tile.WHITE_SMILING_FACE, RGB.Cyan)
-
-  def moveBy(amount: Point, gameMap: GameMap): NPC =
+  def moveBy(amount: Point, gameMap: GameMap): Orc =
     this.copy(position = position + amount)
+
+final case class Troll(position: Point) extends Entity:
+  val tile: MapTile           = MapTile(DfTiles.Tile.`T`, RGB.fromColorInts(0, 127, 0))
+  val blocksMovement: Boolean = true
+  val name: String            = "Troll"
+
+  def moveBy(amount: Point, gameMap: GameMap): Troll =
+    this.copy(position = position + amount)
+
+final case class PlayerUpdate(player: Player, message: String)
+enum PlayerAction derives CanEqual:
+  case MoveNorth, MoveSouth, MoveEast, MoveWest, Escape, Bump

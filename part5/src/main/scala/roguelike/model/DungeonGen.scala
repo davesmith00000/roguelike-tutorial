@@ -6,9 +6,20 @@ import scala.annotation.tailrec
 
 object DungeonGen:
 
-  val roomMaxSize: Int = 10
-  val roomMinSize: Int = 6
-  val maxRooms: Int    = 30
+  val RoomMaxSize: Int   = 10
+  val RoomMinSize: Int   = 6
+  val MaxRooms: Int      = 30
+  val MaxMonstersPerRoom = 2
+
+  def placeEntities(dice: Dice, room: Rectangle, maxMonstersPerRoom: Int): List[Entity] =
+    (0 until dice.roll(maxMonstersPerRoom)).toList.map { i =>
+      val x = dice.roll(room.width - 2) + room.left + 1
+      val y = dice.roll(room.height - 2) + room.top + 1
+
+      if dice.rollDouble < 0.8 then Orc(Point(x, y))
+      else Troll(Point(x, y))
+
+    }.distinct
 
   def createRoom(rect: Rectangle): List[(Point, GameTile)] =
     (rect.top + 1 until rect.bottom).flatMap { y =>
@@ -29,16 +40,24 @@ object DungeonGen:
       (Point(x, y), GameTile.Ground)
     }.toList
 
-  def makeMap(dice: Dice, maxRooms: Int, roomMinSize: Int, roomMaxSize: Int, mapSize: Size): Dungeon =
+  def makeMap(
+      dice: Dice,
+      maxRooms: Int,
+      roomMinSize: Int,
+      roomMaxSize: Int,
+      mapSize: Size,
+      maxMonstersPerRoom: Int
+  ): Dungeon =
     @tailrec
     def rec(
         numOfRooms: Int,
         lastRoomCenter: Option[Point],
         rooms: List[Rectangle],
         tiles: List[(Point, GameTile)],
+        entities: List[Entity],
         playerStart: Point
     ): Dungeon =
-      if numOfRooms == maxRooms then Dungeon(playerStart, tiles)
+      if numOfRooms == maxRooms then Dungeon(playerStart, tiles, entities)
       else
         val w = dice.rollFromZero(roomMaxSize - roomMinSize) + roomMinSize
         val h = dice.rollFromZero(roomMaxSize - roomMinSize) + roomMinSize
@@ -47,10 +66,11 @@ object DungeonGen:
 
         val newRoom = Rectangle(x, y, w, h)
 
-        if rooms.exists(_.overlaps(newRoom)) then rec(numOfRooms + 1, lastRoomCenter, rooms, tiles, playerStart)
+        if rooms.exists(_.overlaps(newRoom)) then rec(numOfRooms + 1, lastRoomCenter, rooms, tiles, entities, playerStart)
         else
           val roomTiles  = createRoom(newRoom)
           val roomCenter = newRoom.center
+          val roomEntities = placeEntities(dice, newRoom, MaxMonstersPerRoom)
 
           val tunnel =
             lastRoomCenter match
@@ -70,9 +90,10 @@ object DungeonGen:
             Option(roomCenter),
             newRoom :: rooms,
             tiles ++ roomTiles ++ tunnel,
+            entities ++ roomEntities,
             if numOfRooms == 0 then roomCenter else playerStart
           )
 
-    rec(0, None, Nil, Nil, Point.zero)
+    rec(0, None, Nil, Nil, Nil, Point.zero)
 
-final case class Dungeon(playerStart: Point, positionedTiles: List[(Point, GameTile)])
+final case class Dungeon(playerStart: Point, positionedTiles: List[(Point, GameTile)], entities: List[Entity])

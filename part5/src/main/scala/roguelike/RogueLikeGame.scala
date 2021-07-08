@@ -48,7 +48,7 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
     Outcome(Model.initial(screenSize))
 
   def initialViewModel(startupData: Unit, model: Model): Outcome[ViewModel] =
-    Outcome(ViewModel.initial(model.screenSize))
+    Outcome(ViewModel.initial)
 
   def setup(bootData: Unit, assetCollection: AssetCollection, dice: Dice): Outcome[Startup[Unit]] =
     Outcome(Startup.Success(()))
@@ -67,6 +67,7 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
     Outcome(
       SceneUpdateFragment(
         Layer(BindingKey("game")),
+        Layer(BindingKey("log")),
         Layer(BindingKey("fps"))
       )
     )
