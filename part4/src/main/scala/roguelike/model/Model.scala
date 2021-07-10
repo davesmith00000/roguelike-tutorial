@@ -6,7 +6,7 @@ import indigoextras.trees.QuadTree
 
 final case class Model(screenSize: Size, player: Player, entities: List[Entity], gameMap: GameMap):
   def entitiesList: List[Entity] =
-    player :: entities
+    player :: entities.filter(e => gameMap.visible.contains(e.position))
 
   def moveUp: Model =
     val p = player.moveUp(gameMap)
