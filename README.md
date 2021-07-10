@@ -8,7 +8,14 @@ I'm following the spirit of the tutorials rather than the letter, since Indigo i
 
 Everything is being built with [Indigo](https://indigoengine.io/) and I'm evolving a [***starter kit***](https://github.com/PurpleKingdomGames/indigo-roguelike-starterkit) that you can use.
 
-## Contents
+## Completed Tutorial Parts
+
+### Controls (so far...)
+
+Basic movement: Arrow keys.
+Parts 4 and 5: Hit refresh to generate a new level.
+
+### Table of Contents
 
 Part|Title|Screenshot(s)|Play!
 ---|---|---|---
