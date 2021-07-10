@@ -12,11 +12,11 @@ Everything is being built with [Indigo](https://indigoengine.io/) and I'm evolvi
 
 Part|Title|Screenshot(s)|Play!
 ---|---|---|---
-0/1|Setting Up / Drawing the ‘@’ symbol and moving it around|![Part 1](part1/roguelike_part1.gif "Part 1")|Click to play!
-2|The generic Entity, the render functions, and the map|![Part 2](part2/roguelike-part2.gif "Part 2")|Click to play!
-3|Generating a dungeon|![Part 3](part3/roguelike-part3_2.gif "Part 3")|Click to play!
-4|Field of view|![Part 4](part4/roguelike-part4_2.gif "Part 4")|Click to play!
-5|Placing enemies and kicking them (harmlessly)|![Part 5](part5/roguelike_part5.gif "Part 5")|Click to play!
+0/1|Setting Up / Drawing the ‘@’ symbol and moving it around|![Part 1](part1/roguelike_part1.gif "Part 1")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part1/)
+2|The generic Entity, the render functions, and the map|![Part 2](part2/roguelike-part2.gif "Part 2")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part2/)
+3|Generating a dungeon|![Part 3](part3/roguelike-part3_2.gif "Part 3")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part3/)
+4|Field of view|![Part 4](part4/roguelike-part4_2.gif "Part 4")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part4/)
+5|Placing enemies and kicking them (harmlessly)|![Part 5](part5/roguelike_part5.gif "Part 5")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part5/)
 6|||_Coming soon..._
 7|||_Coming soon..._
 8|||_Coming soon..._
