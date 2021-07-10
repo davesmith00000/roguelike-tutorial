@@ -7,7 +7,6 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 import roguelike.terminal.{TerminalEntity, TerminalText}
 import roguelike.model.Model
 import roguelike.model.ViewModel
-import indigoextras.subsystems.FPSCounter
 
 @JSExportTopLevel("IndigoGame")
 object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
@@ -38,9 +37,6 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
         .withShaders(
           TerminalEntity.shader(Assets.Required.mapFragShader),
           TerminalText.shader(Assets.Required.textFragShader)
-        )
-        .withSubSystems(
-          FPSCounter(Point(5), 30, BindingKey("fps"))
         )
     ).addGlobalEvents(RegenerateLevel)
 
