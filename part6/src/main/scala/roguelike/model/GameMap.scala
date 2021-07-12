@@ -4,17 +4,34 @@ import indigo._
 import roguelike.terminal.MapTile
 import roguelike.utils.FOV
 import roguelike.DfTiles
+import roguelike.utils.PathFinder
 
 import indigoextras.trees.QuadTree
 import indigoextras.trees.QuadTree.{QuadBranch, QuadEmpty, QuadLeaf}
 import indigoextras.geometry.Vertex
-
-import scala.annotation.tailrec
 import indigoextras.geometry.BoundingBox
 
-final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[Point], explored: Set[Point], entities: List[Entity]):
+import scala.annotation.tailrec
+
+final case class GameMap(
+    size: Size,
+    tileMap: QuadTree[GameTile],
+    visible: List[Point],
+    explored: Set[Point],
+    entities: List[Entity]
+):
   def entitiesList: List[Entity] =
     entities.filter(e => visible.contains(e.position))
+
+  def damageEntity(id: Int, damage: Int): GameMap =
+    this.copy(
+      entities = entities.map {
+        case e: Hostile if e.id == id =>
+          e.takeDamage(damage)
+
+        case e => e
+      }
+    )
 
   private def updateMap(tm: QuadTree[GameTile], coords: Point, f: GameTile => GameTile): QuadTree[GameTile] =
     val vtx = Vertex.fromPoint(coords)
@@ -22,12 +39,32 @@ final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[
       case None       => tm
       case Some(tile) => tm.insertElement(tile, vtx)
 
-  def update(playerPosition: Point): GameMap =
-    val newVisible = GameMap.calculateFOV(15, playerPosition, tileMap)
-    this.copy(
-      visible = newVisible,
-      explored = explored ++ newVisible
-    )
+  def update(dice: Dice, playerPosition: Point, pause: Boolean): GlobalEvent => Outcome[GameMap] =
+    case e @ UpdateEntities =>
+      val newVisible = GameMap.calculateFOV(15, playerPosition, tileMap)
+      val updatedEntities =
+        if !pause then Outcome.sequence(entities.map(_.update(dice, playerPosition, this)(e))) else Outcome(entities)
+
+      updatedEntities.map { es =>
+        this.copy(
+          visible = newVisible,
+          explored = explored ++ newVisible,
+          entities = es
+        )
+      }
+
+    case e: MoveEntity =>
+      val updatedEntities =
+        Outcome.sequence(entities.map(_.update(dice, playerPosition, this)(e)))
+
+      updatedEntities.map { es =>
+        this.copy(
+          entities = es
+        )
+      }
+
+    case _ =>
+      Outcome(this)
 
   def visibleTiles: List[(Point, MapTile)] =
     visible
@@ -82,6 +119,16 @@ final case class GameMap(size: Size, tileMap: QuadTree[GameTile], visible: List[
 
     rec(List(tileMap), Nil)
 
+  def getPathTo(dice: Dice, from: Point, to: Point, additionalBlocked: List[Point]): List[Point] =
+    val area = Rectangle.fromTwoPoints(from, to).expand(2)
+    val filter: GameTile => Boolean = {
+      case GameTile.Ground => true
+      case _               => false
+    }
+    val walkable = GameMap.searchByBounds(tileMap, area, filter).filterNot(additionalBlocked.contains)
+
+    GameMap.getPathTo(dice, from, to, walkable, area)
+
 object GameMap:
   def initial(size: Size, entities: List[Entity]): GameMap =
     GameMap(
@@ -103,7 +150,7 @@ object GameMap:
       )
 
     val tiles =
-      searchByBounds(tileMap, bounds).filter(pt => center.distanceTo(pt) <= radius)
+      searchByBounds(tileMap, bounds, _ => true).filter(pt => center.distanceTo(pt) <= radius)
 
     @tailrec
     def visibleTiles(remaining: List[Point], acc: List[Point]): List[Point] =
@@ -123,7 +170,7 @@ object GameMap:
 
     visibleTiles(tiles, Nil)
 
-  def searchByBounds(quadTree: QuadTree[GameTile], bounds: Rectangle): List[Point] =
+  def searchByBounds(quadTree: QuadTree[GameTile], bounds: Rectangle, filter: GameTile => Boolean): List[Point] =
     val boundingBox: BoundingBox = BoundingBox.fromRectangle(bounds)
 
     @tailrec
@@ -137,10 +184,16 @@ object GameMap:
             case QuadBranch(bounds, a, b, c, d) if boundingBox.overlaps(bounds) =>
               rec(a :: b :: c :: d :: xs, acc)
 
-            case QuadLeaf(_, exactPosition, value) if boundingBox.contains(exactPosition) =>
+            case QuadLeaf(_, exactPosition, value) if boundingBox.contains(exactPosition) && filter(value) =>
               rec(xs, exactPosition.toPoint :: acc)
 
             case _ =>
               rec(xs, acc)
 
     rec(List(quadTree), Nil)
+
+  def getPathTo(dice: Dice, from: Point, to: Point, walkable: List[Point], area: Rectangle): List[Point] =
+    PathFinder
+      .fromWalkable(area.size, walkable.map(_ - area.position))
+      .locatePath(dice, from - area.position, to - area.position, _ => 1)
+      .map(_ + area.position)
