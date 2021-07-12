@@ -1,12 +1,12 @@
-package roguelike.model
+package roguelike.utils
 
 import indigo.Point
 
-class GameMapTests extends munit.FunSuite {
+class FOVTests extends munit.FunSuite {
 
   test("bresenhams line - 1x1") {
     val actual =
-      GameMap.bresenhamLine(Point(0, 0), Point(1, 1))
+      FOV.bresenhamLine(Point(0, 0), Point(1, 1))
 
     val expected =
       List(Point(1, 1), Point(0, 0))
@@ -16,7 +16,7 @@ class GameMapTests extends munit.FunSuite {
 
   test("bresenhams line - vertical") {
     val actual =
-      GameMap.bresenhamLine(Point(10, 13), Point(10, 21))
+      FOV.bresenhamLine(Point(10, 13), Point(10, 21))
 
     val expected =
       List(
@@ -36,7 +36,7 @@ class GameMapTests extends munit.FunSuite {
 
   test("bresenhams line - horizontal") {
     val actual =
-      GameMap.bresenhamLine(Point(7, 13), Point(12, 13))
+      FOV.bresenhamLine(Point(7, 13), Point(12, 13))
 
     val expected =
       List(
@@ -53,7 +53,7 @@ class GameMapTests extends munit.FunSuite {
 
   test("bresenhams line - diagonal") {
     val actual =
-      GameMap.bresenhamLine(Point(0, 1), Point(6, 4))
+      FOV.bresenhamLine(Point(0, 1), Point(6, 4))
 
     val expected =
       List(
@@ -71,7 +71,7 @@ class GameMapTests extends munit.FunSuite {
 
   test("bresenhams line - same") {
     val actual =
-      GameMap.bresenhamLine(Point(0, 1), Point(0, 1))
+      FOV.bresenhamLine(Point(0, 1), Point(0, 1))
 
     val expected =
       List(
@@ -83,13 +83,14 @@ class GameMapTests extends munit.FunSuite {
 
   test("bresenhams line - tricky - misses target") {
     val actual =
-      GameMap.bresenhamLine(Point(8, 3), Point(5, 5))
+      FOV.bresenhamLine(Point(8, 3), Point(5, 5))
 
     val expected =
       List(
         Point(8, 3),
         Point(7, 4),
-        Point(6, 5)
+        Point(6, 5),
+        Point(5, 5) // The line would in fact go past this, but the destination is artificially added.
       ).reverse
 
     assertEquals(actual, expected)
