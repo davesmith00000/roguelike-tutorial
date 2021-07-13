@@ -77,22 +77,6 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     case _ =>
       Outcome(viewModel)
 
-  val statusLine: TextBox =
-    TextBox("")
-      .withColor(RGBA.Green)
-      .withFontFamily(FontFamily.monospace)
-      .withFontSize(Pixels((RogueLikeGame.charSize.height * 2) - 4))
-      .withSize(RogueLikeGame.screenSize * RogueLikeGame.charSize)
-      .moveTo(2, 2)
-
-  val consoleLine: TextBox =
-    TextBox("> ")
-      .withColor(RGBA.Green)
-      .withFontFamily(FontFamily.monospace)
-      .withFontSize(Pixels((RogueLikeGame.charSize.height * 2) - 4))
-      .withSize(RogueLikeGame.screenSize * RogueLikeGame.charSize)
-      .moveTo(2, ((RogueLikeGame.screenSize.height - 2) * RogueLikeGame.charSize.height) + 1)
-
   def present(context: FrameContext[Unit], model: Model, viewModel: ViewModel): Outcome[SceneUpdateFragment] =
     viewModel.terminalEntity match
       case None =>
@@ -116,8 +100,8 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             ),
             Layer(
               BindingKey("log"),
-              statusLine.withText(model.status),
-              consoleLine.withText("> " + model.message)
+              View.renderBar(model.player, 20, Point(0, 42)),
+              View.consoleLine.withText("> " + model.message)
             )
           )
         )

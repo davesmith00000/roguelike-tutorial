@@ -10,7 +10,6 @@ final case class Model(
     screenSize: Size,
     player: Player,
     gameMap: GameMap,
-    status: String,
     message: String,
     paused: Boolean
 ):
@@ -21,8 +20,7 @@ final case class Model(
     case e: GameEvent.MoveEntity =>
       gameMap.update(dice, player.position, paused)(e).map { gm =>
         this.copy(
-          gameMap = gm,
-          status = Model.formatStatus(player)
+          gameMap = gm
         )
       }
 
@@ -38,8 +36,7 @@ final case class Model(
       Outcome(
         this.copy(
           player = player.takeDamage(damage),
-          message = if p.isAlive then msg else "You died!",
-          status = Model.formatStatus(p)
+          message = if p.isAlive then msg else "You died!"
         )
       )
 
@@ -50,8 +47,7 @@ final case class Model(
         case None =>
           Outcome(
             this.copy(
-              message = s"${name.capitalize} swings and misses!",
-              status = Model.formatStatus(player)
+              message = s"${name.capitalize} swings and misses!"
             )
           )
 
@@ -65,8 +61,7 @@ final case class Model(
           Outcome(
             this.copy(
               gameMap = gameMap.damageEntity(target.id, damage),
-              message = msg,
-              status = Model.formatStatus(player)
+              message = msg
             )
           )
 
@@ -89,16 +84,12 @@ final case class Model(
 
 object Model:
 
-  def formatStatus(player: Player): String =
-    s"HP: ${Math.max(0, player.fighter.hp)}/${player.fighter.maxHp}"
-
   def initial(screenSize: Size): Model =
     val p = Player.initial(Point.zero)
     Model(
       screenSize,
       p,
       GameMap.initial(screenSize, Nil),
-      formatStatus(p),
       "",
       false
     )
@@ -120,7 +111,6 @@ object Model:
       screenSize,
       p,
       GameMap.gen(screenSize, dungeon).updateEntities(dice, dungeon.playerStart, true).unsafeGet,
-      formatStatus(p),
       "",
       false
     )
