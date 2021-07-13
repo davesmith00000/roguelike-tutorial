@@ -100,7 +100,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             ),
             Layer(
               BindingKey("log"),
-              View.renderBar(model.player, 20, Point(0, 42)),
+              View.renderBar(model.player, 20, Point(0, 45)),
               View.consoleLine.withText("> " + model.message)
             )
           )

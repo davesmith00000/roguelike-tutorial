@@ -20,9 +20,9 @@ object View:
     TextBox("> ")
       .withColor(RGBA.Green)
       .withFontFamily(FontFamily.monospace)
-      .withFontSize(Pixels((RogueLikeGame.charSize.height * 2) - 4))
-      .withSize(RogueLikeGame.screenSize * RogueLikeGame.charSize)
-      .moveTo(2, ((RogueLikeGame.screenSize.height - 2) * RogueLikeGame.charSize.height) + 1)
+      .withFontSize(Pixels(RogueLikeGame.charSize.height))
+      .withSize((RogueLikeGame.screenSize - 21) * RogueLikeGame.charSize)
+      .moveTo(Point(21, 45) * RogueLikeGame.charSize.toPoint)
 
   def renderBar(player: Player, totalWidth: Int, position: Point): Group =
     val height   = RogueLikeGame.charSize.height + 2
