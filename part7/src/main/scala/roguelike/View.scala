@@ -11,7 +11,7 @@ object View:
 
   val statusLine: Text[TerminalText] =
     Text("", DfTiles.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA.Zero))
-    .moveTo(1, 2)
+      .moveTo(1, 2)
 
   val consoleLine: TextBox =
     TextBox("> ")
