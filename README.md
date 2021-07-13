@@ -24,7 +24,7 @@ Part|Title|Screenshot(s)|Play!
 3|Generating a dungeon|![Part 3](part3/roguelike-part3_2.gif "Part 3")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part3/)
 4|Field of view|![Part 4](part4/roguelike-part4_2.gif "Part 4")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part4/)
 5|Placing enemies and kicking them (harmlessly)|![Part 5](part5/roguelike_part5.gif "Part 5")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part5/)
-6|||_Coming soon..._
+6|Doing (and taking) some damage|![Part 6](part6/roguelike_part6.gif "Part 6")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part6/)
 7|||_Coming soon..._
 8|||_Coming soon..._
 9|||_Coming soon..._
