@@ -11,8 +11,7 @@ import roguelike.terminal.TerminalEntity
 import roguelike.model.Model
 import roguelike.model.ViewModel
 import roguelike.model.GameTile
-import roguelike.model.MoveEntity
-import roguelike.model.MeleeAttack
+import roguelike.GameEvent
 
 object GameScene extends Scene[Unit, Model, ViewModel]:
 
@@ -50,10 +49,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     case RegenerateLevel =>
       Outcome(Model.gen(context.dice, model.screenSize))
 
-    case e: MoveEntity =>
-      model.update(context.dice)(e)
-
-    case e: MeleeAttack =>
+    case e: GameEvent =>
       model.update(context.dice)(e)
 
     case _ =>

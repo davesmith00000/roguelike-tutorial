@@ -4,6 +4,7 @@ import indigo._
 import roguelike.terminal.MapTile
 import roguelike.utils.FOV
 import roguelike.DfTiles
+import roguelike.GameEvent
 import roguelike.utils.PathFinder
 
 import indigoextras.trees.QuadTree
@@ -41,21 +42,30 @@ final case class GameMap(
       case None       => tm
       case Some(tile) => tm.insertElement(tile, vtx)
 
-  def update(dice: Dice, playerPosition: Point, pause: Boolean): GlobalEvent => Outcome[GameMap] =
-    case e @ UpdateEntities =>
-      val newVisible = GameMap.calculateFOV(15, playerPosition, tileMap)
-      val updatedEntities =
-        if !pause then Outcome.sequence(entities.map(_.update(dice, playerPosition, this)(e))) else Outcome(entities)
+  def updateEntities(dice: Dice, playerPosition: Point, pause: Boolean): Outcome[GameMap] =
+    val newVisible = GameMap.calculateFOV(15, playerPosition, tileMap)
+    val updatedEntities =
+      if !pause then
+        Outcome.sequence(
+          entities.map {
+            case entity: Hostile =>
+              entity.nextMove(dice, playerPosition, this)
 
-      updatedEntities.map { es =>
-        this.copy(
-          visible = newVisible,
-          explored = explored ++ newVisible,
-          entities = es
+            case entity => Outcome(entity)
+          }
         )
-      }
+      else Outcome(entities)
 
-    case e: MoveEntity =>
+    updatedEntities.map { es =>
+      this.copy(
+        visible = newVisible,
+        explored = explored ++ newVisible,
+        entities = es
+      )
+    }
+
+  def update(dice: Dice, playerPosition: Point, pause: Boolean): GlobalEvent => Outcome[GameMap] =
+    case e: GameEvent.MoveEntity =>
       val updatedEntities =
         Outcome.sequence(entities.map(_.update(dice, playerPosition, this)(e)))
 

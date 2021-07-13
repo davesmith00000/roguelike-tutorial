@@ -2,14 +2,23 @@ package roguelike.model
 
 import indigo._
 
+import roguelike.GameEvent
+
 import indigoextras.trees.QuadTree
 
-final case class Model(screenSize: Size, player: Player, gameMap: GameMap, status: String, message: String, paused: Boolean):
+final case class Model(
+    screenSize: Size,
+    player: Player,
+    gameMap: GameMap,
+    status: String,
+    message: String,
+    paused: Boolean
+):
   def entitiesList: List[Entity] =
     gameMap.entitiesList :+ player
 
   def update(dice: Dice): GlobalEvent => Outcome[Model] =
-    case e: MoveEntity =>
+    case e: GameEvent.MoveEntity =>
       gameMap.update(dice, player.position, paused)(e).map { gm =>
         this.copy(
           gameMap = gm,
@@ -17,7 +26,7 @@ final case class Model(screenSize: Size, player: Player, gameMap: GameMap, statu
         )
       }
 
-    case MeleeAttack(name, power, None) =>
+    case GameEvent.MeleeAttack(name, power, None) =>
       val damage = Math.max(0, power - player.fighter.defense)
 
       val msg =
@@ -34,7 +43,7 @@ final case class Model(screenSize: Size, player: Player, gameMap: GameMap, statu
         )
       )
 
-    case MeleeAttack(name, power, Some(id)) =>
+    case GameEvent.MeleeAttack(name, power, Some(id)) =>
       gameMap.entities.collectFirst {
         case e: Hostile if id == e.id => e
       } match
@@ -64,41 +73,19 @@ final case class Model(screenSize: Size, player: Player, gameMap: GameMap, statu
     case _ =>
       Outcome(this)
 
-  def moveUp(dice: Dice): Outcome[Model] =
+  def performTurn(dice: Dice, by: Point): Outcome[Model] =
     for {
-      p  <- player.bump(Point(0, -1), gameMap)
-      gm <- gameMap.update(dice, p.position, paused)(UpdateEntities)
+      p  <- player.bump(by, gameMap)
+      gm <- gameMap.updateEntities(dice, p.position, paused)
     } yield this.copy(
       player = p,
       gameMap = gm
     )
 
-  def moveDown(dice: Dice): Outcome[Model] =
-    for {
-      p  <- player.bump(Point(0, 1), gameMap)
-      gm <- gameMap.update(dice, p.position, paused)(UpdateEntities)
-    } yield this.copy(
-      player = p,
-      gameMap = gm
-    )
-
-  def moveLeft(dice: Dice): Outcome[Model] =
-    for {
-      p  <- player.bump(Point(-1, 0), gameMap)
-      gm <- gameMap.update(dice, p.position, paused)(UpdateEntities)
-    } yield this.copy(
-      player = p,
-      gameMap = gm
-    )
-
-  def moveRight(dice: Dice): Outcome[Model] =
-    for {
-      p  <- player.bump(Point(1, 0), gameMap)
-      gm <- gameMap.update(dice, p.position, paused)(UpdateEntities)
-    } yield this.copy(
-      player = p,
-      gameMap = gm
-    )
+  def moveUp(dice: Dice): Outcome[Model]    = performTurn(dice, Point(0, -1))
+  def moveDown(dice: Dice): Outcome[Model]  = performTurn(dice, Point(0, 1))
+  def moveLeft(dice: Dice): Outcome[Model]  = performTurn(dice, Point(-1, 0))
+  def moveRight(dice: Dice): Outcome[Model] = performTurn(dice, Point(1, 0))
 
 object Model:
 
@@ -132,7 +119,7 @@ object Model:
     Model(
       screenSize,
       p,
-      GameMap.gen(screenSize, dungeon).update(dice, dungeon.playerStart, true)(UpdateEntities).unsafeGet,
+      GameMap.gen(screenSize, dungeon).updateEntities(dice, dungeon.playerStart, true).unsafeGet,
       formatStatus(p),
       "",
       false
