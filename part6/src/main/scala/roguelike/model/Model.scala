@@ -6,7 +6,7 @@ import indigoextras.trees.QuadTree
 
 final case class Model(screenSize: Size, player: Player, gameMap: GameMap, status: String, message: String, paused: Boolean):
   def entitiesList: List[Entity] =
-    player :: gameMap.entitiesList
+    gameMap.entitiesList :+ player
 
   def update(dice: Dice): GlobalEvent => Outcome[Model] =
     case e: MoveEntity =>

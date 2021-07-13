@@ -21,7 +21,9 @@ final case class GameMap(
     entities: List[Entity]
 ):
   def entitiesList: List[Entity] =
-    entities.filter(e => visible.contains(e.position))
+    entities.filter(e => visible.contains(e.position)).sortBy { case e: Actor =>
+      e.isAlive
+    }
 
   def damageEntity(id: Int, damage: Int): GameMap =
     this.copy(
