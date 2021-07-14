@@ -26,15 +26,17 @@ final case class GameMap(
       e.isAlive
     }
 
-  def damageEntity(id: Int, damage: Int): GameMap =
-    this.copy(
-      entities = entities.map {
-        case e: Hostile if e.id == id =>
-          e.takeDamage(damage)
+  def damageEntity(id: Int, damage: Int): Outcome[GameMap] =
+    Outcome
+      .sequence(
+        entities.map {
+          case e: Hostile if e.id == id && e.isAlive =>
+            e.takeDamage(damage)
 
-        case e => e
-      }
-    )
+          case e => Outcome(e)
+        }
+      )
+      .map(es => this.copy(entities = es))
 
   private def updateMap(tm: QuadTree[GameTile], coords: Point, f: GameTile => GameTile): QuadTree[GameTile] =
     val vtx = Vertex.fromPoint(coords)

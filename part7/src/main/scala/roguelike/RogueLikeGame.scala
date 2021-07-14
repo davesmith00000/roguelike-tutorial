@@ -11,7 +11,7 @@ import roguelike.model.ViewModel
 @JSExportTopLevel("IndigoGame")
 object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
 
-  val screenSize: Size = Size(80, 45)
+  val screenSize: Size = Size(80, 50)
   val charSize: Size   = Size(10, 10)
 
   def initialScene(bootData: Unit): Option[SceneName] =
@@ -38,7 +38,7 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
           TerminalEntity.shader(Assets.Required.mapFragShader),
           TerminalText.shader(Assets.Required.textFragShader)
         )
-    ).addGlobalEvents(RegenerateLevel)
+    ).addGlobalEvents(GameEvent.RegenerateLevel)
 
   def initialModel(startupData: Unit): Outcome[Model] =
     Outcome(Model.initial(screenSize))
@@ -67,5 +67,3 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
         Layer(BindingKey("fps"))
       )
     )
-
-case object RegenerateLevel extends GlobalEvent

@@ -51,11 +51,13 @@ sealed trait Hostile extends Actor:
 
     Outcome(this).addGlobalEvents(events)
 
-  def takeDamage(amount: Int): Actor =
+  def takeDamage(amount: Int): Outcome[Actor] =
     val f = fighter.takeDamage(amount)
-    this
-      .withFighter(f)
-      .markAsDead(if f.hp > 0 then false else true)
+    Outcome(
+      this
+        .withFighter(f)
+        .markAsDead(if f.hp > 0 then false else true)
+    ).addGlobalEvents(if f.hp <= 0 then List(GameEvent.Log(Message(s"You killed a $name", RGB(0.75, 0, 0)))) else Nil)
 
 /** Fighter class
   * @param hp
@@ -85,8 +87,12 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter) ext
 
   def bump(amount: Point, gameMap: GameMap): Outcome[Player] =
     gameMap.entities.collectFirst { case e: Hostile if e.position == position + amount && e.blocksMovement => e } match
-      case None         => Outcome(moveBy(amount, gameMap))
-      case Some(target) => Outcome(this).addGlobalEvents(GameEvent.MeleeAttack(name, fighter.power, Option(target.id)))
+      case None =>
+        Outcome(moveBy(amount, gameMap))
+
+      case Some(target) =>
+        Outcome(this)
+          .addGlobalEvents(GameEvent.MeleeAttack(name, fighter.power, Option(target.id)))
 
   def moveBy(amount: Point, gameMap: GameMap): Player =
     gameMap.lookUp(position + amount) match
@@ -116,7 +122,7 @@ object Player:
 final case class Orc(id: Int, position: Point, isAlive: Boolean, fighter: Fighter, movePath: List[Point])
     extends Hostile:
   def tile: MapTile =
-    if isAlive then MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63)) else MapTile(DfTiles.Tile.`o`, RGB.Red)
+    if isAlive then MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63)) else MapTile(DfTiles.Tile.`%`, RGB(1.0, 0.4, 0.9))
   val blocksMovement: Boolean = isAlive
   val name: String            = "Orc"
 
@@ -139,7 +145,7 @@ object Orc:
 final case class Troll(id: Int, position: Point, isAlive: Boolean, fighter: Fighter, movePath: List[Point])
     extends Hostile:
   def tile: MapTile =
-    if isAlive then MapTile(DfTiles.Tile.`T`, RGB.fromColorInts(0, 127, 0)) else MapTile(DfTiles.Tile.`T`, RGB.Red)
+    if isAlive then MapTile(DfTiles.Tile.`T`, RGB.fromColorInts(0, 127, 0)) else MapTile(DfTiles.Tile.`%`, RGB.Magenta)
   val blocksMovement: Boolean = isAlive
   val name: String            = "Troll"
 

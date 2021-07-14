@@ -12,6 +12,7 @@ import roguelike.model.Model
 import roguelike.model.ViewModel
 import roguelike.model.GameTile
 import roguelike.GameEvent
+import roguelike.model.Message
 
 object GameScene extends Scene[Unit, Model, ViewModel]:
 
@@ -46,8 +47,9 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.player.isAlive =>
       model.moveRight(context.dice)
 
-    case RegenerateLevel =>
-      Outcome(Model.gen(context.dice, model.screenSize))
+    case GameEvent.RegenerateLevel =>
+      Model.gen(context.dice, model.screenSize)
+        .addGlobalEvents(GameEvent.Log(Message("Welcome!", RGB.Cyan)))
 
     case e: GameEvent =>
       model.update(context.dice)(e)
@@ -60,17 +62,22 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       model: Model,
       viewModel: ViewModel
   ): GlobalEvent => Outcome[ViewModel] =
-    case KeyboardEvent.KeyUp(_) | RegenerateLevel =>
+    case KeyboardEvent.KeyUp(_) | GameEvent.RegenerateLevel | GameEvent.Log(_) =>
       val term =
         TerminalEmulator(RogueLikeGame.screenSize)
           .put(model.gameMap.toExploredTiles)
           .put(model.gameMap.visibleTiles)
           .put(model.entitiesList.map(e => (e.position, e.tile)))
-          .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
+
+      val log =
+        model.messageLog.toTerminal(Size(RogueLikeGame.screenSize.width - 21, 5))
 
       Outcome(
         viewModel.copy(
-          terminalEntity = Option(term)
+          terminalEntity = Option(
+            term.inset(log, Point(21, 45))
+              .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
+          )
         )
       )
 
@@ -100,8 +107,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             ),
             Layer(
               BindingKey("log"),
-              View.renderBar(model.player, 20, Point(0, 45)),
-              View.consoleLine.withText("> " + model.message)
+              View.renderBar(model.player, 20, Point(0, 45))
             )
           )
         )
