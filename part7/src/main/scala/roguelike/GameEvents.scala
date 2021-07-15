@@ -10,4 +10,4 @@ enum GameEvent extends GlobalEvent:
   case MoveEntity(id: Int, to: Point) extends GameEvent
   case Log(message: Message) extends GameEvent
   case RegenerateLevel extends GameEvent
-  case EndTurn extends GameEvent
+  case Redraw extends GameEvent

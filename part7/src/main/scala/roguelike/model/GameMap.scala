@@ -51,9 +51,10 @@ final case class GameMap(
         Outcome.sequence(
           entities.map {
             case entity: Hostile =>
-              entity.nextMove(dice, playerPosition, this)
+              entity.nextMove(dice, playerPosition, this, newVisible)
 
-            case entity => Outcome(entity)
+            case entity =>
+              Outcome(entity)
           }
         )
       else Outcome(entities)
@@ -139,7 +140,7 @@ final case class GameMap(
       case GameTile.Ground => true
       case _               => false
     }
-    val walkable = GameMap.searchByBounds(tileMap, area, filter).filterNot(additionalBlocked.contains)
+    val walkable = GameMap.searchByBounds(tileMap, area, filter).map(_._2).filterNot(additionalBlocked.contains)
 
     GameMap.getPathTo(dice, from, to, walkable, area)
 
@@ -164,18 +165,18 @@ object GameMap:
       )
 
     val tiles =
-      searchByBounds(tileMap, bounds, _ => true).filter(pt => center.distanceTo(pt) <= radius)
+      searchByBounds(tileMap, bounds, _ => true).filter(t => center.distanceTo(t._2) <= radius)
 
     @tailrec
-    def visibleTiles(remaining: List[Point], acc: List[Point]): List[Point] =
+    def visibleTiles(remaining: List[(GameTile, Point)], acc: List[Point]): List[Point] =
       remaining match
         case Nil =>
           acc
 
-        case pt :: pts =>
-          val lineOfSight = FOV.bresenhamLine(pt, center)
+        case (t, pt) :: pts =>
+          val lineOfSight = FOV.bresenhamLine(pt, center).dropRight(1)
 
-          if lineOfSight.forall(tiles.contains) then
+          if lineOfSight.forall(pt => tiles.exists(t => t._2 == pt && !t._1.blockSight)) then
             visibleTiles(
               pts,
               pt :: acc
@@ -184,11 +185,15 @@ object GameMap:
 
     visibleTiles(tiles, Nil)
 
-  def searchByBounds(quadTree: QuadTree[GameTile], bounds: Rectangle, filter: GameTile => Boolean): List[Point] =
+  def searchByBounds(
+      quadTree: QuadTree[GameTile],
+      bounds: Rectangle,
+      filter: GameTile => Boolean
+  ): List[(GameTile, Point)] =
     val boundingBox: BoundingBox = BoundingBox.fromRectangle(bounds)
 
     @tailrec
-    def rec(remaining: List[QuadTree[GameTile]], acc: List[Point]): List[Point] =
+    def rec(remaining: List[QuadTree[GameTile]], acc: List[(GameTile, Point)]): List[(GameTile, Point)] =
       remaining match
         case Nil =>
           acc
@@ -199,7 +204,7 @@ object GameMap:
               rec(a :: b :: c :: d :: xs, acc)
 
             case QuadLeaf(_, exactPosition, value) if boundingBox.contains(exactPosition) && filter(value) =>
-              rec(xs, exactPosition.toPoint :: acc)
+              rec(xs, (value -> exactPosition.toPoint) :: acc)
 
             case _ =>
               rec(xs, acc)

@@ -80,30 +80,24 @@ final case class Model(
             )
             .addGlobalEvents(events)
 
-    case GameEvent.EndTurn =>
-      gameMap.updateEntities(dice, player.position, paused).map { gm =>
-        this.copy(
-          gameMap = gm
-        )
-      }
-
     case _ =>
       Outcome(this)
 
-  def performPlayerTurn(by: Point): Outcome[Model] =
-    player
-      .bump(by, gameMap)
-      .map { p =>
-        this.copy(
-          player = p
-        )
-      }
-      .addGlobalEvents(GameEvent.EndTurn)
+  def performPlayerTurn(dice: Dice, by: Point): Outcome[Model] =
+    val res = for {
+      p  <- player.bump(by, gameMap)
+      gm <- gameMap.updateEntities(dice, p.position, paused)
+    } yield this.copy(
+      player = p,
+      gameMap = gm
+    )
 
-  def moveUp(dice: Dice): Outcome[Model]    = performPlayerTurn(Point(0, -1))
-  def moveDown(dice: Dice): Outcome[Model]  = performPlayerTurn(Point(0, 1))
-  def moveLeft(dice: Dice): Outcome[Model]  = performPlayerTurn(Point(-1, 0))
-  def moveRight(dice: Dice): Outcome[Model] = performPlayerTurn(Point(1, 0))
+    res.addGlobalEvents(GameEvent.Redraw)
+
+  def moveUp(dice: Dice): Outcome[Model]    = performPlayerTurn(dice, Point(0, -1))
+  def moveDown(dice: Dice): Outcome[Model]  = performPlayerTurn(dice, Point(0, 1))
+  def moveLeft(dice: Dice): Outcome[Model]  = performPlayerTurn(dice, Point(-1, 0))
+  def moveRight(dice: Dice): Outcome[Model] = performPlayerTurn(dice, Point(1, 0))
 
 object Model:
 

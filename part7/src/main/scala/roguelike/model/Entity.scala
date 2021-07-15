@@ -27,16 +27,15 @@ sealed trait Hostile extends Actor:
   def markAsDead(isDead: Boolean): Hostile
 
   def update(dice: Dice, playerPosition: Point, gameMap: GameMap): GameEvent => Outcome[Hostile] =
-    case GameEvent.MoveEntity(entityId, to)
-        if entityId == id && !gameMap.entities.exists(e => e.blocksMovement && e.position == to) =>
+    case GameEvent.MoveEntity(entityId, to) if entityId == id =>
       Outcome(moveTo(to))
 
     case _ =>
       Outcome(this)
 
-  def nextMove(dice: Dice, playerPosition: Point, gameMap: GameMap): Outcome[Hostile] =
+  def nextMove(dice: Dice, playerPosition: Point, gameMap: GameMap, nextVisible: List[Point]): Outcome[Hostile] =
     val events =
-      if isAlive && gameMap.visible.contains(position) then
+      if isAlive && nextVisible.contains(position) then
         if playerPosition.distanceTo(position) <= 1 then List(GameEvent.MeleeAttack(name, fighter.power, None))
         else
           val entityPositions = gameMap.entities.flatMap(e => if e.blocksMovement then List(e.position) else Nil)
@@ -44,6 +43,9 @@ sealed trait Hostile extends Actor:
             // start/current :: next :: remaining
             case _ :: nextPosition :: _ =>
               List(GameEvent.MoveEntity(id, nextPosition))
+
+            case current :: _ =>
+              List(GameEvent.MoveEntity(id, current))
 
             case _ =>
               Nil
@@ -122,7 +124,7 @@ object Player:
 final case class Orc(id: Int, position: Point, isAlive: Boolean, fighter: Fighter, movePath: List[Point])
     extends Hostile:
   def tile: MapTile =
-    if isAlive then MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63)) else MapTile(DfTiles.Tile.`%`, RGB(1.0, 0.4, 0.9))
+    if isAlive then MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63)) else MapTile(DfTiles.Tile.`%`, RGB(1.0, 0.6, 1.0))
   val blocksMovement: Boolean = isAlive
   val name: String            = "Orc"
 

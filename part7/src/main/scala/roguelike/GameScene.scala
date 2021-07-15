@@ -48,7 +48,8 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       model.moveRight(context.dice)
 
     case GameEvent.RegenerateLevel =>
-      Model.gen(context.dice, model.screenSize)
+      Model
+        .gen(context.dice, model.screenSize)
         .addGlobalEvents(GameEvent.Log(Message("Welcome!", RGB.Cyan)))
 
     case e: GameEvent =>
@@ -62,27 +63,37 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       model: Model,
       viewModel: ViewModel
   ): GlobalEvent => Outcome[ViewModel] =
-    case KeyboardEvent.KeyUp(_) | GameEvent.RegenerateLevel | GameEvent.Log(_) =>
-      val term =
-        TerminalEmulator(RogueLikeGame.screenSize)
-          .put(model.gameMap.toExploredTiles)
-          .put(model.gameMap.visibleTiles)
-          .put(model.entitiesList.map(e => (e.position, e.tile)))
+    case _: KeyboardEvent =>
+      redrawTerminal(model, viewModel)
 
-      val log =
-        model.messageLog.toTerminal(Size(RogueLikeGame.screenSize.width - 21, 5))
+    case GameEvent.Redraw | GameEvent.RegenerateLevel =>
+      redrawTerminal(model, viewModel)
 
-      Outcome(
-        viewModel.copy(
-          terminalEntity = Option(
-            term.inset(log, Point(21, 45))
-              .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
-          )
-        )
-      )
+    case _: GameEvent.Log =>
+      redrawTerminal(model, viewModel)
 
     case _ =>
       Outcome(viewModel)
+
+  private def redrawTerminal(model: Model, viewModel: ViewModel): Outcome[ViewModel] =
+    val term =
+      TerminalEmulator(RogueLikeGame.screenSize)
+        .put(model.gameMap.toExploredTiles)
+        .put(model.gameMap.visibleTiles)
+        .put(model.entitiesList.map(e => (e.position, e.tile)))
+
+    val log =
+      model.messageLog.toTerminal(Size(RogueLikeGame.screenSize.width - 21, 5))
+
+    Outcome(
+      viewModel.copy(
+        terminalEntity = Option(
+          term
+            .inset(log, Point(21, 45))
+            .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
+        )
+      )
+    )
 
   def present(context: FrameContext[Unit], model: Model, viewModel: ViewModel): Outcome[SceneUpdateFragment] =
     viewModel.terminalEntity match
@@ -107,7 +118,8 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             ),
             Layer(
               BindingKey("log"),
-              View.renderBar(model.player, 20, Point(0, 45))
+              View.renderBar(model.player, 20, Point(0, 45)),
+              View.renderNameHints(RogueLikeGame.charSize, context.mouse.position, model.gameMap.entitiesList)
             )
           )
         )
