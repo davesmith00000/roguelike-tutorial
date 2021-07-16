@@ -23,7 +23,7 @@ object View:
     Text("", DfTiles.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA.Red))
 
   def renderBar(player: Player, totalWidth: Int, position: Point): Group =
-    val height   = RogueLikeGame.charSize.height + 3
+    val height   = RogueLikeGame.charSize.height + 4
     val width    = RogueLikeGame.charSize.width * totalWidth
     val barWidth = (player.fighter.hp.toFloat / player.fighter.maxHp.toFloat * width).toInt
 
