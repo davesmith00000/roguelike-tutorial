@@ -30,7 +30,7 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
           GameConfig.default
             .withMagnification(1)
             .withFrameRate(30)
-            .withViewport(screenSize.width * charSize.width, (screenSize.height + 5) * charSize.height)
+            .withViewport(screenSize.width * charSize.width, screenSize.height * charSize.height)
         )
         .withFonts(DfTiles.Fonts.fontInfo)
         .withAssets(Assets.assets)
