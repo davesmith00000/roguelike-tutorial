@@ -13,8 +13,8 @@ object DungeonGen:
 
   def placeEntities(entityCount: Int, dice: Dice, room: Rectangle, maxMonstersPerRoom: Int): List[Entity] =
     (0 until dice.roll(maxMonstersPerRoom)).toList.map { i =>
-      val x = dice.roll(room.width - 2) + room.left + 1
-      val y = dice.roll(room.height - 2) + room.top + 1
+      val x = dice.roll(room.width - 4) + room.left + 2
+      val y = dice.roll(room.height - 4) + room.top + 2
 
       if dice.rollDouble < 0.8 then Orc.spawn(entityCount + i, Point(x, y))
       else Troll.spawn(entityCount + i, Point(x, y))
