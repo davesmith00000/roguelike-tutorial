@@ -29,7 +29,7 @@ final case class Model(
         this.copy(
           gameMap = gm
         )
-      }
+      }.addGlobalEvents(GameEvent.Redraw)
 
     case GameEvent.MeleeAttack(name, power, None) =>
       val damage = Math.max(0, power - player.fighter.defense)

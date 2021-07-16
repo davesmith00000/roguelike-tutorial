@@ -39,15 +39,14 @@ sealed trait Hostile extends Actor:
         if playerPosition.distanceTo(position) <= 1 then List(GameEvent.MeleeAttack(name, fighter.power, None))
         else
           val entityPositions = gameMap.entities.flatMap(e => if e.blocksMovement then List(e.position) else Nil)
-          gameMap.getPathTo(dice, position, playerPosition, entityPositions) match
-            // start/current :: next :: remaining
-            case _ :: nextPosition :: _ =>
+          val path            = gameMap.getPathTo(dice, position, playerPosition, entityPositions)
+
+          // First path result is current location, we want the next one if it exists.
+          path.drop(1).headOption match
+            case Some(nextPosition) =>
               List(GameEvent.MoveEntity(id, nextPosition))
 
-            case current :: _ =>
-              List(GameEvent.MoveEntity(id, current))
-
-            case _ =>
+            case None =>
               Nil
       else Nil
 
@@ -124,7 +123,8 @@ object Player:
 final case class Orc(id: Int, position: Point, isAlive: Boolean, fighter: Fighter, movePath: List[Point])
     extends Hostile:
   def tile: MapTile =
-    if isAlive then MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63)) else MapTile(DfTiles.Tile.`%`, RGB(1.0, 0.6, 1.0))
+    if isAlive then MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63))
+    else MapTile(DfTiles.Tile.`%`, RGB(1.0, 0.6, 1.0))
   val blocksMovement: Boolean = isAlive
   val name: String            = "Orc"
 
