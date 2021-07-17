@@ -5,16 +5,27 @@ import indigo._
 import roguelike.GameEvent
 
 import indigoextras.trees.QuadTree
+import roguelike.RogueLikeGame
 
 final case class Model(
     screenSize: Size,
     player: Player,
     gameMap: GameMap,
     messageLog: MessageLog,
-    paused: Boolean
+    historyViewer: HistoryViewer,
+    paused: Boolean,
+    showMessageHistory: Boolean
 ):
   def entitiesList: List[Entity] =
     gameMap.entitiesList :+ player
+
+  def toggleMessageHistory: Model =
+    val show = !showMessageHistory
+    this.copy(
+      paused = if show then true else false,
+      showMessageHistory = show,
+      historyViewer = if show then historyViewer.withPosition(0) else historyViewer
+    )
 
   def update(dice: Dice): GlobalEvent => Outcome[Model] =
     case GameEvent.Log(message) =>
@@ -25,11 +36,14 @@ final case class Model(
       )
 
     case e: GameEvent.MoveEntity =>
-      gameMap.update(dice, player.position, paused)(e).map { gm =>
-        this.copy(
-          gameMap = gm
-        )
-      }.addGlobalEvents(GameEvent.Redraw)
+      gameMap
+        .update(dice, player.position, paused)(e)
+        .map { gm =>
+          this.copy(
+            gameMap = gm
+          )
+        }
+        .addGlobalEvents(GameEvent.Redraw)
 
     case GameEvent.MeleeAttack(name, power, None) =>
       val damage = Math.max(0, power - player.fighter.defense)
@@ -107,7 +121,9 @@ object Model:
       screenSize,
       p,
       GameMap.initial(screenSize, Nil),
-      MessageLog(30),
+      MessageLog.Unlimited,
+      HistoryViewer(RogueLikeGame.screenSize / 2),
+      false,
       false
     )
 
@@ -132,7 +148,9 @@ object Model:
           screenSize,
           p,
           gm,
-          MessageLog(30),
+          MessageLog.Unlimited,
+          HistoryViewer(Size(40, 20)),
+          false,
           false
         )
       }

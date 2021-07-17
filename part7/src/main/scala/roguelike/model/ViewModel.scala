@@ -10,4 +10,7 @@ final case class ViewModel(terminalEntity: Option[TerminalEntity], shroud: MapTi
 
 object ViewModel:
   def initial: ViewModel =
-    ViewModel(None, MapTile(DfTiles.Tile.SPACE))
+    ViewModel(
+      None,
+      MapTile(DfTiles.Tile.SPACE)
+    )
