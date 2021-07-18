@@ -12,8 +12,6 @@ sealed trait Entity:
   def tile: MapTile
   def blocksMovement: Boolean
   def name: String
-  def moveBy(amount: Point, gameMap: GameMap): Outcome[Entity]
-  def moveBy(x: Int, y: Int, gameMap: GameMap): Outcome[Entity] = moveBy(Point(x, y), gameMap)
 
 sealed trait Actor extends Entity:
   def isAlive: Boolean
