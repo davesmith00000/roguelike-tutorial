@@ -5,6 +5,7 @@ import roguelike.terminal.MapTile
 import roguelike.DfTiles
 import roguelike.utils.PathFinder
 import roguelike.GameEvent
+import roguelike.ColorScheme
 
 sealed trait Entity:
   def position: Point
@@ -73,6 +74,25 @@ sealed trait Hostile extends Actor:
 final case class Fighter(hp: Int, maxHp: Int, defense: Int, power: Int):
   def withHp(value: Int): Fighter =
     this.copy(hp = Math.max(0, Math.min(value, maxHp)))
+
+  def heal(amount: Int): Outcome[Fighter] =
+    if hp == maxHp then Outcome(this)
+    else
+      val newHpValue = hp + amount
+      if hp + amount > maxHp then maxHp else hp + amount
+
+      val amountRecovered = newHpValue - hp
+
+      val events =
+        if amountRecovered <= 0 then Nil
+        else
+          List(
+            GameEvent.Log(Message(s"Player healed by ${amountRecovered.toString}!", ColorScheme.healthRecovered))
+          )
+
+      Outcome(
+        this.copy(hp = newHpValue)
+      ).addGlobalEvents(events)
 
   def takeDamage(amount: Int): Fighter =
     this.copy(hp = hp - amount)
