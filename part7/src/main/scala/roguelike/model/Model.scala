@@ -115,6 +115,8 @@ final case class Model(
 
 object Model:
 
+  val HistoryWindowSize: Size = Size(50, 36)
+
   def initial(screenSize: Size): Model =
     val p = Player.initial(Point.zero)
     Model(
@@ -122,7 +124,7 @@ object Model:
       p,
       GameMap.initial(screenSize, Nil),
       MessageLog.Unlimited,
-      HistoryViewer(RogueLikeGame.screenSize / 2),
+      HistoryViewer(HistoryWindowSize),
       false,
       false
     )
@@ -149,7 +151,7 @@ object Model:
           p,
           gm,
           MessageLog.Unlimited,
-          HistoryViewer(Size(40, 20)),
+          HistoryViewer(HistoryWindowSize),
           false,
           false
         )

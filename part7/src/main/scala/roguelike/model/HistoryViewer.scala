@@ -16,10 +16,16 @@ final case class HistoryViewer(size: Size, position: Int, window: TerminalEmulat
   def scrollUp: HistoryViewer =
     withPosition(if position - 1 >= 0 then position - 1 else position)
   def scrollDown(lineCount: Int): HistoryViewer =
-    withPosition(if position + 1 <= lineCount then position + 1 else lineCount)
+    val innerHeight: Int = size.height - 2
+    withPosition(
+      if lineCount > innerHeight then
+        if position + 1 <= lineCount - innerHeight then position + 1 else lineCount - innerHeight
+      else
+        position
+    )
 
   def toTerminal(log: MessageLog): TerminalEmulator =
-    val logTerm = log.toTerminal(size - 2, true, 0, false)
+    val logTerm = log.toTerminal(size - 2, true, position, false)
     window.inset(logTerm, Point(1, 1))
 
 object HistoryViewer:
@@ -28,10 +34,11 @@ object HistoryViewer:
   val MinWindowSize: Size = Size(WindowTitle.length + 4, 5)
 
   def apply(size: Size): HistoryViewer =
-    HistoryViewer(size.min(MinWindowSize), 0, createWindow(size))
+    val checkSize = size.max(MinWindowSize)
+    HistoryViewer(checkSize, 0, createWindow(checkSize))
 
   def createWindow(size: Size): TerminalEmulator =
-    val checkSize   = size.min(MinWindowSize)
+    val checkSize   = size.max(MinWindowSize)
     val titleBar    = List.fill(checkSize.width - 2 - WindowTitle.length)("─").mkString
     val middleSpace = List.fill(checkSize.width - 2)(" ").mkString
     val bottomBar   = List.fill(checkSize.width - 2)("─").mkString
@@ -44,6 +51,6 @@ object HistoryViewer:
       TerminalEmulator(checkSize)
         .putLine(Point(0, 0), header, RGB.White, bgColor)
         .putLines(Point(0, 1), List.fill(checkSize.height - 2)(middle), RGB.White, bgColor)
-        .putLine(Point(0, checkSize.height), footer, RGB.White, bgColor)
+        .putLine(Point(0, checkSize.height - 1), footer, RGB.White, bgColor)
 
     windowTerm

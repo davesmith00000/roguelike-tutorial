@@ -113,7 +113,10 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       if model.showMessageHistory then
         term
           .inset(log, Point(21, 45))
-          .inset(model.historyViewer.toTerminal(model.messageLog), (RogueLikeGame.screenSize / 4).toPoint)
+          .inset(
+            model.historyViewer.toTerminal(model.messageLog),
+            ((RogueLikeGame.screenSize - model.historyViewer.size) / 2).toPoint
+          )
       else
         term
           .inset(log, Point(21, 45))
