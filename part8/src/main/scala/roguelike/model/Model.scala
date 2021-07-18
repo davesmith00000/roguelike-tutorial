@@ -52,7 +52,7 @@ final case class Model(
 
       Outcome(
         this.copy(
-          player = player.takeDamage(damage)
+          player = p
         )
       ).addGlobalEvents(msgs)
 
@@ -110,7 +110,7 @@ object Model:
     Model(
       screenSize,
       p,
-      GameMap.initial(screenSize, Nil),
+      GameMap.initial(screenSize, Nil, Nil),
       MessageLog.Unlimited,
       HistoryViewer(HistoryWindowSize),
       false,

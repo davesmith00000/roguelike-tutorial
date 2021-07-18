@@ -19,12 +19,13 @@ final case class GameMap(
     tileMap: QuadTree[GameTile],
     visible: List[Point],
     explored: Set[Point],
-    hostiles: List[Hostile]
+    hostiles: List[Hostile],
+    items: List[Item]
 ):
   def entitiesList: List[Entity] =
-    hostiles.filter(e => visible.contains(e.position)).sortBy { case e: Actor =>
+    (items ++ hostiles.sortBy { case e: Actor =>
       e.isAlive
-    }
+    }).filter(e => visible.contains(e.position))
 
   def damageHostile(id: Int, damage: Int): Outcome[GameMap] =
     Outcome
@@ -151,17 +152,18 @@ final case class GameMap(
     GameMap.getPathTo(dice, from, to, walkable, area)
 
 object GameMap:
-  def initial(size: Size, hostiles: List[Hostile]): GameMap =
+  def initial(size: Size, hostiles: List[Hostile], items: List[Item]): GameMap =
     GameMap(
       size,
       QuadTree.empty(size.width, size.height),
       Nil,
       Set(),
-      hostiles
+      hostiles,
+      items
     )
 
   def gen(size: Size, dungeon: Dungeon): GameMap =
-    initial(size, dungeon.hostiles).insert(dungeon.positionedTiles)
+    initial(size, dungeon.hostiles, dungeon.items).insert(dungeon.positionedTiles)
 
   def calculateFOV(radius: Int, center: Point, tileMap: QuadTree[GameTile]): List[Point] =
     val bounds: Rectangle =

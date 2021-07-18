@@ -49,6 +49,9 @@ final case class Fighter(hp: Int, maxHp: Int, defense: Int, power: Int):
   def takeDamage(amount: Int): Fighter =
     this.copy(hp = hp - amount)
 
+  def heal(amount: Int): Fighter =
+    this.copy(hp = hp + amount)
+
 object Fighter:
   def apply(hp: Int, defense: Int, power: Int): Fighter =
     Fighter(hp, hp, defense, power)
@@ -87,6 +90,12 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter) ext
     this.copy(
       fighter = f,
       isAlive = if f.hp > 0 then true else false
+    )
+
+  def heal(amount: Int): Player =
+    val f = fighter.heal(amount)
+    this.copy(
+      fighter = f
     )
 
 object Player:
@@ -139,3 +148,9 @@ final case class Troll(id: Int, position: Point, isAlive: Boolean, fighter: Figh
 object Troll:
   def spawn(id: Int, start: Point): Troll =
     Troll(id, start, true, Fighter(2, 0, 3), Nil)
+
+final case class Item(position: Point, consumable: Consumable) extends Entity:
+  def tile: MapTile = consumable.tile
+  val blocksMovement: Boolean = false
+  def name: String = consumable.name
+
