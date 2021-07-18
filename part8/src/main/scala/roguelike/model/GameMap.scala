@@ -46,17 +46,41 @@ final case class GameMap(
 
   def updateEntities(dice: Dice, playerPosition: Point, pause: Boolean): Outcome[GameMap] =
     val newVisible = GameMap.calculateFOV(15, playerPosition, tileMap)
-    val updatedEntities =
-      if !pause then
-        Outcome.sequence(
-          entities.map {
-            case entity: Hostile =>
-              entity.nextMove(dice, playerPosition, this, newVisible)
 
-            case entity =>
-              Outcome(entity)
-          }
-        )
+    @tailrec
+    def rec(remaining: List[Entity], events: List[GameEvent], acc: List[Entity]): Outcome[List[Entity]] =
+      remaining match
+        case Nil =>
+          Outcome(acc).addGlobalEvents(events)
+
+        case (x: Hostile) :: xs if !x.isAlive || !newVisible.contains(x.position) =>
+          // Filter out the dead and the unseen
+          rec(xs, events, x :: acc)
+
+        case (x: Hostile) :: xs if playerPosition.distanceTo(x.position) <= 1 =>
+          // Close enough to attack!
+          val event = GameEvent.HostileMeleeAttack(x.name, x.fighter.power)
+          rec(xs, event :: events, x :: acc)
+
+        case (x: Hostile) :: xs =>
+          // Otherwise, move a little closer...
+          val entityPositions = (xs ++ acc).flatMap(e => if e.blocksMovement then List(e.position) else Nil)
+          val path            = getPathTo(dice, x.position, playerPosition, entityPositions)
+
+          // First path result is current location, we want the next one if it exists.
+          path.drop(1).headOption match
+            case Some(nextPosition) =>
+              rec(xs, events, x.moveTo(nextPosition) :: acc)
+
+            case None =>
+              rec(xs, events, x :: acc)
+
+        case x :: xs =>
+          // Everything else.
+          rec(xs, events, x :: acc)
+
+    val updatedEntities =
+      if !pause then rec(entities, Nil, Nil)
       else Outcome(entities)
 
     updatedEntities.map { es =>
@@ -66,20 +90,6 @@ final case class GameMap(
         entities = es
       )
     }
-
-  def update(dice: Dice, playerPosition: Point, pause: Boolean): GlobalEvent => Outcome[GameMap] =
-    case e: GameEvent.MoveEntity =>
-      val updatedEntities =
-        Outcome.sequence(entities.map(_.update(dice, playerPosition, this)(e)))
-
-      updatedEntities.map { es =>
-        this.copy(
-          entities = es
-        )
-      }
-
-    case _ =>
-      Outcome(this)
 
   def visibleTiles: List[(Point, MapTile)] =
     visible

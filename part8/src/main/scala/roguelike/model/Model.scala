@@ -27,7 +27,7 @@ final case class Model(
       historyViewer = if show then historyViewer.withPosition(0) else historyViewer
     )
 
-  def update(dice: Dice): GlobalEvent => Outcome[Model] =
+  def update(dice: Dice): GameEvent => Outcome[Model] =
     case GameEvent.Log(message) =>
       Outcome(
         this.copy(
@@ -35,17 +35,7 @@ final case class Model(
         )
       )
 
-    case e: GameEvent.MoveEntity =>
-      gameMap
-        .update(dice, player.position, paused)(e)
-        .map { gm =>
-          this.copy(
-            gameMap = gm
-          )
-        }
-        .addGlobalEvents(GameEvent.Redraw)
-
-    case GameEvent.MeleeAttack(name, power, None) =>
+    case GameEvent.HostileMeleeAttack(name, power) =>
       val damage = Math.max(0, power - player.fighter.defense)
 
       val attackMessage =
@@ -66,7 +56,7 @@ final case class Model(
         )
       ).addGlobalEvents(msgs)
 
-    case GameEvent.MeleeAttack(name, power, Some(id)) =>
+    case GameEvent.PlayerMeleeAttack(name, power, id) =>
       gameMap.entities.collectFirst {
         case e: Hostile if id == e.id => e
       } match
@@ -94,19 +84,17 @@ final case class Model(
             )
             .addGlobalEvents(events)
 
-    case _ =>
+    case GameEvent.PlayerTurnEnd =>
+      gameMap
+        .updateEntities(dice, player.position, paused)
+        .map(gm => this.copy(gameMap = gm))
+        .addGlobalEvents(GameEvent.Redraw)
+
+    case GameEvent.Redraw | GameEvent.RegenerateLevel =>
       Outcome(this)
 
   def performPlayerTurn(dice: Dice, by: Point): Outcome[Model] =
-    val res = for {
-      p  <- player.bump(by, gameMap)
-      gm <- gameMap.updateEntities(dice, p.position, paused)
-    } yield this.copy(
-      player = p,
-      gameMap = gm
-    )
-
-    res.addGlobalEvents(GameEvent.Redraw)
+    player.bump(by, gameMap).map(p => this.copy(player = p))
 
   def moveUp(dice: Dice): Outcome[Model]    = performPlayerTurn(dice, Point(0, -1))
   def moveDown(dice: Dice): Outcome[Model]  = performPlayerTurn(dice, Point(0, 1))

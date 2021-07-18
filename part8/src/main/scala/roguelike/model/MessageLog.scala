@@ -10,6 +10,7 @@ import roguelike.terminal.MapTile
 import roguelike.DfTiles
 import roguelike.Assets
 import roguelike.RogueLikeGame
+import roguelike.ColorScheme
 
 final case class Message(text: String, fgColor: RGB, count: Int, stackable: Boolean):
   def fullText: String =
@@ -38,6 +39,9 @@ final case class Message(text: String, fgColor: RGB, count: Int, stackable: Bool
 object Message:
   def apply(text: String, fgColor: RGB): Message =
     Message(text, fgColor, 1, true)
+
+  val thatWayIsBlocked: Message =
+    Message("That way is blocked.", ColorScheme.impossible)
 
 final case class MessageLog(messages: List[Message], maxLength: Option[Int]):
 

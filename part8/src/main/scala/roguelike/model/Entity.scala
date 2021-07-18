@@ -5,15 +5,15 @@ import roguelike.terminal.MapTile
 import roguelike.DfTiles
 import roguelike.utils.PathFinder
 import roguelike.GameEvent
+import roguelike.ColorScheme
 
 sealed trait Entity:
   def position: Point
   def tile: MapTile
   def blocksMovement: Boolean
   def name: String
-  def moveBy(amount: Point, gameMap: GameMap): Entity
-  def moveBy(x: Int, y: Int, gameMap: GameMap): Entity = moveBy(Point(x, y), gameMap)
-  def update(dice: Dice, playerPosition: Point, gameMap: GameMap): GameEvent => Outcome[Entity]
+  def moveBy(amount: Point, gameMap: GameMap): Outcome[Entity]
+  def moveBy(x: Int, y: Int, gameMap: GameMap): Outcome[Entity] = moveBy(Point(x, y), gameMap)
 
 sealed trait Actor extends Entity:
   def isAlive: Boolean
@@ -25,32 +25,6 @@ sealed trait Hostile extends Actor:
   def moveTo(newPosition: Point): Hostile
   def withFighter(newFighter: Fighter): Hostile
   def markAsDead(isDead: Boolean): Hostile
-
-  def update(dice: Dice, playerPosition: Point, gameMap: GameMap): GameEvent => Outcome[Hostile] =
-    case GameEvent.MoveEntity(entityId, to) if entityId == id =>
-      Outcome(moveTo(to))
-
-    case _ =>
-      Outcome(this)
-
-  def nextMove(dice: Dice, playerPosition: Point, gameMap: GameMap, nextVisible: List[Point]): Outcome[Hostile] =
-    val events =
-      if isAlive && nextVisible.contains(position) then
-        if playerPosition.distanceTo(position) <= 1 then List(GameEvent.MeleeAttack(name, fighter.power, None))
-        else
-          val entityPositions = gameMap.entities.flatMap(e => if e.blocksMovement then List(e.position) else Nil)
-          val path            = gameMap.getPathTo(dice, position, playerPosition, entityPositions)
-
-          // First path result is current location, we want the next one if it exists.
-          path.drop(1).headOption match
-            case Some(nextPosition) =>
-              List(GameEvent.MoveEntity(id, nextPosition))
-
-            case None =>
-              Nil
-      else Nil
-
-    Outcome(this).addGlobalEvents(events)
 
   def takeDamage(amount: Int): Outcome[Actor] =
     val f = fighter.takeDamage(amount)
@@ -89,22 +63,26 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter) ext
   def bump(amount: Point, gameMap: GameMap): Outcome[Player] =
     gameMap.entities.collectFirst { case e: Hostile if e.position == position + amount && e.blocksMovement => e } match
       case None =>
-        Outcome(moveBy(amount, gameMap))
+        moveBy(amount, gameMap)
 
       case Some(target) =>
         Outcome(this)
-          .addGlobalEvents(GameEvent.MeleeAttack(name, fighter.power, Option(target.id)))
+          .addGlobalEvents(
+            GameEvent.PlayerMeleeAttack(name, fighter.power, target.id),
+            GameEvent.PlayerTurnEnd
+          )
 
-  def moveBy(amount: Point, gameMap: GameMap): Player =
+  def moveBy(amount: Point, gameMap: GameMap): Outcome[Player] =
     gameMap.lookUp(position + amount) match
       case None =>
-        this
+        Outcome(this).addGlobalEvents(GameEvent.Log(Message.thatWayIsBlocked))
 
       case Some(tile) if tile.isBlocked =>
-        this
+        Outcome(this).addGlobalEvents(GameEvent.Log(Message.thatWayIsBlocked))
 
       case Some(tile) =>
-        this.copy(position = position + amount)
+        Outcome(this.copy(position = position + amount))
+          .addGlobalEvents(GameEvent.PlayerTurnEnd)
 
   def takeDamage(amount: Int): Player =
     val f = fighter.takeDamage(amount)
@@ -112,9 +90,6 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter) ext
       fighter = f,
       isAlive = if f.hp > 0 then true else false
     )
-
-  def update(dice: Dice, playerPosition: Point, gameMap: GameMap): GlobalEvent => Outcome[Player] =
-    _ => Outcome(this)
 
 object Player:
   def initial(start: Point): Player =
@@ -128,8 +103,8 @@ final case class Orc(id: Int, position: Point, isAlive: Boolean, fighter: Fighte
   val blocksMovement: Boolean = isAlive
   val name: String            = "Orc"
 
-  def moveBy(amount: Point, gameMap: GameMap): Orc =
-    this.copy(position = position + amount)
+  def moveBy(amount: Point, gameMap: GameMap): Outcome[Orc] =
+    Outcome(this.copy(position = position + amount))
 
   def moveTo(newPosition: Point): Orc =
     this.copy(position = newPosition)
@@ -151,8 +126,8 @@ final case class Troll(id: Int, position: Point, isAlive: Boolean, fighter: Figh
   val blocksMovement: Boolean = isAlive
   val name: String            = "Troll"
 
-  def moveBy(amount: Point, gameMap: GameMap): Troll =
-    this.copy(position = position + amount)
+  def moveBy(amount: Point, gameMap: GameMap): Outcome[Troll] =
+    Outcome(this.copy(position = position + amount))
 
   def moveTo(newPosition: Point): Troll =
     this.copy(position = newPosition)
