@@ -24,7 +24,7 @@ sealed trait Hostile extends Actor:
   def withFighter(newFighter: Fighter): Hostile
   def markAsDead(isDead: Boolean): Hostile
 
-  def takeDamage(amount: Int): Outcome[Actor] =
+  def takeDamage(amount: Int): Outcome[Hostile] =
     val f = fighter.takeDamage(amount)
     Outcome(
       this
@@ -59,7 +59,7 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter) ext
   val name: String            = "Player"
 
   def bump(amount: Point, gameMap: GameMap): Outcome[Player] =
-    gameMap.entities.collectFirst { case e: Hostile if e.position == position + amount && e.blocksMovement => e } match
+    gameMap.hostiles.collectFirst { case e: Hostile if e.position == position + amount && e.blocksMovement => e } match
       case None =>
         moveBy(amount, gameMap)
 

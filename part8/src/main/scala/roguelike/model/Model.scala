@@ -57,7 +57,7 @@ final case class Model(
       ).addGlobalEvents(msgs)
 
     case GameEvent.PlayerMeleeAttack(name, power, id) =>
-      gameMap.entities.collectFirst {
+      gameMap.hostiles.collectFirst {
         case e: Hostile if id == e.id => e
       } match
         case None =>
@@ -72,7 +72,7 @@ final case class Model(
             else Message(s"${name.capitalize} attacks but does no damage", RGB(0.3, 0.3, 0.3))
 
           val res = gameMap
-            .damageEntity(target.id, damage)
+            .damageHostile(target.id, damage)
 
           val events = GameEvent.Log(msg) :: res.globalEventsOrNil.reverse
 
@@ -86,7 +86,7 @@ final case class Model(
 
     case GameEvent.PlayerTurnEnd =>
       gameMap
-        .updateEntities(dice, player.position, paused)
+        .updateHostiles(dice, player.position, paused)
         .map(gm => this.copy(gameMap = gm))
         .addGlobalEvents(GameEvent.Redraw)
 
@@ -132,7 +132,7 @@ object Model:
 
     GameMap
       .gen(screenSize, dungeon)
-      .updateEntities(dice, dungeon.playerStart, true)
+      .updateHostiles(dice, dungeon.playerStart, true)
       .map { gm =>
         Model(
           screenSize,

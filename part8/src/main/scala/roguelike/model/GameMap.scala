@@ -19,24 +19,24 @@ final case class GameMap(
     tileMap: QuadTree[GameTile],
     visible: List[Point],
     explored: Set[Point],
-    entities: List[Entity]
+    hostiles: List[Hostile]
 ):
   def entitiesList: List[Entity] =
-    entities.filter(e => visible.contains(e.position)).sortBy { case e: Actor =>
+    hostiles.filter(e => visible.contains(e.position)).sortBy { case e: Actor =>
       e.isAlive
     }
 
-  def damageEntity(id: Int, damage: Int): Outcome[GameMap] =
+  def damageHostile(id: Int, damage: Int): Outcome[GameMap] =
     Outcome
       .sequence(
-        entities.map {
-          case e: Hostile if e.id == id && e.isAlive =>
+        hostiles.map {
+          case e if e.id == id && e.isAlive =>
             e.takeDamage(damage)
 
           case e => Outcome(e)
         }
       )
-      .map(es => this.copy(entities = es))
+      .map(es => this.copy(hostiles = es))
 
   private def updateMap(tm: QuadTree[GameTile], coords: Point, f: GameTile => GameTile): QuadTree[GameTile] =
     val vtx = Vertex.fromPoint(coords)
@@ -44,25 +44,25 @@ final case class GameMap(
       case None       => tm
       case Some(tile) => tm.insertElement(tile, vtx)
 
-  def updateEntities(dice: Dice, playerPosition: Point, pause: Boolean): Outcome[GameMap] =
+  def updateHostiles(dice: Dice, playerPosition: Point, pause: Boolean): Outcome[GameMap] =
     val newVisible = GameMap.calculateFOV(15, playerPosition, tileMap)
 
     @tailrec
-    def rec(remaining: List[Entity], events: List[GameEvent], acc: List[Entity]): Outcome[List[Entity]] =
+    def rec(remaining: List[Hostile], events: List[GameEvent], acc: List[Hostile]): Outcome[List[Hostile]] =
       remaining match
         case Nil =>
           Outcome(acc).addGlobalEvents(events)
 
-        case (x: Hostile) :: xs if !x.isAlive || !newVisible.contains(x.position) =>
+        case x :: xs if !x.isAlive || !newVisible.contains(x.position) =>
           // Filter out the dead and the unseen
           rec(xs, events, x :: acc)
 
-        case (x: Hostile) :: xs if playerPosition.distanceTo(x.position) <= 1 =>
+        case x :: xs if playerPosition.distanceTo(x.position) <= 1 =>
           // Close enough to attack!
           val event = GameEvent.HostileMeleeAttack(x.name, x.fighter.power)
           rec(xs, event :: events, x :: acc)
 
-        case (x: Hostile) :: xs =>
+        case x :: xs =>
           // Otherwise, move a little closer...
           val entityPositions = (xs ++ acc).flatMap(e => if e.blocksMovement then List(e.position) else Nil)
           val path            = getPathTo(dice, x.position, playerPosition, entityPositions)
@@ -75,19 +75,15 @@ final case class GameMap(
             case None =>
               rec(xs, events, x :: acc)
 
-        case x :: xs =>
-          // Everything else.
-          rec(xs, events, x :: acc)
-
     val updatedEntities =
-      if !pause then rec(entities, Nil, Nil)
-      else Outcome(entities)
+      if !pause then rec(hostiles, Nil, Nil)
+      else Outcome(hostiles)
 
     updatedEntities.map { es =>
       this.copy(
         visible = newVisible,
         explored = explored ++ newVisible,
-        entities = es
+        hostiles = es
       )
     }
 
@@ -155,17 +151,17 @@ final case class GameMap(
     GameMap.getPathTo(dice, from, to, walkable, area)
 
 object GameMap:
-  def initial(size: Size, entities: List[Entity]): GameMap =
+  def initial(size: Size, hostiles: List[Hostile]): GameMap =
     GameMap(
       size,
       QuadTree.empty(size.width, size.height),
       Nil,
       Set(),
-      entities
+      hostiles
     )
 
   def gen(size: Size, dungeon: Dungeon): GameMap =
-    initial(size, dungeon.entities).insert(dungeon.positionedTiles)
+    initial(size, dungeon.hostiles).insert(dungeon.positionedTiles)
 
   def calculateFOV(radius: Int, center: Point, tileMap: QuadTree[GameTile]): List[Point] =
     val bounds: Rectangle =
