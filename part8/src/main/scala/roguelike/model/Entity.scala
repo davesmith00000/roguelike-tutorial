@@ -56,10 +56,22 @@ object Fighter:
   def apply(hp: Int, defense: Int, power: Int): Fighter =
     Fighter(hp, hp, defense, power)
 
-final case class Player(position: Point, isAlive: Boolean, fighter: Fighter) extends Actor:
+final case class Player(position: Point, isAlive: Boolean, fighter: Fighter, inventory: Inventory) extends Actor:
   def tile: MapTile = if isAlive then MapTile(DfTiles.Tile.`@`, RGB.Magenta) else MapTile(DfTiles.Tile.`@`, RGB.Red)
   val blocksMovement: Boolean = false
   val name: String            = "Player"
+
+  def pickUp(worldItems: List[Item]): Outcome[(Player, List[Item])] =
+    worldItems.find(_.position == position) match
+      case None =>
+        Outcome((this, worldItems))
+          .addGlobalEvents(GameEvent.Log(Message.thereIsNothingHereToPickUp))
+
+      case Some(item) =>
+        inventory.add(item).map { case (inv, accepted) =>
+          if accepted then (this.copy(inventory = inv), worldItems.filterNot(_.position == position))
+          else (this, worldItems)
+        }
 
   def bump(amount: Point, gameMap: GameMap): Outcome[Player] =
     gameMap.hostiles.collectFirst { case e: Hostile if e.position == position + amount && e.blocksMovement => e } match
@@ -100,7 +112,7 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter) ext
 
 object Player:
   def initial(start: Point): Player =
-    Player(start, true, Fighter(10, 1, 5))
+    Player(start, true, Fighter(10, 1, 5), Inventory(26, Nil))
 
 final case class Orc(id: Int, position: Point, isAlive: Boolean, fighter: Fighter, movePath: List[Point])
     extends Hostile:
@@ -150,7 +162,6 @@ object Troll:
     Troll(id, start, true, Fighter(2, 0, 3), Nil)
 
 final case class Item(position: Point, consumable: Consumable) extends Entity:
-  def tile: MapTile = consumable.tile
+  def tile: MapTile           = consumable.tile
   val blocksMovement: Boolean = false
-  def name: String = consumable.name
-
+  def name: String            = consumable.name

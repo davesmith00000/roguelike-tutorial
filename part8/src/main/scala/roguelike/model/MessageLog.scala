@@ -43,6 +43,9 @@ object Message:
   val thatWayIsBlocked: Message =
     Message("That way is blocked.", ColorScheme.impossible)
 
+  val thereIsNothingHereToPickUp: Message =
+    Message("There is nothing here to pick up.", ColorScheme.impossible)
+
 final case class MessageLog(messages: List[Message], maxLength: Option[Int]):
 
   def logLength: Int = 

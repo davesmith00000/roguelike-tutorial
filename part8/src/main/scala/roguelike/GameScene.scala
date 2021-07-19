@@ -35,34 +35,34 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     Set()
 
   def updateModel(context: FrameContext[Unit], model: Model): GlobalEvent => Outcome[Model] =
-    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.showMessageHistory =>
+    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.showingHistory =>
       Outcome(
         model.copy(
           historyViewer = model.historyViewer.scrollUp
         )
       ).addGlobalEvents(GameEvent.Redraw)
 
-    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.player.isAlive =>
-      model.moveUp(context.dice)
-
-    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.showMessageHistory =>
+    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.currentState.showingHistory =>
       Outcome(
         model.copy(
           historyViewer = model.historyViewer.scrollDown(model.messageLog.logLength)
         )
       ).addGlobalEvents(GameEvent.Redraw)
 
+    case KeyboardEvent.KeyUp(Key.LEFT_ARROW) if model.currentState.showingHistory =>
+      Outcome(model)
+
+    case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.currentState.showingHistory =>
+      Outcome(model)
+
+    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.player.isAlive =>
+      model.moveUp(context.dice)
+
     case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.player.isAlive =>
       model.moveDown(context.dice)
 
-    case KeyboardEvent.KeyUp(Key.LEFT_ARROW) if model.showMessageHistory =>
-      Outcome(model)
-
     case KeyboardEvent.KeyUp(Key.LEFT_ARROW) if model.player.isAlive =>
       model.moveLeft(context.dice)
-
-    case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.showMessageHistory =>
-      Outcome(model)
 
     case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.player.isAlive =>
       model.moveRight(context.dice)
@@ -70,6 +70,9 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     case KeyboardEvent.KeyUp(Key.KEY_V) =>
       Outcome(model.toggleMessageHistory)
         .addGlobalEvents(GameEvent.Redraw)
+
+    case KeyboardEvent.KeyUp(Key.KEY_G) if model.currentState.isRunning =>
+      model.pickUp
 
     case GameEvent.RegenerateLevel =>
       Model
@@ -110,7 +113,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       model.messageLog.toTerminal(Size(RogueLikeGame.screenSize.width - 21, 5), false, 0, true)
 
     val withHistory =
-      if model.showMessageHistory then
+      if model.currentState.showingHistory then
         term
           .inset(log, Point(21, 45))
           .inset(

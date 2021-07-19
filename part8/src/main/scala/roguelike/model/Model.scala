@@ -14,16 +14,16 @@ final case class Model(
     messageLog: MessageLog,
     historyViewer: HistoryViewer,
     paused: Boolean,
-    showMessageHistory: Boolean
+    currentState: GameState
 ):
   def entitiesList: List[Entity] =
     gameMap.entitiesList :+ player
 
   def toggleMessageHistory: Model =
-    val show = !showMessageHistory
+    val show = !currentState.showingHistory
     this.copy(
       paused = if show then true else false,
-      showMessageHistory = show,
+      currentState = if show then GameState.History else GameState.Game,
       historyViewer = if show then historyViewer.withPosition(0) else historyViewer
     )
 
@@ -101,6 +101,14 @@ final case class Model(
   def moveLeft(dice: Dice): Outcome[Model]  = performPlayerTurn(dice, Point(-1, 0))
   def moveRight(dice: Dice): Outcome[Model] = performPlayerTurn(dice, Point(1, 0))
 
+  def pickUp: Outcome[Model] =
+    player.pickUp(gameMap.items).map { case (p, updatedItems) =>
+      this.copy(
+        player = p,
+        gameMap = gameMap.copy(items = updatedItems)
+      )
+    }
+
 object Model:
 
   val HistoryWindowSize: Size = Size(50, 36)
@@ -114,7 +122,7 @@ object Model:
       MessageLog.Unlimited,
       HistoryViewer(HistoryWindowSize),
       false,
-      false
+      GameState.Game
     )
 
   def gen(dice: Dice, screenSize: Size): Outcome[Model] =
@@ -141,6 +149,24 @@ object Model:
           MessageLog.Unlimited,
           HistoryViewer(HistoryWindowSize),
           false,
-          false
+          GameState.Game
         )
       }
+
+enum GameState:
+  case Game, History, Inventory
+
+  def showingHistory: Boolean =
+    this match
+      case GameState.History => true
+      case _                 => false
+
+  def showingInventory: Boolean =
+    this match
+      case GameState.Inventory => true
+      case _                   => false
+
+  def isRunning: Boolean =
+    this match
+      case GameState.Game => true
+      case _              => false
