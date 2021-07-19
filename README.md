@@ -12,8 +12,11 @@ Everything is being built with [Indigo](https://indigoengine.io/) and I'm evolvi
 
 ### Controls (so far...)
 
-Basic movement: Arrow keys.
-Parts 4 and 5: Hit refresh to generate a new level.
+Parts|Controls
+---|---
+0/1 to 3|Move using Arrow keys, attack by bumping into baddies.
+4 to 6|_As above, plus:_ Hit refresh in your browser to generate a new level.
+7 to ?|_As above, plus:_ Hit the 'v' key to show message history and use up and down arrows to scroll.
 
 ### Table of Contents
 
