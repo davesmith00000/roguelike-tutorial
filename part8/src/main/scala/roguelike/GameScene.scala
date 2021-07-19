@@ -13,6 +13,7 @@ import roguelike.model.ViewModel
 import roguelike.model.GameTile
 import roguelike.GameEvent
 import roguelike.model.Message
+import roguelike.model.GameState
 
 object GameScene extends Scene[Unit, Model, ViewModel]:
 
@@ -55,20 +56,28 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.currentState.showingHistory =>
       Outcome(model)
 
-    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.player.isAlive =>
+    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveUp(context.dice)
 
-    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.player.isAlive =>
+    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveDown(context.dice)
 
-    case KeyboardEvent.KeyUp(Key.LEFT_ARROW) if model.player.isAlive =>
+    case KeyboardEvent.KeyUp(Key.LEFT_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveLeft(context.dice)
 
-    case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.player.isAlive =>
+    case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveRight(context.dice)
 
-    case KeyboardEvent.KeyUp(Key.KEY_V) =>
+    case KeyboardEvent.KeyUp(Key.KEY_V) if model.currentState.isRunning || model.currentState.showingHistory =>
       Outcome(model.toggleMessageHistory)
+        .addGlobalEvents(GameEvent.Redraw)
+
+    case KeyboardEvent.KeyUp(Key.KEY_I) if model.currentState.isRunning || model.currentState.showingInventory =>
+      Outcome(model.toggleInventory)
+        .addGlobalEvents(GameEvent.Redraw)
+
+    case KeyboardEvent.KeyUp(Key.KEY_D) if model.currentState.isRunning || model.currentState.showingDropMenu =>
+      Outcome(model.toggleDropMenu)
         .addGlobalEvents(GameEvent.Redraw)
 
     case KeyboardEvent.KeyUp(Key.KEY_G) if model.currentState.isRunning =>
@@ -112,22 +121,39 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     val log =
       model.messageLog.toTerminal(Size(RogueLikeGame.screenSize.width - 21, 5), false, 0, true)
 
-    val withHistory =
-      if model.currentState.showingHistory then
-        term
-          .inset(log, Point(21, 45))
-          .inset(
-            model.historyViewer.toTerminal(model.messageLog),
-            ((RogueLikeGame.screenSize - model.historyViewer.size) / 2).toPoint
-          )
-      else
-        term
-          .inset(log, Point(21, 45))
+    val withWindows =
+      model.currentState match
+        case GameState.Game =>
+          term.inset(log, Point(21, 45))
+
+        case GameState.History =>
+          term
+            .inset(log, Point(21, 45))
+            .inset(
+              model.historyViewer.toTerminal(model.messageLog),
+              ((RogueLikeGame.screenSize - model.historyViewer.size) / 2).toPoint
+            )
+
+        case GameState.Inventory =>
+          term
+            .inset(log, Point(21, 45))
+            .inset(
+              model.inventoryWindow.toTerminal,
+              ((RogueLikeGame.screenSize - model.inventoryWindow.size) / 2).toPoint
+            )
+
+        case GameState.Drop =>
+          term
+            .inset(log, Point(21, 45))
+            .inset(
+              model.dropWindow.toTerminal,
+              ((RogueLikeGame.screenSize - model.dropWindow.size) / 2).toPoint
+            )
 
     Outcome(
       viewModel.copy(
         terminalEntity = Option(
-          withHistory
+          withWindows
             .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
         )
       )

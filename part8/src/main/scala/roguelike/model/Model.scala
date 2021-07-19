@@ -6,6 +6,9 @@ import roguelike.GameEvent
 
 import indigoextras.trees.QuadTree
 import roguelike.RogueLikeGame
+import roguelike.model.windows.HistoryViewer
+import roguelike.model.windows.InventoryWindow
+import roguelike.model.windows.DropWindow
 
 final case class Model(
     screenSize: Size,
@@ -13,6 +16,8 @@ final case class Model(
     gameMap: GameMap,
     messageLog: MessageLog,
     historyViewer: HistoryViewer,
+    inventoryWindow: InventoryWindow,
+    dropWindow: DropWindow,
     paused: Boolean,
     currentState: GameState
 ):
@@ -25,6 +30,22 @@ final case class Model(
       paused = if show then true else false,
       currentState = if show then GameState.History else GameState.Game,
       historyViewer = if show then historyViewer.withPosition(0) else historyViewer
+    )
+
+  def toggleInventory: Model =
+    val show = !currentState.showingInventory
+    this.copy(
+      paused = if show then true else false,
+      currentState = if show then GameState.Inventory else GameState.Game,
+      inventoryWindow = if show then inventoryWindow.withPosition(0) else inventoryWindow
+    )
+
+  def toggleDropMenu: Model =
+    val show = !currentState.showingDropMenu
+    this.copy(
+      paused = if show then true else false,
+      currentState = if show then GameState.Drop else GameState.Game,
+      dropWindow = if show then dropWindow.withPosition(0) else dropWindow
     )
 
   def update(dice: Dice): GameEvent => Outcome[Model] =
@@ -111,7 +132,9 @@ final case class Model(
 
 object Model:
 
-  val HistoryWindowSize: Size = Size(50, 36)
+  val HistoryWindowSize: Size   = Size(50, 36)
+  val InventoryWindowSize: Size = Size(30, 10)
+  val DropWindowSize: Size      = Size(30, 10)
 
   def initial(screenSize: Size): Model =
     val p = Player.initial(Point.zero)
@@ -121,6 +144,8 @@ object Model:
       GameMap.initial(screenSize, Nil, Nil),
       MessageLog.Unlimited,
       HistoryViewer(HistoryWindowSize),
+      InventoryWindow(InventoryWindowSize),
+      DropWindow(DropWindowSize),
       false,
       GameState.Game
     )
@@ -148,13 +173,15 @@ object Model:
           gm,
           MessageLog.Unlimited,
           HistoryViewer(HistoryWindowSize),
+          InventoryWindow(InventoryWindowSize),
+          DropWindow(DropWindowSize),
           false,
           GameState.Game
         )
       }
 
 enum GameState:
-  case Game, History, Inventory
+  case Game, History, Inventory, Drop
 
   def showingHistory: Boolean =
     this match
@@ -165,6 +192,11 @@ enum GameState:
     this match
       case GameState.Inventory => true
       case _                   => false
+
+  def showingDropMenu: Boolean =
+    this match
+      case GameState.Drop => true
+      case _              => false
 
   def isRunning: Boolean =
     this match
