@@ -16,7 +16,8 @@ Parts|Controls
 ---|---
 0/1 to 3|Move using Arrow keys, attack by bumping into baddies.
 4 to 6|_As above, plus:_ Hit refresh in your browser to generate a new level.
-7 to ?|_As above, plus:_ Hit the 'v' key to show message history and use up and down arrows to scroll.
+7|_As above, plus:_ Hit the 'v' key to show message history and use up and down arrows to scroll.
+8 to ?|_As above, plus:_ Hit the 'i' key to show inventory and 'd' to show the "drop" menu. Use up and down arrows to scroll in both, the a-z keys to choose an item to consume/drop, and shift|ctrl|alt|esc to close any windows.
 
 ### Table of Contents
 
