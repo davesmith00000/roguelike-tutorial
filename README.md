@@ -29,7 +29,7 @@ Part|Title|Screenshot(s)|Play!
 5|Placing enemies and kicking them (harmlessly)|![Part 5](part5/roguelike_part5.gif "Part 5")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part5/)
 6|Doing (and taking) some damage|![Part 6](part6/roguelike_part6.gif "Part 6")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part6/)
 7|Creating the Interface|![Part 7](part7/roguelike_part7_2.gif "Part 7")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part7/)
-8|||_Coming soon..._
+8|Items and Inventory|![Part 8](part8/roguelike_part8.gif "Part 8")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part8/)
 9|||_Coming soon..._
 10|||_Coming soon..._
 11|||_Coming soon..._
