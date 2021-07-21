@@ -24,10 +24,16 @@ final case class Model(
   def entitiesList: List[Entity] =
     gameMap.entitiesList :+ player
 
+  def closeAllWindows: Model =
+    this.copy(
+      paused = false,
+      currentState = GameState.Game
+    )
+
   def toggleMessageHistory: Model =
     val show = !currentState.showingHistory
     this.copy(
-      paused = if show then true else false,
+      // paused = if show then true else false,
       currentState = if show then GameState.History else GameState.Game,
       historyViewer = if show then historyViewer.withPosition(0) else historyViewer
     )
@@ -35,7 +41,7 @@ final case class Model(
   def toggleInventory: Model =
     val show = !currentState.showingInventory
     this.copy(
-      paused = if show then true else false,
+      // paused = if show then true else false,
       currentState = if show then GameState.Inventory else GameState.Game,
       inventoryWindow = if show then inventoryWindow.withPosition(0) else inventoryWindow
     )
@@ -43,7 +49,7 @@ final case class Model(
   def toggleDropMenu: Model =
     val show = !currentState.showingDropMenu
     this.copy(
-      paused = if show then true else false,
+      // paused = if show then true else false,
       currentState = if show then GameState.Drop else GameState.Game,
       dropWindow = if show then dropWindow.withPosition(0) else dropWindow
     )

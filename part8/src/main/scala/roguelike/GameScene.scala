@@ -14,6 +14,7 @@ import roguelike.model.GameTile
 import roguelike.GameEvent
 import roguelike.model.Message
 import roguelike.model.GameState
+import roguelike.model.windows.Window
 
 object GameScene extends Scene[Unit, Model, ViewModel]:
 
@@ -36,6 +37,14 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     Set()
 
   def updateModel(context: FrameContext[Unit], model: Model): GlobalEvent => Outcome[Model] =
+
+    // Window close keys
+    case KeyboardEvent.KeyUp(Key.ESCAPE) | KeyboardEvent.KeyUp(Key.SHIFT) | KeyboardEvent.KeyUp(Key.CTRL) |
+        KeyboardEvent.KeyUp(Key.ALT) if !model.currentState.isRunning =>
+      Outcome(model.closeAllWindows)
+        .addGlobalEvents(GameEvent.Redraw)
+
+    // History window
     case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.showingHistory =>
       Outcome(
         model.copy(
@@ -50,12 +59,74 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
         )
       ).addGlobalEvents(GameEvent.Redraw)
 
-    case KeyboardEvent.KeyUp(Key.LEFT_ARROW) if model.currentState.showingHistory =>
-      Outcome(model)
+    // Inventory window
+    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.showingInventory =>
+      Outcome(
+        model.copy(
+          inventoryWindow = model.inventoryWindow.scrollUp
+        )
+      ).addGlobalEvents(GameEvent.Redraw)
 
-    case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.currentState.showingHistory =>
-      Outcome(model)
+    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.currentState.showingInventory =>
+      Outcome(
+        model.copy(
+          inventoryWindow = model.inventoryWindow.scrollDown(model.player.inventory.items.length)
+        )
+      ).addGlobalEvents(GameEvent.Redraw)
 
+    case KeyboardEvent.KeyUp(key) if model.currentState.showingInventory =>
+      Window.letterPositions.get(key.key) match
+        case None =>
+          Outcome(model)
+
+        case Some(keyIndex) =>
+          model.player
+            .consume(keyIndex)
+            .map { p =>
+              model.copy(
+                player = p
+              )
+            }
+            .addGlobalEvents(GameEvent.Redraw)
+
+    // Drop window
+    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.showingDropMenu =>
+      Outcome(
+        model.copy(
+          dropWindow = model.dropWindow.scrollUp
+        )
+      ).addGlobalEvents(GameEvent.Redraw)
+
+    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.currentState.showingDropMenu =>
+      Outcome(
+        model.copy(
+          dropWindow = model.dropWindow.scrollDown(model.player.inventory.items.length)
+        )
+      ).addGlobalEvents(GameEvent.Redraw)
+
+    case KeyboardEvent.KeyUp(key) if model.currentState.showingDropMenu =>
+      Window.letterPositions.get(key.key) match
+        case None =>
+          Outcome(model)
+
+        case Some(keyIndex) =>
+          model.player
+            .drop(keyIndex, model.gameMap.items)
+            .map {
+              case (p, None) =>
+                model.copy(
+                  player = p
+                )
+
+              case (p, Some(item)) =>
+                model.copy(
+                  player = p,
+                  gameMap = model.gameMap.dropItem(item)
+                )
+            }
+            .addGlobalEvents(GameEvent.Redraw)
+
+    // Game controls
     case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveUp(context.dice)
 
@@ -68,6 +139,10 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveRight(context.dice)
 
+    case KeyboardEvent.KeyUp(Key.KEY_G) if model.currentState.isRunning && model.player.isAlive =>
+      model.pickUp
+
+    // Window toggles
     case KeyboardEvent.KeyUp(Key.KEY_V) if model.currentState.isRunning || model.currentState.showingHistory =>
       Outcome(model.toggleMessageHistory)
         .addGlobalEvents(GameEvent.Redraw)
@@ -80,9 +155,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       Outcome(model.toggleDropMenu)
         .addGlobalEvents(GameEvent.Redraw)
 
-    case KeyboardEvent.KeyUp(Key.KEY_G) if model.currentState.isRunning =>
-      model.pickUp
-
+    // Other
     case GameEvent.RegenerateLevel =>
       Model
         .gen(context.dice, model.screenSize)
@@ -138,7 +211,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
           term
             .inset(log, Point(21, 45))
             .inset(
-              model.inventoryWindow.toTerminal,
+              model.inventoryWindow.toTerminal(model.player.inventory),
               ((RogueLikeGame.screenSize - model.inventoryWindow.size) / 2).toPoint
             )
 
@@ -146,7 +219,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
           term
             .inset(log, Point(21, 45))
             .inset(
-              model.dropWindow.toTerminal,
+              model.dropWindow.toTerminal(model.player.inventory),
               ((RogueLikeGame.screenSize - model.dropWindow.size) / 2).toPoint
             )
 

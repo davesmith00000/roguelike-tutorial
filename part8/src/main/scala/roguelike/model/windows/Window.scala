@@ -34,7 +34,10 @@ object Window:
     if position - 1 >= 0 then position - 1 else position
 
   def nextScrollDown(maxHeight: Int, lineCount: Int, position: Int): Int =
-    val innerHeight: Int = maxHeight//size.height - 2
+    val innerHeight: Int = maxHeight
     if lineCount > innerHeight then
       if position + 1 <= lineCount - innerHeight then position + 1 else lineCount - innerHeight
     else position
+
+  val letters: List[String]             = ('a' to 'z').toList.map(_.toString)
+  val letterPositions: Map[String, Int] = letters.zipWithIndex.toMap

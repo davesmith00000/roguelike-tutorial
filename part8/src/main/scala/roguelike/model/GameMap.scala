@@ -108,6 +108,11 @@ final case class GameMap(
   def lookUp(at: Point): Option[GameTile] =
     tileMap.fetchElementAt(Vertex.fromPoint(at))
 
+  def dropItem(item: Item): GameMap =
+    this.copy(
+      items = item :: items
+    )
+
   def toExploredTiles: List[(Point, MapTile)] =
     @tailrec
     def rec(open: List[QuadTree[GameTile]], acc: List[(Point, MapTile)]): List[(Point, MapTile)] =

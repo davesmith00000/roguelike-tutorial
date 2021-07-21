@@ -61,6 +61,29 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter, inv
   val blocksMovement: Boolean = false
   val name: String            = "Player"
 
+  def consume(itemAt: Int): Outcome[Player] =
+    inventory
+      .consume(itemAt, this)
+      .map { case (inv, p) =>
+        p.copy(inventory = inv)
+      }
+
+  def drop(itemAt: Int, worldItems: List[Item]): Outcome[(Player, Option[Item])] =
+    if worldItems.exists(_.position == position) && inventory.items.nonEmpty then
+      Outcome((this, None))
+        .addGlobalEvents(GameEvent.Log(Message("Cannot drop here.", ColorScheme.invalid)))
+    else
+      inventory
+        .drop(itemAt)
+        .map {
+          case (inv, None) =>
+            (this.copy(inventory = inv), None)
+
+          case (inv, Some(item)) =>
+            (this.copy(inventory = inv), Option(item.moveTo(position)))
+
+        }
+
   def pickUp(worldItems: List[Item]): Outcome[(Player, List[Item])] =
     worldItems.find(_.position == position) match
       case None =>
@@ -165,3 +188,6 @@ final case class Item(position: Point, consumable: Consumable) extends Entity:
   def tile: MapTile           = consumable.tile
   val blocksMovement: Boolean = false
   def name: String            = consumable.name
+
+  def moveTo(newPosition: Point): Item =
+    this.copy(position = newPosition)
