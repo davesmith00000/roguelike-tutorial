@@ -22,14 +22,23 @@ object DungeonGen:
 
     }.distinct
 
-  def placeItems(entityCount: Int, dice: Dice, room: Rectangle, maxItemsPerRoom: Int, hostiles: List[Hostile]): List[Item] =
+  def placeItems(
+      entityCount: Int,
+      dice: Dice,
+      room: Rectangle,
+      maxItemsPerRoom: Int,
+      hostiles: List[Hostile]
+  ): List[Item] =
     (0 until dice.roll(maxItemsPerRoom)).toList.flatMap { i =>
-      val x = dice.roll(room.width - 4) + room.left + 2
-      val y = dice.roll(room.height - 4) + room.top + 2
+      val x   = dice.roll(room.width - 4) + room.left + 2
+      val y   = dice.roll(room.height - 4) + room.top + 2
       val pos = Point(x, y)
 
+      val itemChance = dice.rollDouble
+
       if hostiles.contains(pos) then Nil
-      else List(Item(pos, Consumable.HealthPotion(4)))
+      else if itemChance < 0.7 then List(Item(pos, Consumable.HealthPotion(4)))
+      else List(Item(pos, Consumable.LightningScroll(20, 5)))
 
     }.distinct
 
@@ -121,4 +130,9 @@ object DungeonGen:
 
     rec(0, None, Nil, Nil, Nil, Nil, Nil, Point.zero)
 
-final case class Dungeon(playerStart: Point, positionedTiles: List[(Point, GameTile)], hostiles: List[Hostile], items: List[Item])
+final case class Dungeon(
+    playerStart: Point,
+    positionedTiles: List[(Point, GameTile)],
+    hostiles: List[Hostile],
+    items: List[Item]
+)

@@ -61,9 +61,9 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter, inv
   val blocksMovement: Boolean = false
   val name: String            = "Player"
 
-  def consume(itemAt: Int): Outcome[Player] =
+  def consume(itemAt: Int, visibleHostiles: List[Hostile]): Outcome[Player] =
     inventory
-      .consume(itemAt, this)
+      .consume(itemAt, this, visibleHostiles)
       .map { case (inv, p) =>
         p.copy(inventory = inv)
       }
@@ -104,7 +104,7 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter, inv
       case Some(target) =>
         Outcome(this)
           .addGlobalEvents(
-            GameEvent.PlayerMeleeAttack(name, fighter.power, target.id),
+            GameEvent.PlayerAttack(name, fighter.power, target.id),
             GameEvent.PlayerTurnEnd
           )
 

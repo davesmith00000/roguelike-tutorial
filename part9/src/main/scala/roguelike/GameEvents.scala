@@ -7,7 +7,7 @@ import roguelike.model.Message
 
 enum GameEvent extends GlobalEvent:
   // Player events
-  case PlayerMeleeAttack(attackerName: String, power: Int, id: Int) extends GameEvent
+  case PlayerAttack(attackerName: String, power: Int, id: Int) extends GameEvent
   case PlayerTurnEnd extends GameEvent
 
   // Hostile events

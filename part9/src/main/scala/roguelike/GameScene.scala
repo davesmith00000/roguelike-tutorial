@@ -81,7 +81,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
 
         case Some(keyIndex) =>
           model.player
-            .consume(keyIndex)
+            .consume(keyIndex, model.gameMap.visibleHostiles)
             .map { p =>
               model.copy(
                 player = p

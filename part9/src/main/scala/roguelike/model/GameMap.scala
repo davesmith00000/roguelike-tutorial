@@ -27,6 +27,9 @@ final case class GameMap(
       e.isAlive
     }).filter(e => visible.contains(e.position))
 
+  def visibleHostiles: List[Hostile] =
+    hostiles.filter(e => e.isAlive && visible.contains(e.position))
+
   def damageHostile(id: Int, damage: Int): Outcome[GameMap] =
     Outcome
       .sequence(

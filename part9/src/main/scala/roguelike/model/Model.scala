@@ -84,7 +84,7 @@ final case class Model(
         )
       ).addGlobalEvents(msgs)
 
-    case GameEvent.PlayerMeleeAttack(name, power, id) =>
+    case GameEvent.PlayerAttack(name, power, id) =>
       gameMap.hostiles.collectFirst {
         case e: Hostile if id == e.id => e
       } match

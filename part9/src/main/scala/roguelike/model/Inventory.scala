@@ -27,21 +27,25 @@ final case class Inventory(capacity: Int, items: List[Item]):
         GameEvent.PlayerTurnEnd
       )
 
-  def consume(itemAt: Int, player: Player): Outcome[(Inventory, Player)] =
+  def consume(itemAt: Int, player: Player, visibleHostiles: List[Hostile]): Outcome[(Inventory, Player)] =
+    val remove: (Int, List[Item]) => List[Item] = (at, items) =>
+      val (start, end) = items.splitAt(itemAt)
+      start ++ end.drop(1)
+
     items.lift(itemAt) match
       case None =>
         Outcome((this, player))
           .addGlobalEvents(GameEvent.Log(Message("Invalid entry.", ColorScheme.invalid)))
 
       case Some(Item(_, potion @ Consumable.HealthPotion(_))) =>
-        potion.action(player).map { attempt =>
-          if attempt.consumed then
-            val (start, end) = items.splitAt(itemAt)
+        Consumable.useHealthPotion(potion, player).map { attempt =>
+          if attempt._2 then (this.copy(items = remove(itemAt, items)), attempt._1)
+          else (this, player)
+        }
 
-            val next = this.copy(
-              items = start ++ end.drop(1)
-            )
-            (next, attempt.player)
+      case Some(Item(_, scroll @ Consumable.LightningScroll(_, _))) =>
+        Consumable.useLightningScroll(scroll, player, visibleHostiles).map { consumed =>
+          if consumed then (this.copy(items = remove(itemAt, items)), player)
           else (this, player)
         }
 
