@@ -30,7 +30,7 @@ sealed trait Hostile extends Actor:
       this
         .withFighter(f)
         .markAsDead(if f.hp > 0 then false else true)
-    ).addGlobalEvents(if f.hp <= 0 then List(GameEvent.Log(Message(s"You killed a $name", RGB(0.75, 0, 0)))) else Nil)
+    ).addGlobalEvents(if f.hp <= 0 then List(GameEvent.Log(Message(s"You killed a $name", ColorScheme.enemyDie))) else Nil)
 
 /** Fighter class
   * @param hp

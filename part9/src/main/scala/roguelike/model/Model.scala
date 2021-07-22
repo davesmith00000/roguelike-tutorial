@@ -9,6 +9,7 @@ import roguelike.RogueLikeGame
 import roguelike.model.windows.HistoryViewer
 import roguelike.model.windows.InventoryWindow
 import roguelike.model.windows.DropWindow
+import roguelike.ColorScheme
 
 final case class Model(
     screenSize: Size,
@@ -67,15 +68,15 @@ final case class Model(
 
       val attackMessage =
         GameEvent.Log(
-          if damage > 0 then Message(s"${name.capitalize} attacks for $damage hit points.", RGB.Yellow)
-          else Message(s"${name.capitalize} attacks but does no damage", RGB(0.5, 0.5, 0.5))
+          if damage > 0 then Message(s"${name.capitalize} attacks for $damage hit points.", ColorScheme.enemyAttack)
+          else Message(s"${name.capitalize} attacks but does no damage", ColorScheme.enemyAttack)
         )
 
       val p = player.takeDamage(damage)
 
       val msgs =
         if p.isAlive then List(attackMessage)
-        else GameEvent.Log(Message("You died!", RGB.Red)) :: attackMessage :: Nil
+        else GameEvent.Log(Message("You died!", ColorScheme.playerDie)) :: attackMessage :: Nil
 
       Outcome(
         this.copy(
@@ -89,14 +90,14 @@ final case class Model(
       } match
         case None =>
           Outcome(this)
-            .addGlobalEvents(GameEvent.Log(Message(s"${name.capitalize} swings and misses!", RGB(0.5, 0.5, 0.5))))
+            .addGlobalEvents(GameEvent.Log(Message(s"${name.capitalize} swings and misses!", ColorScheme.playerAttack)))
 
         case Some(target) =>
           val damage = Math.max(0, power - target.fighter.defense)
 
           val msg =
-            if damage > 0 then Message(s"${name.capitalize} attacks for $damage hit points.", RGB(1.0, 0.8, 0.1))
-            else Message(s"${name.capitalize} attacks but does no damage", RGB(0.3, 0.3, 0.3))
+            if damage > 0 then Message(s"${name.capitalize} attacks for $damage hit points.", ColorScheme.playerAttack)
+            else Message(s"${name.capitalize} attacks but does no damage", ColorScheme.playerAttack)
 
           val res = gameMap
             .damageHostile(target.id, damage)
