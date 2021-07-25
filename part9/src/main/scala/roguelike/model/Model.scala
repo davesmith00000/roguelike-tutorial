@@ -14,6 +14,7 @@ import roguelike.ColorScheme
 final case class Model(
     screenSize: Size,
     player: Player,
+    lookAtTarget: Point,
     gameMap: GameMap,
     messageLog: MessageLog,
     historyViewer: HistoryViewer,
@@ -34,7 +35,6 @@ final case class Model(
   def toggleMessageHistory: Model =
     val show = !currentState.showingHistory
     this.copy(
-      // paused = if show then true else false,
       currentState = if show then GameState.History else GameState.Game,
       historyViewer = if show then historyViewer.withPosition(0) else historyViewer
     )
@@ -42,7 +42,6 @@ final case class Model(
   def toggleInventory: Model =
     val show = !currentState.showingInventory
     this.copy(
-      // paused = if show then true else false,
       currentState = if show then GameState.Inventory else GameState.Game,
       inventoryWindow = if show then inventoryWindow.withPosition(0) else inventoryWindow
     )
@@ -50,9 +49,15 @@ final case class Model(
   def toggleDropMenu: Model =
     val show = !currentState.showingDropMenu
     this.copy(
-      // paused = if show then true else false,
       currentState = if show then GameState.Drop else GameState.Game,
       dropWindow = if show then dropWindow.withPosition(0) else dropWindow
+    )
+
+  def toggleLookAround: Model =
+    val show = !currentState.lookingAround
+    this.copy(
+      currentState = if show then GameState.LookAround else GameState.Game,
+      lookAtTarget = player.position
     )
 
   def update(dice: Dice): GameEvent => Outcome[Model] =
@@ -129,6 +134,14 @@ final case class Model(
   def moveLeft(dice: Dice): Outcome[Model]  = performPlayerTurn(dice, Point(-1, 0))
   def moveRight(dice: Dice): Outcome[Model] = performPlayerTurn(dice, Point(1, 0))
 
+  def performMoveLookAtTarget(by: Point): Outcome[Model] =
+    Outcome(this.copy(lookAtTarget = lookAtTarget + by))
+
+  def lookUp: Outcome[Model]    = performMoveLookAtTarget(Point(0, -1))
+  def lookDown: Outcome[Model]  = performMoveLookAtTarget(Point(0, 1))
+  def lookLeft: Outcome[Model]  = performMoveLookAtTarget(Point(-1, 0))
+  def lookRight: Outcome[Model] = performMoveLookAtTarget(Point(1, 0))
+
   def pickUp: Outcome[Model] =
     player.pickUp(gameMap.items).map { case (p, updatedItems) =>
       this.copy(
@@ -148,6 +161,7 @@ object Model:
     Model(
       screenSize,
       p,
+      Point.zero,
       GameMap.initial(screenSize, Nil, Nil),
       MessageLog.Unlimited,
       HistoryViewer(HistoryWindowSize),
@@ -177,6 +191,7 @@ object Model:
         Model(
           screenSize,
           p,
+          Point.zero,
           gm,
           MessageLog.Unlimited,
           HistoryViewer(HistoryWindowSize),
@@ -188,7 +203,7 @@ object Model:
       }
 
 enum GameState:
-  case Game, History, Inventory, Drop
+  case Game, History, Inventory, Drop, LookAround
 
   def showingHistory: Boolean =
     this match
@@ -209,3 +224,8 @@ enum GameState:
     this match
       case GameState.Game => true
       case _              => false
+
+  def lookingAround: Boolean =
+    this match
+      case GameState.LookAround => true
+      case _                    => false

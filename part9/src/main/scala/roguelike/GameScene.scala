@@ -126,6 +126,19 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             }
             .addGlobalEvents(GameEvent.Redraw)
 
+    // Looking around
+    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.lookingAround =>
+      model.lookUp
+
+    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.currentState.lookingAround =>
+      model.lookDown
+
+    case KeyboardEvent.KeyUp(Key.LEFT_ARROW) if model.currentState.lookingAround =>
+      model.lookLeft
+
+    case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.currentState.lookingAround =>
+      model.lookRight
+
     // Game controls
     case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveUp(context.dice)
@@ -153,6 +166,11 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
 
     case KeyboardEvent.KeyUp(Key.KEY_D) if model.currentState.isRunning || model.currentState.showingDropMenu =>
       Outcome(model.toggleDropMenu)
+        .addGlobalEvents(GameEvent.Redraw)
+
+    // Look Around
+    case KeyboardEvent.KeyUp(Key.FORWARD_SLASH) if model.currentState.isRunning || model.currentState.lookingAround =>
+      Outcome(model.toggleLookAround)
         .addGlobalEvents(GameEvent.Redraw)
 
     // Other
@@ -222,6 +240,23 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
               model.dropWindow.toTerminal(model.player.inventory),
               ((RogueLikeGame.screenSize - model.dropWindow.size) / 2).toPoint
             )
+
+        case GameState.LookAround =>
+          term
+            .get(model.lookAtTarget)
+            .map(
+              _.withForegroundColor(RGB.White)
+                .withBackgroundColor(RGBA(0.7, 0.7, 0.7))
+            ) match
+            case None =>
+              term
+                .inset(log, Point(21, 45))
+                .put(model.lookAtTarget, MapTile(DfTiles.Tile.DARK_SHADE, RGB.White, RGBA(0.7, 0.7, 0.7)))
+
+            case Some(tile) =>
+              term
+                .inset(log, Point(21, 45))
+                .put(model.lookAtTarget, tile)
 
     Outcome(
       viewModel.copy(
