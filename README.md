@@ -17,7 +17,8 @@ Parts|Controls
 0/1 to 3|Move using Arrow keys, attack by bumping into baddies.
 4 to 6|_As above, plus:_ Hit refresh in your browser to generate a new level.
 7|_As above, plus:_ Hit the 'v' key to show message history and use up and down arrows to scroll.
-8 to ?|_As above, plus:_ Hit the 'i' key to show inventory and 'd' to show the "drop" menu. Use up and down arrows to scroll in both, the a-z keys to choose an item to consume/drop, and shift|ctrl|alt|esc to close any windows.
+8|_As above, plus:_ Hit the 'i' key to show inventory and 'd' to show the "drop" menu. Use up and down arrows to scroll in both, the a-z keys to choose an item to consume/drop, and shift|ctrl|alt|esc to close any windows.
+9 to ?|_As above, plus:_ Hit the "/" key to enter "look around" mode and "/" or "Esc" to leave. When using a confusion or fireball scroll, you will enter look around mode to find a target, press "Enter" to select it.
 
 ### Table of Contents
 
@@ -31,7 +32,7 @@ Part|Title|Screenshot(s)|Play!
 6|Doing (and taking) some damage|![Part 6](part6/roguelike_part6.gif "Part 6")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part6/)
 7|Creating the Interface|![Part 7](part7/roguelike_part7_2.gif "Part 7")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part7/)
 8|Items and Inventory|![Part 8](part8/roguelike_part8.gif "Part 8")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part8/)
-9|||_Coming soon..._
+9|Ranged Scrolls and Targeting|![Part 9](part9/roguelike_part9.gif "Part 9")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part9/)
 10|||_Coming soon..._
 11|||_Coming soon..._
 12|||_Coming soon..._
