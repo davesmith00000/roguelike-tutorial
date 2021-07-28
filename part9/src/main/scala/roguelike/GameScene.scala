@@ -170,8 +170,12 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
 
     // Look Around
     case KeyboardEvent.KeyUp(Key.FORWARD_SLASH) if model.currentState.isRunning || model.currentState.lookingAround =>
-      Outcome(model.toggleLookAround)
+      Outcome(model.toggleLookAround(0))
         .addGlobalEvents(GameEvent.Redraw)
+
+    case KeyboardEvent.KeyUp(Key.ENTER) if model.currentState.lookingAround =>
+      Outcome(model.toggleLookAround(0))
+        .addGlobalEvents(GameEvent.Targeted(model.lookAtTarget))
 
     // Other
     case GameEvent.RegenerateLevel =>
@@ -241,7 +245,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
               ((RogueLikeGame.screenSize - model.dropWindow.size) / 2).toPoint
             )
 
-        case GameState.LookAround =>
+        case GameState.LookAround(radius) =>
           term
             .get(model.lookAtTarget)
             .map(
@@ -291,7 +295,8 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             Layer(
               BindingKey("log"),
               View.renderBar(model.player, 20, Point(0, 45)),
-              View.renderNameHints(RogueLikeGame.charSize, context.mouse.position, model.gameMap.entitiesList)
+              View.renderNameHints(RogueLikeGame.charSize, context.mouse.position, model.gameMap.entitiesList),
+              View.renderAreaOfEffect(RogueLikeGame.charSize, model.lookAtTarget, model.currentState)
             )
           )
         )

@@ -21,7 +21,8 @@ final case class Model(
     inventoryWindow: InventoryWindow,
     dropWindow: DropWindow,
     paused: Boolean,
-    currentState: GameState
+    currentState: GameState,
+    targetingWithItemAt: Option[Int]
 ):
   def entitiesList: List[Entity] =
     gameMap.entitiesList :+ player
@@ -53,10 +54,10 @@ final case class Model(
       dropWindow = if show then dropWindow.withPosition(0) else dropWindow
     )
 
-  def toggleLookAround: Model =
+  def toggleLookAround(radius: Int): Model =
     val show = !currentState.lookingAround
     this.copy(
-      currentState = if show then GameState.LookAround else GameState.Game,
+      currentState = if show then GameState.LookAround(radius) else GameState.Game,
       lookAtTarget = player.position
     )
 
@@ -67,6 +68,55 @@ final case class Model(
           messageLog = messageLog.addMessage(message)
         )
       )
+
+    case GameEvent.TargetUsingItem(inventoryPosition, radius) =>
+      Outcome(
+        this.copy(
+          currentState = GameState.LookAround(radius),
+          lookAtTarget = player.position,
+          targetingWithItemAt = Option(inventoryPosition)
+        )
+      ).addGlobalEvents(GameEvent.Redraw)
+
+    case GameEvent.Targeted(position) =>
+      targetingWithItemAt match
+        case None =>
+          Outcome(this)
+            .addGlobalEvents(GameEvent.Log(Message("No item selected", ColorScheme.impossible)))
+
+        case Some(_) if position == player.position =>
+          Outcome(this)
+            .addGlobalEvents(GameEvent.Log(Message("You cannot target yourself!", ColorScheme.impossible)))
+
+        case Some(_) if !gameMap.visible.contains(position) =>
+          Outcome(this)
+            .addGlobalEvents(
+              GameEvent.Log(Message("You cannot target an area that you cannot see!", ColorScheme.impossible))
+            )
+
+        case Some(_) if !gameMap.hostiles.map(_.position).contains(position) =>
+          Outcome(this)
+            .addGlobalEvents(GameEvent.Log(Message("You must select an enemy to target.", ColorScheme.impossible)))
+
+        case Some(itemAt) =>
+          gameMap.hostiles.find(_.position == position) match
+            case None =>
+              Outcome(this)
+                .addGlobalEvents(GameEvent.Log(Message("You must select an enemy to target.", ColorScheme.impossible)))
+
+            case Some(target) =>
+              player
+                .consumeTargetted(itemAt, target, gameMap.visibleHostiles)
+                .map { p =>
+                  this
+                    .copy(
+                      player = p,
+                      targetingWithItemAt = None,
+                      currentState = GameState.Game
+                    )
+                    .closeAllWindows
+                }
+                .addGlobalEvents(GameEvent.PlayerTurnEnd)
 
     case GameEvent.HostileMeleeAttack(name, power) =>
       val damage = Math.max(0, power - player.fighter.defense)
@@ -94,7 +144,7 @@ final case class Model(
         case e: Hostile if id == e.id => e
       } match
         case None =>
-          Outcome(this)
+          Outcome(this.closeAllWindows)
             .addGlobalEvents(GameEvent.Log(Message(s"${name.capitalize} swings and misses!", ColorScheme.playerAttack)))
 
         case Some(target) =>
@@ -111,11 +161,51 @@ final case class Model(
 
           res.clearGlobalEvents
             .map(gm =>
+              this
+                .copy(
+                  gameMap = gm
+                )
+                .closeAllWindows
+            )
+            .addGlobalEvents(events)
+
+    case GameEvent.PlayerCastsConfusion(name, numberOfTurns, id) =>
+      gameMap.hostiles.collectFirst {
+        case e: Hostile if id == e.id => e
+      } match
+        case None =>
+          Outcome(this)
+            .addGlobalEvents(GameEvent.Log(Message(s"${name.capitalize} misses!", ColorScheme.playerAttack)))
+
+        case Some(target) =>
+          gameMap
+            .confuseHostile(target.id, numberOfTurns)
+            .map(gm =>
               this.copy(
                 gameMap = gm
               )
             )
-            .addGlobalEvents(events)
+
+    case GameEvent.PlayerCastsFireball(name, damage, id) =>
+      gameMap.hostiles.collectFirst {
+        case e: Hostile if id == e.id => e
+      } match
+        case None =>
+          Outcome(this)
+            .addGlobalEvents(
+              GameEvent.Log(Message(s"${name.capitalize} misses!", ColorScheme.playerAttack)),
+              GameEvent.PlayerTurnEnd
+            )
+
+        case Some(target) =>
+          gameMap
+            .damageHostile(target.id, damage)
+            .map(gm =>
+              this.copy(
+                gameMap = gm
+              )
+            )
+            .addGlobalEvents(GameEvent.PlayerTurnEnd)
 
     case GameEvent.PlayerTurnEnd =>
       gameMap
@@ -168,7 +258,8 @@ object Model:
       InventoryWindow(InventoryWindowSize),
       DropWindow(DropWindowSize),
       false,
-      GameState.Game
+      GameState.Game,
+      None
     )
 
   def gen(dice: Dice, screenSize: Size): Outcome[Model] =
@@ -198,12 +289,17 @@ object Model:
           InventoryWindow(InventoryWindowSize),
           DropWindow(DropWindowSize),
           false,
-          GameState.Game
+          GameState.Game,
+          None
         )
       }
 
 enum GameState:
-  case Game, History, Inventory, Drop, LookAround
+  case Game extends GameState
+  case History extends GameState
+  case Inventory extends GameState
+  case Drop extends GameState
+  case LookAround(radius: Int) extends GameState
 
   def showingHistory: Boolean =
     this match
@@ -227,5 +323,5 @@ enum GameState:
 
   def lookingAround: Boolean =
     this match
-      case GameState.LookAround => true
-      case _                    => false
+      case GameState.LookAround(_) => true
+      case _                       => false

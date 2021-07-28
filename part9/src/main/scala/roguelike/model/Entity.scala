@@ -23,6 +23,10 @@ sealed trait Hostile extends Actor:
   def moveTo(newPosition: Point): Hostile
   def withFighter(newFighter: Fighter): Hostile
   def markAsDead(isDead: Boolean): Hostile
+  def state: HostileState
+  def isConfused: Boolean
+  def confuseFor(turns: Int): Outcome[Hostile]
+  def nextState: Hostile
 
   def takeDamage(amount: Int): Outcome[Hostile] =
     val f = fighter.takeDamage(amount)
@@ -30,7 +34,9 @@ sealed trait Hostile extends Actor:
       this
         .withFighter(f)
         .markAsDead(if f.hp > 0 then false else true)
-    ).addGlobalEvents(if f.hp <= 0 then List(GameEvent.Log(Message(s"You killed a $name", ColorScheme.enemyDie))) else Nil)
+    ).addGlobalEvents(
+      if f.hp <= 0 then List(GameEvent.Log(Message(s"You killed a $name", ColorScheme.enemyDie))) else Nil
+    )
 
 /** Fighter class
   * @param hp
@@ -64,6 +70,13 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter, inv
   def consume(itemAt: Int, visibleHostiles: List[Hostile]): Outcome[Player] =
     inventory
       .consume(itemAt, this, visibleHostiles)
+      .map { case (inv, p) =>
+        p.copy(inventory = inv)
+      }
+
+  def consumeTargetted(itemAt: Int, target: Hostile, visibleHostiles: List[Hostile]): Outcome[Player] =
+    inventory
+      .consumeTargeted(itemAt, this, target, visibleHostiles)
       .map { case (inv, p) =>
         p.copy(inventory = inv)
       }
@@ -137,8 +150,14 @@ object Player:
   def initial(start: Point): Player =
     Player(start, true, Fighter(10, 1, 5), Inventory(26, Nil))
 
-final case class Orc(id: Int, position: Point, isAlive: Boolean, fighter: Fighter, movePath: List[Point])
-    extends Hostile:
+final case class Orc(
+    id: Int,
+    position: Point,
+    isAlive: Boolean,
+    fighter: Fighter,
+    movePath: List[Point],
+    state: HostileState
+) extends Hostile:
   def tile: MapTile =
     if isAlive then MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63))
     else MapTile(DfTiles.Tile.`%`, RGB(1.0, 0.6, 1.0))
@@ -157,12 +176,27 @@ final case class Orc(id: Int, position: Point, isAlive: Boolean, fighter: Fighte
   def markAsDead(isDead: Boolean): Orc =
     this.copy(isAlive = !isDead)
 
+  def confuseFor(turns: Int): Outcome[Orc] =
+    Outcome(this.copy(state = HostileState.Confused(turns)))
+
+  def isConfused: Boolean =
+    state.isConfused
+
+  def nextState: Orc =
+    this.copy(state = state.next)
+
 object Orc:
   def spawn(id: Int, start: Point): Orc =
-    Orc(id, start, true, Fighter(1, 0, 2), Nil)
+    Orc(id, start, true, Fighter(1, 0, 2), Nil, HostileState.Normal)
 
-final case class Troll(id: Int, position: Point, isAlive: Boolean, fighter: Fighter, movePath: List[Point])
-    extends Hostile:
+final case class Troll(
+    id: Int,
+    position: Point,
+    isAlive: Boolean,
+    fighter: Fighter,
+    movePath: List[Point],
+    state: HostileState
+) extends Hostile:
   def tile: MapTile =
     if isAlive then MapTile(DfTiles.Tile.`T`, RGB.fromColorInts(0, 127, 0)) else MapTile(DfTiles.Tile.`%`, RGB.Magenta)
   val blocksMovement: Boolean = isAlive
@@ -180,9 +214,18 @@ final case class Troll(id: Int, position: Point, isAlive: Boolean, fighter: Figh
   def markAsDead(isDead: Boolean): Troll =
     this.copy(isAlive = !isDead)
 
+  def confuseFor(turns: Int): Outcome[Troll] =
+    Outcome(this.copy(state = HostileState.Confused(turns)))
+
+  def isConfused: Boolean =
+    state.isConfused
+
+  def nextState: Troll =
+    this.copy(state = state.next)
+
 object Troll:
   def spawn(id: Int, start: Point): Troll =
-    Troll(id, start, true, Fighter(2, 0, 3), Nil)
+    Troll(id, start, true, Fighter(2, 0, 3), Nil, HostileState.Normal)
 
 final case class Item(position: Point, consumable: Consumable) extends Entity:
   def tile: MapTile           = consumable.tile
@@ -191,3 +234,18 @@ final case class Item(position: Point, consumable: Consumable) extends Entity:
 
   def moveTo(newPosition: Point): Item =
     this.copy(position = newPosition)
+
+enum HostileState:
+  case Normal extends HostileState
+  case Confused(remaining: Int) extends HostileState
+
+  def isConfused: Boolean =
+    this match
+      case Normal      => false
+      case Confused(_) => true
+
+  def next: HostileState =
+    this match
+      case Normal      => Normal
+      case Confused(0) => Normal
+      case Confused(i) => Confused(i - 1)

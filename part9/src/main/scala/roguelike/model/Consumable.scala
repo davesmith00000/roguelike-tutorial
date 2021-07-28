@@ -24,6 +24,14 @@ object Consumable:
     val name: String  = "Lightning Scroll"
     val tile: MapTile = MapTile(DfTiles.Tile.`!`, RGB.Cyan)
 
+  final case class FireBallScroll(damage: Int, radius: Int) extends Consumable:
+    val name: String  = "Fireball Scroll"
+    val tile: MapTile = MapTile(DfTiles.Tile.`~`, RGB.Red)
+
+  final case class ConfusionScroll(numberOfTurns: Int) extends Consumable:
+    val name: String  = "Confusion Scroll"
+    val tile: MapTile = MapTile(DfTiles.Tile.`~`, RGB.fromColorInts(207, 63, 255))
+
   def useHealthPotion(healthPotion: HealthPotion, player: Player): Outcome[(Player, Boolean)] =
     val possibleAmount =
       player.fighter.maxHp - player.fighter.hp
@@ -66,3 +74,33 @@ object Consumable:
             GameEvent.Log(Message(msg, ColorScheme.playerAttack)),
             GameEvent.PlayerAttack(player.name, scroll.damage, target.id)
           )
+
+  def useConfusionScroll(scroll: ConfusionScroll, player: Player, target: Hostile): Outcome[Boolean] =
+    val msg = s"The eyes of the ${target.name} look vacant, as it starts to stumble around!"
+    Outcome(true)
+      .addGlobalEvents(
+        GameEvent.Log(Message(msg, ColorScheme.playerAttack)),
+        GameEvent.PlayerCastsConfusion(player.name, scroll.numberOfTurns, target.id)
+      )
+
+  def useFireballScroll(
+      scroll: FireBallScroll,
+      player: Player,
+      target: Hostile,
+      hostiles: List[Hostile]
+  ): Outcome[Boolean] =
+    val events =
+      hostiles.filter(_.position.distanceTo(target.position).toInt <= scroll.radius).flatMap { h =>
+        List(
+          GameEvent.Log(
+            Message(
+              s"The ${h.name} is engulfed in a fiery explosion, taking ${scroll.damage} damage!",
+              ColorScheme.playerAttack
+            )
+          ),
+          GameEvent.PlayerCastsFireball(player.name, scroll.damage, h.id)
+        )
+      }
+
+    Outcome(true)
+      .addGlobalEvents(events)

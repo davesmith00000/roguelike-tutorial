@@ -42,6 +42,18 @@ final case class GameMap(
       )
       .map(es => this.copy(hostiles = es))
 
+  def confuseHostile(id: Int, numberOfTurns: Int): Outcome[GameMap] =
+    Outcome
+      .sequence(
+        hostiles.map {
+          case e if e.id == id && e.isAlive =>
+            e.confuseFor(numberOfTurns)
+
+          case e => Outcome(e)
+        }
+      )
+      .map(es => this.copy(hostiles = es))
+
   private def updateMap(tm: QuadTree[GameTile], coords: Point, f: GameTile => GameTile): QuadTree[GameTile] =
     val vtx = Vertex.fromPoint(coords)
     tm.fetchElementAt(vtx).map(f) match
@@ -65,6 +77,11 @@ final case class GameMap(
           // Close enough to attack!
           val event = GameEvent.HostileMeleeAttack(x.name, x.fighter.power)
           rec(xs, event :: events, x :: acc)
+
+        case x :: xs if x.isConfused =>
+          // Is confused!
+          val randomMove = getRandomDirection(dice, x.position)
+          rec(xs, events, x.nextState.moveTo(randomMove) :: acc)
 
         case x :: xs =>
           // Otherwise, move a little closer...
@@ -158,6 +175,33 @@ final case class GameMap(
     val walkable = GameMap.searchByBounds(tileMap, area, filter).map(_._2).filterNot(additionalBlocked.contains)
 
     GameMap.getPathTo(dice, from, to, walkable, area)
+
+  def getRandomDirection(dice: Dice, position: Point): Point =
+    val up    = Point(0, -1)
+    val down  = Point(0, 1)
+    val left  = Point(-1, 0)
+    val right = Point(1, 0)
+
+    val positions =
+      List(
+        position + up,
+        position + down,
+        position + left,
+        position + right
+      ).filter { pt =>
+        tileMap.fetchElementAt(Vertex.fromPoint(pt)) match
+          case None =>
+            false
+
+          case Some(t) if t.blocked =>
+            false
+
+          case _ =>
+            true
+      }
+
+    if positions.isEmpty then position
+    else positions(dice.rollFromZero(positions.length - 1))
 
 object GameMap:
   def initial(size: Size, hostiles: List[Hostile], items: List[Item]): GameMap =

@@ -38,6 +38,8 @@ object DungeonGen:
 
       if hostiles.contains(pos) then Nil
       else if itemChance < 0.7 then List(Item(pos, Consumable.HealthPotion(4)))
+      else if itemChance < 0.8 then List(Item(pos, Consumable.FireBallScroll(12, 3)))
+      else if itemChance < 0.9 then List(Item(pos, Consumable.ConfusionScroll(10)))
       else List(Item(pos, Consumable.LightningScroll(20, 5)))
 
     }.distinct

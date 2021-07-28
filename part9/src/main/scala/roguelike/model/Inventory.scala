@@ -49,6 +49,47 @@ final case class Inventory(capacity: Int, items: List[Item]):
           else (this, player)
         }
 
+      case Some(Item(_, Consumable.ConfusionScroll(_))) =>
+        Outcome((this, player))
+          .addGlobalEvents(GameEvent.TargetUsingItem(itemAt, 0))
+
+      case Some(Item(_, Consumable.FireBallScroll(_, radius))) =>
+        Outcome((this, player))
+          .addGlobalEvents(GameEvent.TargetUsingItem(itemAt, radius))
+
+  def consumeTargeted(
+      itemAt: Int,
+      player: Player,
+      target: Hostile,
+      hostiles: List[Hostile]
+  ): Outcome[(Inventory, Player)] =
+    val remove: (Int, List[Item]) => List[Item] = (at, items) =>
+      val (start, end) = items.splitAt(itemAt)
+      start ++ end.drop(1)
+
+    items.lift(itemAt) match
+      case None =>
+        Outcome((this, player))
+          .addGlobalEvents(GameEvent.Log(Message("Invalid entry.", ColorScheme.invalid)))
+
+      case Some(Item(_, Consumable.HealthPotion(_))) =>
+        Outcome((this, player))
+
+      case Some(Item(_, Consumable.LightningScroll(_, _))) =>
+        Outcome((this, player))
+
+      case Some(Item(_, scroll @ Consumable.ConfusionScroll(_))) =>
+        Consumable.useConfusionScroll(scroll, player, target).map { consumed =>
+          if consumed then (this.copy(items = remove(itemAt, items)), player)
+          else (this, player)
+        }
+
+      case Some(Item(_, scroll @ Consumable.FireBallScroll(_, _))) =>
+        Consumable.useFireballScroll(scroll, player, target, hostiles).map { consumed =>
+          if consumed then (this.copy(items = remove(itemAt, items)), player)
+          else (this, player)
+        }
+
   def drop(itemAt: Int): Outcome[(Inventory, Option[Item])] =
     items.lift(itemAt) match
       case None =>

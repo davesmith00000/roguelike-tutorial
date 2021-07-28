@@ -5,6 +5,7 @@ import roguelike.model.Player
 import roguelike.terminal.TerminalText
 import roguelike.model.Entity
 import roguelike.model.Hostile
+import roguelike.model.GameState
 
 object View:
 
@@ -48,3 +49,23 @@ object View:
           tt.withText(entity.name.capitalize).moveTo(Point(0, row * charSize.height) + offset)
       }
     )
+
+  def renderAreaOfEffect(charSize: Size, target: Point, gameState: GameState): Group =
+    gameState match
+      case GameState.LookAround(0) =>
+        Group.empty
+
+      case GameState.LookAround(radius) =>
+        val pos  = (target - Point(radius)) * charSize.toPoint
+        val size = if radius * 2 % 2 == 0 then Size((radius * 2) + 1) else Size(radius * 2)
+        Group(
+          Shape
+            .Box(
+              Rectangle(pos, size * charSize),
+              Fill.None,
+              Stroke(2, RGBA.Green)
+            )
+        )
+
+      case _ =>
+        Group.empty
