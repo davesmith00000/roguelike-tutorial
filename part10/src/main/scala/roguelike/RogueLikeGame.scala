@@ -11,14 +11,15 @@ import roguelike.model.ViewModel
 @JSExportTopLevel("IndigoGame")
 object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
 
-  val screenSize: Size = Size(80, 50)
-  val charSize: Size   = Size(10, 10)
+  val screenSize: Size   = Size(80, 50)
+  val charSize: Size     = Size(10, 10)
+  val viewportSize: Size = screenSize * charSize
 
   def initialScene(bootData: Unit): Option[SceneName] =
-    None
+    Option(MainMenuScene.name)
 
   def scenes(bootData: Unit): NonEmptyList[Scene[Unit, Model, ViewModel]] =
-    NonEmptyList(GameScene)
+    NonEmptyList(MainMenuScene, GameScene)
 
   val eventFilters: EventFilters =
     EventFilters.Permissive
@@ -30,7 +31,7 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
           GameConfig.default
             .withMagnification(1)
             .withFrameRate(30)
-            .withViewport(screenSize.width * charSize.width, screenSize.height * charSize.height)
+            .withViewport(viewportSize.width, viewportSize.height)
         )
         .withFonts(DfTiles.Fonts.fontInfo)
         .withAssets(Assets.assets)
