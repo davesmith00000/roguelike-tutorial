@@ -213,7 +213,7 @@ final case class Model(
         .map(gm => this.copy(gameMap = gm))
         .addGlobalEvents(GameEvent.Redraw)
 
-    case GameEvent.Redraw | GameEvent.RegenerateLevel =>
+    case GameEvent.Redraw =>
       Outcome(this)
 
   def performPlayerTurn(dice: Dice, by: Point): Outcome[Model] =

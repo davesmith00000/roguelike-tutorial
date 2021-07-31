@@ -16,13 +16,13 @@ import roguelike.model.Message
 import roguelike.model.GameState
 import roguelike.model.windows.Window
 
-object MainMenuScene extends Scene[Unit, Model, ViewModel]:
+object LoadingScene extends Scene[Unit, Model, ViewModel]:
 
   type SceneModel     = Model
   type SceneViewModel = ViewModel
 
   val name: SceneName =
-    SceneName("main menu scene")
+    SceneName("loading scene")
 
   val modelLens: Lens[Model, Model] =
     Lens.keepLatest
@@ -37,15 +37,6 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
     Set()
 
   def updateModel(context: FrameContext[Unit], model: Model): GlobalEvent => Outcome[Model] =
-    case KeyboardEvent.KeyUp(Key.KEY_N) =>
-      Model
-        .gen(context.dice, RogueLikeGame.screenSize)
-        .addGlobalEvents(
-          GameEvent.Redraw,
-          SceneEvent.JumpTo(GameScene.name),
-          GameEvent.Log(Message("Welcome!", RGB.Cyan))
-        )
-
     case _ =>
       Outcome(model)
 
@@ -67,10 +58,7 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
         )
           .scaleBy((RogueLikeGame.viewportSize / Size(160, 100)).toVector),
         TerminalEmulator(RogueLikeGame.screenSize)
-          .putLine(Point(2, 20), "TOMBS OF THE ANCIENT KINGS", RGB.Yellow, RGBA.Black)
-          .putLine(Point(2, 22), " [ n ] Play a new game", RGB.White, RGBA.Black)
-          .putLine(Point(2, 23), " [ c ] Continue last game", RGB.White.mix(RGB.Black, 0.5), RGBA.Black)
-          .putLine(Point(2, 48), "By Dave Smith", RGB.Yellow, RGBA.Black)
+          .putLine(Point(2, 48), "Loading...", RGB.White, RGBA.Black)
           .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
       )
-    )
+    ).addGlobalEvents(SceneEvent.Next)

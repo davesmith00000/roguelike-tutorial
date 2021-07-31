@@ -16,10 +16,10 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
   val viewportSize: Size = screenSize * charSize
 
   def initialScene(bootData: Unit): Option[SceneName] =
-    Option(MainMenuScene.name)
+    None
 
   def scenes(bootData: Unit): NonEmptyList[Scene[Unit, Model, ViewModel]] =
-    NonEmptyList(MainMenuScene, GameScene)
+    NonEmptyList(LoadingScene, MainMenuScene, GameScene)
 
   val eventFilters: EventFilters =
     EventFilters.Permissive
@@ -39,7 +39,7 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
           TerminalEntity.shader(Assets.Required.mapFragShader),
           TerminalText.shader(Assets.Required.textFragShader)
         )
-    ).addGlobalEvents(GameEvent.RegenerateLevel)
+    )
 
   def initialModel(startupData: Unit): Outcome[Model] =
     Outcome(Model.initial(screenSize))

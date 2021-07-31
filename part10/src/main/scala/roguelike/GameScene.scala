@@ -178,10 +178,9 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
         .addGlobalEvents(GameEvent.Targeted(model.lookAtTarget))
 
     // Other
-    case GameEvent.RegenerateLevel =>
-      Model
-        .gen(context.dice, model.screenSize)
-        .addGlobalEvents(GameEvent.Log(Message("Welcome!", RGB.Cyan)))
+    case KeyboardEvent.KeyUp(Key.KEY_Q) =>
+      Outcome(model)
+        .addGlobalEvents(SceneEvent.JumpTo(MainMenuScene.name))
 
     case e: GameEvent =>
       model.update(context.dice)(e)
@@ -197,7 +196,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     case _: KeyboardEvent =>
       redrawTerminal(model, viewModel)
 
-    case GameEvent.Redraw | GameEvent.RegenerateLevel =>
+    case GameEvent.Redraw =>
       redrawTerminal(model, viewModel)
 
     case _: GameEvent.Log =>

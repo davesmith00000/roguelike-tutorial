@@ -17,7 +17,6 @@ enum GameEvent extends GlobalEvent:
 
   // System events
   case Log(message: Message) extends GameEvent
-  case RegenerateLevel extends GameEvent
   case Redraw extends GameEvent
   case TargetUsingItem(inventoryPosition: Int, radius: Int) extends GameEvent
   case Targeted(position: Point) extends GameEvent
