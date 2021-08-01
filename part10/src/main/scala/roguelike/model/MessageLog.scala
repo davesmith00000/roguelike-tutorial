@@ -12,6 +12,10 @@ import roguelike.Assets
 import roguelike.RogueLikeGame
 import roguelike.ColorScheme
 
+import io.circe._
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder, HCursor, Json}
+
 final case class Message(text: String, fgColor: RGB, count: Int, stackable: Boolean):
   def fullText: String =
     if count > 1 then s"$text (x$count)"
@@ -37,6 +41,28 @@ final case class Message(text: String, fgColor: RGB, count: Int, stackable: Bool
     this.copy(stackable = false)
 
 object Message:
+
+  import SharedCodecs.given
+
+  given Encoder[Message] = new Encoder[Message] {
+    final def apply(data: Message): Json = Json.obj(
+      ("text", Json.fromString(data.text)),
+      ("fgColor", data.fgColor.asJson),
+      ("count", Json.fromInt(data.count)),
+      ("stackable", Json.fromBoolean(data.stackable))
+    )
+  }
+
+  given Decoder[Message] = new Decoder[Message] {
+    final def apply(c: HCursor): Decoder.Result[Message] =
+      for {
+        text      <- c.downField("text").as[String]
+        fgColor   <- c.downField("fgColor").as[RGB]
+        count     <- c.downField("count").as[Int]
+        stackable <- c.downField("stackable").as[Boolean]
+      } yield Message(text, fgColor, count, stackable)
+  }
+
   def apply(text: String, fgColor: RGB): Message =
     Message(text, fgColor, 1, true)
 
@@ -48,7 +74,7 @@ object Message:
 
 final case class MessageLog(messages: List[Message], maxLength: Option[Int]):
 
-  def logLength: Int = 
+  def logLength: Int =
     messages.length
 
   def addMessage(message: Message): MessageLog =
@@ -77,9 +103,30 @@ final case class MessageLog(messages: List[Message], maxLength: Option[Int]):
     MessageLog.logToTerminal(size, messages, reversed, startOffset, fadeOut)
 
   def render(position: Point, size: Size, reversed: Boolean, startOffset: Int): TerminalEntity =
-    MessageLog.renderMessages(position * RogueLikeGame.charSize.toPoint, size * RogueLikeGame.charSize, messages, reversed, startOffset)
+    MessageLog.renderMessages(
+      position * RogueLikeGame.charSize.toPoint,
+      size * RogueLikeGame.charSize,
+      messages,
+      reversed,
+      startOffset
+    )
 
 object MessageLog:
+
+  given Encoder[MessageLog] = new Encoder[MessageLog] {
+    final def apply(data: MessageLog): Json = Json.obj(
+      ("messages", data.messages.asJson),
+      ("maxLength", data.maxLength.asJson)
+    )
+  }
+
+  given Decoder[MessageLog] = new Decoder[MessageLog] {
+    final def apply(c: HCursor): Decoder.Result[MessageLog] =
+      for {
+        messages  <- c.downField("messages").as[List[Message]]
+        maxLength <- c.downField("maxLength").as[Option[Int]]
+      } yield MessageLog(messages, maxLength)
+  }
 
   def Unlimited: MessageLog =
     MessageLog(Nil, None)
@@ -87,7 +134,13 @@ object MessageLog:
   def Limited(maxLength: Int): MessageLog =
     MessageLog(Nil, Option(maxLength))
 
-  def logToTerminal(size: Size, messages: List[Message], reversed: Boolean, startOffset: Int, fadeOut: Boolean): TerminalEmulator =
+  def logToTerminal(
+      size: Size,
+      messages: List[Message],
+      reversed: Boolean,
+      startOffset: Int,
+      fadeOut: Boolean
+  ): TerminalEmulator =
     val msgs = (if reversed then messages.reverse else messages).drop(startOffset)
     msgs
       .take(size.height)
@@ -97,7 +150,13 @@ object MessageLog:
       }
       ._1
 
-  def renderMessages(position: Point, size: Size, messages: List[Message], reversed: Boolean, startOffset: Int): TerminalEntity =
+  def renderMessages(
+      position: Point,
+      size: Size,
+      messages: List[Message],
+      reversed: Boolean,
+      startOffset: Int
+  ): TerminalEntity =
     logToTerminal(size, messages, reversed, startOffset, true)
       .draw(Assets.tileMap, RogueLikeGame.charSize, MapTile(DfTiles.Tile.SPACE))
       .moveTo(position)

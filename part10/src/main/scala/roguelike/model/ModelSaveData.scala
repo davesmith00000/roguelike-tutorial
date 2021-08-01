@@ -1,11 +1,12 @@
 package roguelike.model
 
 import indigo.shared.datatypes.Size
+import indigo.shared.datatypes.Point
+import indigo.shared.datatypes.RGB
 
 import io.circe._
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor, Json}
-import indigo.shared.datatypes.Point
 
 final case class ModelSaveData(
     screenSize: Size,
@@ -69,4 +70,22 @@ object SharedCodecs:
         x <- c.downField("x").as[Int]
         y <- c.downField("y").as[Int]
       } yield new Point(x, y)
+  }
+
+  given Encoder[RGB] = new Encoder[RGB] {
+    final def apply(data: RGB): Json =
+      Json.obj(
+        ("r", Json.fromDoubleOrNull(data.r)),
+        ("g", Json.fromDoubleOrNull(data.g)),
+        ("b", Json.fromDoubleOrNull(data.b))
+      )
+  }
+
+  given Decoder[RGB] = new Decoder[RGB] {
+    final def apply(c: HCursor): Decoder.Result[RGB] =
+      for {
+        r <- c.downField("r").as[Double]
+        g <- c.downField("g").as[Double]
+        b <- c.downField("b").as[Double]
+      } yield new RGB(r, g, b)
   }
