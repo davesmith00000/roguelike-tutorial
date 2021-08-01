@@ -40,6 +40,7 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
     case KeyboardEvent.KeyUp(Key.KEY_N) =>
       Model
         .gen(context.dice, RogueLikeGame.screenSize)
+        .map(_.copy(loadInfo = model.loadInfo))
         .addGlobalEvents(
           SceneEvent.JumpTo(GameScene.name),
           GameEvent.Log(Message("Welcome!", RGB.Cyan))

@@ -281,7 +281,8 @@ object Model:
     initial(saveData.screenSize).copy(
       player = saveData.player,
       gameMap = saveData.gameMap,
-      messageLog = saveData.messageLog
+      messageLog = saveData.messageLog,
+      loadInfo = GameLoadInfo(None, Option(saveData))
     )
 
   def gen(dice: Dice, screenSize: Size): Outcome[Model] =

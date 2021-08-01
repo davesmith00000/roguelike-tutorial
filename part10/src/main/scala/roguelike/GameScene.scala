@@ -16,6 +16,7 @@ import roguelike.model.Message
 import roguelike.model.GameState
 import roguelike.model.windows.Window
 import roguelike.model.ModelSaveData
+import roguelike.model.GameLoadInfo
 
 object GameScene extends Scene[Unit, Model, ViewModel]:
 
@@ -48,14 +49,16 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     // Quit window
     // Save
     case KeyboardEvent.KeyUp(Key.KEY_1) if model.currentState.showingQuit =>
-      Outcome(model)
+      val saveData = model.toSaveData
+      Outcome(model.copy(loadInfo = GameLoadInfo(None, Option(saveData))))
         .addGlobalEvents(StorageEvent.Save(ModelSaveData.saveKey, model.toSaveData.toJsonString))
 
     // Save and Quit
     case KeyboardEvent.KeyUp(Key.KEY_2) if model.currentState.showingQuit =>
-      Outcome(model)
+      val saveData = model.toSaveData
+      Outcome(model.copy(loadInfo = GameLoadInfo(None, Option(saveData))))
         .addGlobalEvents(
-          StorageEvent.Save(ModelSaveData.saveKey, model.toSaveData.toJsonString),
+          StorageEvent.Save(ModelSaveData.saveKey, saveData.toJsonString),
           SceneEvent.JumpTo(MainMenuScene.name)
         )
 
