@@ -45,6 +45,18 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
           GameEvent.Log(Message("Welcome!", RGB.Cyan))
         )
 
+    case KeyboardEvent.KeyUp(Key.KEY_C) if model.loadInfo.loadedData.isDefined =>
+      model.loadInfo.loadedData match
+        case None =>
+          Outcome(model) // should not happen...
+
+        case Some(data) =>
+          Outcome(Model.fromSaveData(data))
+            .addGlobalEvents(
+              SceneEvent.JumpTo(GameScene.name),
+              GameEvent.Redraw
+            )
+
     case _ =>
       Outcome(model)
 
@@ -60,6 +72,10 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
       Outcome(viewModel)
 
   def present(context: FrameContext[Unit], model: Model, viewModel: ViewModel): Outcome[SceneUpdateFragment] =
+    val loadColor: RGB =
+      if model.loadInfo.loadedData.isEmpty then RGB.White.mix(RGB.Black, 0.5)
+      else RGB.White
+
     Outcome(
       SceneUpdateFragment(
         Graphic(
@@ -71,7 +87,7 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
         TerminalEmulator(RogueLikeGame.screenSize)
           .putLine(Point(2, 20), "TOMBS OF THE ANCIENT KINGS", RGB.Yellow, RGBA.Black)
           .putLine(Point(2, 22), " [ n ] Play a new game", RGB.White, RGBA.Black)
-          .putLine(Point(2, 23), " [ c ] Continue last game", RGB.White.mix(RGB.Black, 0.5), RGBA.Black)
+          .putLine(Point(2, 23), " [ c ] Continue last game", loadColor, RGBA.Black)
           .putLine(Point(2, 48), "By Dave Smith", RGB.Yellow, RGBA.Black)
           .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
       )

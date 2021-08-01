@@ -24,7 +24,8 @@ final case class Model(
     quitWindow: QuitWindow,
     paused: Boolean,
     currentState: GameState,
-    targetingWithItemAt: Option[Int]
+    targetingWithItemAt: Option[Int],
+    loadInfo: GameLoadInfo
 ):
   def entitiesList: List[Entity] =
     gameMap.entitiesList :+ player
@@ -272,7 +273,8 @@ object Model:
       QuitWindow.create,
       false,
       GameState.Game,
-      None
+      None,
+      GameLoadInfo(None, None)
     )
 
   def fromSaveData(saveData: ModelSaveData): Model =
@@ -311,7 +313,8 @@ object Model:
           QuitWindow.create,
           false,
           GameState.Game,
-          None
+          None,
+          GameLoadInfo(None, None)
         )
       }
 
@@ -352,3 +355,9 @@ enum GameState:
     this match
       case GameState.Quit => true
       case _              => false
+
+final case class GameLoadInfo(loadingTimeOut: Option[Seconds], loadedData: Option[ModelSaveData]):
+  def updateTimeout(delta: Seconds): GameLoadInfo =
+    this.copy(
+      loadingTimeOut = loadingTimeOut.map(t => if (t - delta).toDouble <= 0.0 then Seconds.zero else t - delta)
+    )

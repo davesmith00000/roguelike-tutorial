@@ -232,7 +232,7 @@ object Player:
         position  <- c.downField("position").as[Point]
         isAlive   <- c.downField("isAlive").as[Boolean]
         fighter   <- c.downField("fighter").as[Fighter]
-        inventory <- c.downField("width").as[Inventory]
+        inventory <- c.downField("inventory").as[Inventory]
       } yield Player(position, isAlive, fighter, inventory)
   }
 

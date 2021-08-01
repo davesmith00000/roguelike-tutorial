@@ -7,6 +7,8 @@ import indigo.shared.datatypes.RGB
 import io.circe._
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.parser.decode
+import indigo.shared.IndigoLogger
 
 final case class ModelSaveData(
     screenSize: Size,
@@ -18,6 +20,17 @@ final case class ModelSaveData(
     this.asJson.noSpaces
 
 object ModelSaveData:
+
+  def fromJsonString(json: String): Option[ModelSaveData] =
+    decode[ModelSaveData](json) match
+      case Left(e) =>
+        IndigoLogger.debug(e.toString)
+        None
+
+      case Right(d) =>
+        Option(d)
+
+  val saveKey: String = "indigo_roguelike"
 
   import SharedCodecs.given
 

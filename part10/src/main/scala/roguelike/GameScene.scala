@@ -15,6 +15,7 @@ import roguelike.GameEvent
 import roguelike.model.Message
 import roguelike.model.GameState
 import roguelike.model.windows.Window
+import roguelike.model.ModelSaveData
 
 object GameScene extends Scene[Unit, Model, ViewModel]:
 
@@ -48,13 +49,13 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     // Save
     case KeyboardEvent.KeyUp(Key.KEY_1) if model.currentState.showingQuit =>
       Outcome(model)
-        .addGlobalEvents(StorageEvent.Save("indigo_roguelike", model.toSaveData.toJsonString))
+        .addGlobalEvents(StorageEvent.Save(ModelSaveData.saveKey, model.toSaveData.toJsonString))
 
     // Save and Quit
     case KeyboardEvent.KeyUp(Key.KEY_2) if model.currentState.showingQuit =>
       Outcome(model)
         .addGlobalEvents(
-          StorageEvent.Save("indigo_roguelike", model.toSaveData.toJsonString),
+          StorageEvent.Save(ModelSaveData.saveKey, model.toSaveData.toJsonString),
           SceneEvent.JumpTo(MainMenuScene.name)
         )
 
