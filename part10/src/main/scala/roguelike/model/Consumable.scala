@@ -53,7 +53,7 @@ object Consumable:
 
   given Decoder[Consumable] = new Decoder[Consumable] {
     final def apply(c: HCursor): Decoder.Result[Consumable] =
-      c.downField("position").as[String].flatMap {
+      c.downField("name").as[String].flatMap {
         case HealthPotion.name =>
           for {
             amount <- c.downField("amount").as[Int]
