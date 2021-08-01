@@ -4,6 +4,10 @@ import indigo._
 import roguelike.terminal.MapTile
 import roguelike.DfTiles
 
+import io.circe._
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder, HCursor, Json}
+
 sealed trait GameTile:
   def lightMapTile: MapTile
   def darkMapTile: MapTile
@@ -27,4 +31,29 @@ object GameTile:
   val scoreAs: GameTile => Int = {
     case Ground => 1
     case Wall   => Int.MaxValue
+  }
+
+  given Encoder[GameTile] = new Encoder[GameTile] {
+    final def apply(data: GameTile): Json =
+      data match
+        case Wall =>
+          Json.obj(
+            ("tileType", Json.fromString("w"))
+          )
+
+        case Ground =>
+          Json.obj(
+            ("tileType", Json.fromString("g"))
+          )
+  }
+
+  given Decoder[GameTile] = new Decoder[GameTile] {
+    final def apply(c: HCursor): Decoder.Result[GameTile] =
+      c.downField("tileType").as[String].flatMap {
+        case "w" =>
+          Right(Wall)
+
+        case "g" =>
+          Right(Ground)
+      }
   }

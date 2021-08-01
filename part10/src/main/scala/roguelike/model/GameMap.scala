@@ -170,6 +170,36 @@ final case class GameMap(
 
     rec(List(tileMap), Nil)
 
+  def toPositionedTiles: List[(Point, GameTile)] =
+    @tailrec
+    def rec(open: List[QuadTree[GameTile]], acc: List[(Point, GameTile)]): List[(Point, GameTile)] =
+      open match
+        case Nil =>
+          acc
+
+        case x :: xs =>
+          x match {
+            case _: QuadEmpty[GameTile] =>
+              rec(xs, acc)
+
+            case l: QuadLeaf[GameTile] =>
+              rec(xs, (l.exactPosition.toPoint, l.value) :: acc)
+
+            case b: QuadBranch[GameTile] if b.isEmpty =>
+              rec(xs, acc)
+
+            case QuadBranch(_, a, b, c, d) =>
+              val next =
+                (if a.isEmpty then Nil else List(a)) ++
+                  (if b.isEmpty then Nil else List(b)) ++
+                  (if c.isEmpty then Nil else List(c)) ++
+                  (if d.isEmpty then Nil else List(d))
+
+              rec(xs ++ next, acc)
+          }
+
+    rec(List(tileMap), Nil)
+
   def getPathTo(dice: Dice, from: Point, to: Point, additionalBlocked: List[Point]): List[Point] =
     val area = Rectangle.fromTwoPoints(from, to).expand(2)
     val filter: GameTile => Boolean = {
@@ -210,27 +240,28 @@ final case class GameMap(
 object GameMap:
 
   import SharedCodecs.given
-  /*
-    size: Size,
-    tileMap: QuadTree[GameTile],
-    visible: List[Point],
-    explored: Set[Point],
-    hostiles: List[Hostile],
-    items: List[Item]
-   */
+
   given Encoder[GameMap] = new Encoder[GameMap] {
     final def apply(data: GameMap): Json = Json.obj(
-      ("position", data.position.asJson),
-      ("consumable", data.consumable.asJson)
+      ("size", data.size.asJson),
+      ("tiles", data.toPositionedTiles.asJson),
+      ("visible", data.visible.asJson),
+      ("explored", data.explored.asJson),
+      ("hostiles", data.hostiles.asJson),
+      ("items", data.items.asJson)
     )
   }
 
   given Decoder[GameMap] = new Decoder[GameMap] {
     final def apply(c: HCursor): Decoder.Result[GameMap] =
       for {
-        position   <- c.downField("position").as[Point]
-        consumable <- c.downField("consumable").as[Consumable]
-      } yield GameMap(position, consumable)
+        size     <- c.downField("size").as[Size]
+        tiles    <- c.downField("tiles").as[List[(Point, GameTile)]]
+        visible  <- c.downField("visible").as[List[Point]]
+        explored <- c.downField("explored").as[Set[Point]]
+        hostiles <- c.downField("hostiles").as[List[Hostile]]
+        items    <- c.downField("items").as[List[Item]]
+      } yield GameMap(size, QuadTree.empty(size.width, size.height), visible, explored, hostiles, items).insert(tiles)
   }
 
   def initial(size: Size, hostiles: List[Hostile], items: List[Item]): GameMap =

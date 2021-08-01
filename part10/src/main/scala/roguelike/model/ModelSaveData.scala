@@ -30,15 +30,15 @@ object ModelSaveData:
     )
   }
 
-given Decoder[ModelSaveData] = new Decoder[ModelSaveData] {
-  final def apply(c: HCursor): Decoder.Result[ModelSaveData] =
-    for {
-      screenSize <- c.downField("screenSize").as[Size]
-      player     <- c.downField("player").as[Player]
-      gameMap    <- c.downField("gameMap").as[GameMap]
-      messageLog <- c.downField("messageLog").as[MessageLog]
-    } yield ModelSaveData(screenSize, player, gameMap, messageLog)
-}
+  given Decoder[ModelSaveData] = new Decoder[ModelSaveData] {
+    final def apply(c: HCursor): Decoder.Result[ModelSaveData] =
+      for {
+        screenSize <- c.downField("screenSize").as[Size]
+        player     <- c.downField("player").as[Player]
+        gameMap    <- c.downField("gameMap").as[GameMap]
+        messageLog <- c.downField("messageLog").as[MessageLog]
+      } yield ModelSaveData(screenSize, player, gameMap, messageLog)
+  }
 
 object SharedCodecs:
 

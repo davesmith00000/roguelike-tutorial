@@ -22,6 +22,7 @@ sealed trait Actor extends Entity:
   def fighter: Fighter
 
 sealed trait Hostile extends Actor:
+  val name: String
   def id: Int
   def movePath: List[Point]
   def moveTo(newPosition: Point): Hostile
@@ -41,6 +42,47 @@ sealed trait Hostile extends Actor:
     ).addGlobalEvents(
       if f.hp <= 0 then List(GameEvent.Log(Message(s"You killed a $name", ColorScheme.enemyDie))) else Nil
     )
+
+object Hostile:
+
+  import SharedCodecs.given
+  
+  given Encoder[Hostile] = new Encoder[Hostile] {
+    final def apply(data: Hostile): Json = Json.obj(
+      ("name", data.name.asJson),
+      ("id", data.id.asJson),
+      ("position", data.position.asJson),
+      ("isAlive", data.isAlive.asJson),
+      ("fighter", data.fighter.asJson),
+      ("movePath", data.movePath.asJson),
+      ("state", data.state.asJson)
+    )
+  }
+
+  given Decoder[Hostile] = new Decoder[Hostile] {
+    final def apply(c: HCursor): Decoder.Result[Hostile] =
+      c.downField("name").as[String].flatMap {
+        case Orc.name =>
+          for {
+            id       <- c.downField("id").as[Int]
+            position <- c.downField("position").as[Point]
+            isAlive  <- c.downField("isAlive").as[Boolean]
+            fighter  <- c.downField("fighter").as[Fighter]
+            movePath <- c.downField("movePath").as[List[Point]]
+            state    <- c.downField("state").as[HostileState]
+          } yield Orc(id, position, isAlive, fighter, movePath, state)
+
+        case Troll.name =>
+          for {
+            id       <- c.downField("id").as[Int]
+            position <- c.downField("position").as[Point]
+            isAlive  <- c.downField("isAlive").as[Boolean]
+            fighter  <- c.downField("fighter").as[Fighter]
+            movePath <- c.downField("movePath").as[List[Point]]
+            state    <- c.downField("state").as[HostileState]
+          } yield Troll(id, position, isAlive, fighter, movePath, state)
+      }
+  }
 
 /** Fighter class
   * @param hp
@@ -206,7 +248,7 @@ final case class Orc(
     if isAlive then MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63))
     else MapTile(DfTiles.Tile.`%`, RGB(1.0, 0.6, 1.0))
   val blocksMovement: Boolean = isAlive
-  val name: String            = "Orc"
+  val name: String            = Orc.name
 
   def moveBy(amount: Point, gameMap: GameMap): Outcome[Orc] =
     Outcome(this.copy(position = position + amount))
@@ -230,6 +272,8 @@ final case class Orc(
     this.copy(state = state.next)
 
 object Orc:
+  val name: String = "Orc"
+
   def spawn(id: Int, start: Point): Orc =
     Orc(id, start, true, Fighter(1, 0, 2), Nil, HostileState.Normal)
 
@@ -244,7 +288,7 @@ final case class Troll(
   def tile: MapTile =
     if isAlive then MapTile(DfTiles.Tile.`T`, RGB.fromColorInts(0, 127, 0)) else MapTile(DfTiles.Tile.`%`, RGB.Magenta)
   val blocksMovement: Boolean = isAlive
-  val name: String            = "Troll"
+  val name: String            = Troll.name
 
   def moveBy(amount: Point, gameMap: GameMap): Outcome[Troll] =
     Outcome(this.copy(position = position + amount))
@@ -268,6 +312,8 @@ final case class Troll(
     this.copy(state = state.next)
 
 object Troll:
+  val name: String = "Troll"
+
   def spawn(id: Int, start: Point): Troll =
     Troll(id, start, true, Fighter(2, 0, 3), Nil, HostileState.Normal)
 
@@ -312,3 +358,31 @@ enum HostileState:
       case Normal      => Normal
       case Confused(0) => Normal
       case Confused(i) => Confused(i - 1)
+
+object HostileState:
+
+  given Encoder[HostileState] = new Encoder[HostileState] {
+    final def apply(data: HostileState): Json =
+      data match
+        case Normal =>
+          Json.obj(
+            ("state", Json.fromString("normal"))
+          )
+
+        case Confused(remaining) =>
+          Json.obj(
+            ("state", Json.fromString("confused")),
+            ("remaining", Json.fromInt(remaining))
+          )
+  }
+
+  given Decoder[HostileState] = new Decoder[HostileState] {
+    final def apply(c: HCursor): Decoder.Result[HostileState] =
+      c.downField("state").as[String].flatMap {
+        case "normal" =>
+          Right(Normal)
+
+        case "confused" =>
+          c.downField("remaining").as[Int].map(Confused.apply)
+      }
+  }
