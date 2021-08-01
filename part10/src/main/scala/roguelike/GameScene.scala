@@ -48,13 +48,13 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
 
     // Quit window
     // Save
-    case KeyboardEvent.KeyUp(Key.KEY_1) if model.currentState.showingQuit =>
+    case KeyboardEvent.KeyUp(Key.KEY_1) if model.currentState.showingQuit && model.player.isAlive =>
       val saveData = model.toSaveData
       Outcome(model.copy(loadInfo = GameLoadInfo(None, Option(saveData))))
         .addGlobalEvents(StorageEvent.Save(ModelSaveData.saveKey, model.toSaveData.toJsonString))
 
     // Save and Quit
-    case KeyboardEvent.KeyUp(Key.KEY_2) if model.currentState.showingQuit =>
+    case KeyboardEvent.KeyUp(Key.KEY_2) if model.currentState.showingQuit && model.player.isAlive =>
       val saveData = model.toSaveData
       Outcome(model.copy(loadInfo = GameLoadInfo(None, Option(saveData))))
         .addGlobalEvents(

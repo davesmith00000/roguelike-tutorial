@@ -9,21 +9,18 @@ import roguelike.model.Inventory
 
 final case class QuitWindow(size: Size, window: TerminalEmulator) extends Window:
 
-  def toTerminal: TerminalEmulator =
+  def toTerminal(playerAlive: Boolean): TerminalEmulator =
     val innerSize = size - 2
+
+    val useable: RGB =
+      if playerAlive then RGB.White
+      else RGB.White.mix(RGB.Black, 0.5)
 
     val term =
       TerminalEmulator(innerSize)
-        .putLines(
-          Point(0, 1),
-          List(
-            " [ 1 ] Save",
-            " [ 2 ] Save and Quit",
-            " [ 3 ] Quit"
-          ),
-          RGB.White,
-          RGBA.Black
-        )
+        .putLine(Point(0, 1), " [ 1 ] Save", useable, RGBA.Black)
+        .putLine(Point(0, 2), " [ 2 ] Save and Quit", useable, RGBA.Black)
+        .putLine(Point(0, 3), " [ 3 ] Quit", RGB.White, RGBA.Black)
 
     window.inset(term, Point(1, 1))
 

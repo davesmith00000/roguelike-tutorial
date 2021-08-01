@@ -71,7 +71,7 @@ final case class ViewModel(terminalEntity: Option[TerminalEntity], shroud: MapTi
           term
             .inset(log, Point(21, 45))
             .inset(
-              model.quitWindow.toTerminal,
+              model.quitWindow.toTerminal(model.player.isAlive),
               ((RogueLikeGame.screenSize - model.quitWindow.size) / 2).toPoint
             )
 
