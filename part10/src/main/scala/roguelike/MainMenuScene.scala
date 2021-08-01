@@ -41,7 +41,6 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
       Model
         .gen(context.dice, RogueLikeGame.screenSize)
         .addGlobalEvents(
-          GameEvent.Redraw,
           SceneEvent.JumpTo(GameScene.name),
           GameEvent.Log(Message("Welcome!", RGB.Cyan))
         )
@@ -54,6 +53,9 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
       model: Model,
       viewModel: ViewModel
   ): GlobalEvent => Outcome[ViewModel] =
+    case KeyboardEvent.KeyUp(Key.KEY_N) =>
+      viewModel.redrawTerminal(model)
+
     case _ =>
       Outcome(viewModel)
 

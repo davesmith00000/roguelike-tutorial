@@ -7,14 +7,14 @@ import indigo.shared.datatypes.RGB
 import indigo.shared.datatypes.RGBA
 import roguelike.model.Inventory
 
-final case class InventoryWindow(size: Size, position: Int, window: TerminalEmulator) extends Window:
+final case class InventoryWindow(size: Size, position: Int, window: TerminalEmulator) extends ScrollingWindow:
 
   def withPosition(newPosition: Int): InventoryWindow =
     this.copy(position = newPosition)
   def scrollUp: InventoryWindow =
-    withPosition(Window.nextScrollUp(position))
+    withPosition(ScrollingWindow.nextScrollUp(position))
   def scrollDown(lineCount: Int): InventoryWindow =
-    withPosition(Window.nextScrollDown(size.height - 2, lineCount, position))
+    withPosition(ScrollingWindow.nextScrollDown(size.height - 2, lineCount, position))
 
   def toTerminal(inventory: Inventory): TerminalEmulator =
     val innerSize = size - 2

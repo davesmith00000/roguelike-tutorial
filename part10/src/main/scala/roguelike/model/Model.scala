@@ -9,6 +9,7 @@ import roguelike.RogueLikeGame
 import roguelike.model.windows.HistoryViewer
 import roguelike.model.windows.InventoryWindow
 import roguelike.model.windows.DropWindow
+import roguelike.model.windows.QuitWindow
 import roguelike.ColorScheme
 
 final case class Model(
@@ -20,6 +21,7 @@ final case class Model(
     historyViewer: HistoryViewer,
     inventoryWindow: InventoryWindow,
     dropWindow: DropWindow,
+    quitWindow: QuitWindow,
     paused: Boolean,
     currentState: GameState,
     targetingWithItemAt: Option[Int]
@@ -59,6 +61,12 @@ final case class Model(
     this.copy(
       currentState = if show then GameState.LookAround(radius) else GameState.Game,
       lookAtTarget = player.position
+    )
+
+  def toggleQuit: Model =
+    val show = !currentState.showingQuit
+    this.copy(
+      currentState = if show then GameState.Quit else GameState.Game
     )
 
   def update(dice: Dice): GameEvent => Outcome[Model] =
@@ -245,6 +253,7 @@ object Model:
   val HistoryWindowSize: Size   = Size(50, 36)
   val InventoryWindowSize: Size = Size(30, 10)
   val DropWindowSize: Size      = Size(30, 10)
+  val QuitWindowSize: Size      = Size(30, 10)
 
   def initial(screenSize: Size): Model =
     val p = Player.initial(Point.zero)
@@ -257,6 +266,7 @@ object Model:
       HistoryViewer(HistoryWindowSize),
       InventoryWindow(InventoryWindowSize),
       DropWindow(DropWindowSize),
+      QuitWindow.create,
       false,
       GameState.Game,
       None
@@ -288,6 +298,7 @@ object Model:
           HistoryViewer(HistoryWindowSize),
           InventoryWindow(InventoryWindowSize),
           DropWindow(DropWindowSize),
+          QuitWindow.create,
           false,
           GameState.Game,
           None
@@ -300,6 +311,7 @@ enum GameState:
   case Inventory extends GameState
   case Drop extends GameState
   case LookAround(radius: Int) extends GameState
+  case Quit extends GameState
 
   def showingHistory: Boolean =
     this match
@@ -325,3 +337,8 @@ enum GameState:
     this match
       case GameState.LookAround(_) => true
       case _                       => false
+
+  def showingQuit: Boolean =
+    this match
+      case GameState.Quit => true
+      case _              => false

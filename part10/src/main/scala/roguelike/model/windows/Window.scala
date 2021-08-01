@@ -8,7 +8,6 @@ import indigo.shared.datatypes.RGBA
 
 trait Window:
   def size: Size
-  def position: Int
   def window: TerminalEmulator
 
 object Window:
@@ -30,6 +29,13 @@ object Window:
 
     windowTerm
 
+  val letters: List[String]             = ('a' to 'z').toList.map(_.toString)
+  val letterPositions: Map[String, Int] = letters.zipWithIndex.toMap
+
+trait ScrollingWindow extends Window:
+  def position: Int
+
+object ScrollingWindow:
   def nextScrollUp(position: Int): Int =
     if position - 1 >= 0 then position - 1 else position
 
@@ -38,6 +44,3 @@ object Window:
     if lineCount > innerHeight then
       if position + 1 <= lineCount - innerHeight then position + 1 else lineCount - innerHeight
     else position
-
-  val letters: List[String]             = ('a' to 'z').toList.map(_.toString)
-  val letterPositions: Map[String, Int] = letters.zipWithIndex.toMap

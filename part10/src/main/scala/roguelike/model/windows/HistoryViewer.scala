@@ -5,14 +5,14 @@ import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.Size
 import roguelike.model.MessageLog
 
-final case class HistoryViewer(size: Size, position: Int, window: TerminalEmulator) extends Window:
+final case class HistoryViewer(size: Size, position: Int, window: TerminalEmulator) extends ScrollingWindow:
 
   def withPosition(newPosition: Int): HistoryViewer =
     this.copy(position = newPosition)
   def scrollUp: HistoryViewer =
-    withPosition(Window.nextScrollUp(position))
+    withPosition(ScrollingWindow.nextScrollUp(position))
   def scrollDown(lineCount: Int): HistoryViewer =
-    withPosition(Window.nextScrollDown(size.height - 2, lineCount, position))
+    withPosition(ScrollingWindow.nextScrollDown(size.height - 2, lineCount, position))
 
   def toTerminal(log: MessageLog): TerminalEmulator =
     val logTerm = log.toTerminal(size - 2, true, position, false)

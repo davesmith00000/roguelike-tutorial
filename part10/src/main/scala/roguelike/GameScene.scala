@@ -44,6 +44,17 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       Outcome(model.closeAllWindows)
         .addGlobalEvents(GameEvent.Redraw)
 
+    // Quit window
+    // Save
+    case KeyboardEvent.KeyUp(Key.KEY_1) if model.currentState.showingQuit =>
+      Outcome(model)//.addGlobalEvents(GameEvent.Redraw)
+    // Save and Quit
+    case KeyboardEvent.KeyUp(Key.KEY_2) if model.currentState.showingQuit =>
+      Outcome(model)//.addGlobalEvents(GameEvent.Redraw)
+    // Quit
+    case KeyboardEvent.KeyUp(Key.KEY_3) if model.currentState.showingQuit =>
+      Outcome(model).addGlobalEvents(SceneEvent.JumpTo(MainMenuScene.name))
+
     // History window
     case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.showingHistory =>
       Outcome(
@@ -168,6 +179,10 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       Outcome(model.toggleDropMenu)
         .addGlobalEvents(GameEvent.Redraw)
 
+    case KeyboardEvent.KeyUp(Key.KEY_Q) if model.currentState.isRunning || model.currentState.showingQuit =>
+      Outcome(model.toggleQuit)
+        .addGlobalEvents(GameEvent.Redraw)
+
     // Look Around
     case KeyboardEvent.KeyUp(Key.FORWARD_SLASH) if model.currentState.isRunning || model.currentState.lookingAround =>
       Outcome(model.toggleLookAround(0))
@@ -178,10 +193,6 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
         .addGlobalEvents(GameEvent.Targeted(model.lookAtTarget))
 
     // Other
-    case KeyboardEvent.KeyUp(Key.KEY_Q) =>
-      Outcome(model)
-        .addGlobalEvents(SceneEvent.JumpTo(MainMenuScene.name))
-
     case e: GameEvent =>
       model.update(context.dice)(e)
 
@@ -194,81 +205,16 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       viewModel: ViewModel
   ): GlobalEvent => Outcome[ViewModel] =
     case _: KeyboardEvent =>
-      redrawTerminal(model, viewModel)
+      viewModel.redrawTerminal(model)
 
     case GameEvent.Redraw =>
-      redrawTerminal(model, viewModel)
+      viewModel.redrawTerminal(model)
 
     case _: GameEvent.Log =>
-      redrawTerminal(model, viewModel)
+      viewModel.redrawTerminal(model)
 
     case _ =>
       Outcome(viewModel)
-
-  private def redrawTerminal(model: Model, viewModel: ViewModel): Outcome[ViewModel] =
-    val term =
-      TerminalEmulator(RogueLikeGame.screenSize)
-        .put(model.gameMap.toExploredTiles)
-        .put(model.gameMap.visibleTiles)
-        .put(model.entitiesList.map(e => (e.position, e.tile)))
-
-    val log =
-      model.messageLog.toTerminal(Size(RogueLikeGame.screenSize.width - 21, 5), false, 0, true)
-
-    val withWindows =
-      model.currentState match
-        case GameState.Game =>
-          term.inset(log, Point(21, 45))
-
-        case GameState.History =>
-          term
-            .inset(log, Point(21, 45))
-            .inset(
-              model.historyViewer.toTerminal(model.messageLog),
-              ((RogueLikeGame.screenSize - model.historyViewer.size) / 2).toPoint
-            )
-
-        case GameState.Inventory =>
-          term
-            .inset(log, Point(21, 45))
-            .inset(
-              model.inventoryWindow.toTerminal(model.player.inventory),
-              ((RogueLikeGame.screenSize - model.inventoryWindow.size) / 2).toPoint
-            )
-
-        case GameState.Drop =>
-          term
-            .inset(log, Point(21, 45))
-            .inset(
-              model.dropWindow.toTerminal(model.player.inventory),
-              ((RogueLikeGame.screenSize - model.dropWindow.size) / 2).toPoint
-            )
-
-        case GameState.LookAround(radius) =>
-          term
-            .get(model.lookAtTarget)
-            .map(
-              _.withForegroundColor(RGB.White)
-                .withBackgroundColor(RGBA(0.7, 0.7, 0.7))
-            ) match
-            case None =>
-              term
-                .inset(log, Point(21, 45))
-                .put(model.lookAtTarget, MapTile(DfTiles.Tile.DARK_SHADE, RGB.White, RGBA(0.7, 0.7, 0.7)))
-
-            case Some(tile) =>
-              term
-                .inset(log, Point(21, 45))
-                .put(model.lookAtTarget, tile)
-
-    Outcome(
-      viewModel.copy(
-        terminalEntity = Option(
-          withWindows
-            .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
-        )
-      )
-    )
 
   def present(context: FrameContext[Unit], model: Model, viewModel: ViewModel): Outcome[SceneUpdateFragment] =
     viewModel.terminalEntity match
