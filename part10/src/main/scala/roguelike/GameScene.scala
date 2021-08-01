@@ -47,7 +47,8 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     // Quit window
     // Save
     case KeyboardEvent.KeyUp(Key.KEY_1) if model.currentState.showingQuit =>
-      Outcome(model)//.addGlobalEvents(GameEvent.Redraw)
+      Outcome(model)
+        .addGlobalEvents(StorageEvent.Save("indigo_roguelike", model.toSaveData.toJsonString))
     // Save and Quit
     case KeyboardEvent.KeyUp(Key.KEY_2) if model.currentState.showingQuit =>
       Outcome(model)//.addGlobalEvents(GameEvent.Redraw)

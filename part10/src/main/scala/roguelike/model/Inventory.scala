@@ -6,6 +6,10 @@ import roguelike.GameEvent
 import indigo.shared.datatypes.RGB
 import indigo.shared.datatypes.Point
 
+import io.circe._
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder, HCursor, Json}
+
 final case class Inventory(capacity: Int, items: List[Item]):
 
   def add(item: Item): Outcome[(Inventory, Boolean)] =
@@ -106,3 +110,20 @@ final case class Inventory(capacity: Int, items: List[Item]):
             GameEvent.Log(Message(s"You dropped the ${item.map(_.name).getOrElse("<name missing!>")}.", RGB.White)),
             GameEvent.PlayerTurnEnd
           )
+
+object Inventory:
+
+  given Encoder[Inventory] = new Encoder[Inventory] {
+    final def apply(data: Inventory): Json = Json.obj(
+      ("capacity", Json.fromInt(data.capacity)),
+      ("items", data.items.asJson)
+    )
+  }
+
+  given Decoder[Inventory] = new Decoder[Inventory] {
+    final def apply(c: HCursor): Decoder.Result[Inventory] =
+      for {
+        capacity <- c.downField("capacity").as[Int]
+        items    <- c.downField("items").as[List[Item]]
+      } yield Inventory(capacity, items)
+  }

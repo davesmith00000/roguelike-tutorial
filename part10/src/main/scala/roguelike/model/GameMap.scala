@@ -12,6 +12,10 @@ import indigoextras.trees.QuadTree.{QuadBranch, QuadEmpty, QuadLeaf}
 import indigoextras.geometry.Vertex
 import indigoextras.geometry.BoundingBox
 
+import io.circe._
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder, HCursor, Json}
+
 import scala.annotation.tailrec
 
 final case class GameMap(
@@ -204,6 +208,31 @@ final case class GameMap(
     else positions(dice.rollFromZero(positions.length - 1))
 
 object GameMap:
+
+  import SharedCodecs.given
+  /*
+    size: Size,
+    tileMap: QuadTree[GameTile],
+    visible: List[Point],
+    explored: Set[Point],
+    hostiles: List[Hostile],
+    items: List[Item]
+   */
+  given Encoder[GameMap] = new Encoder[GameMap] {
+    final def apply(data: GameMap): Json = Json.obj(
+      ("position", data.position.asJson),
+      ("consumable", data.consumable.asJson)
+    )
+  }
+
+  given Decoder[GameMap] = new Decoder[GameMap] {
+    final def apply(c: HCursor): Decoder.Result[GameMap] =
+      for {
+        position   <- c.downField("position").as[Point]
+        consumable <- c.downField("consumable").as[Consumable]
+      } yield GameMap(position, consumable)
+  }
+
   def initial(size: Size, hostiles: List[Hostile], items: List[Item]): GameMap =
     GameMap(
       size,

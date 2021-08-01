@@ -8,7 +8,12 @@ import roguelike.ColorScheme
 import indigo.shared.Outcome
 import roguelike.GameEvent
 
+import io.circe._
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder, HCursor, Json}
+
 import scala.annotation.tailrec
+import roguelike.model.Consumable.ConfusionScroll
 
 sealed trait Consumable:
   def name: String
@@ -16,21 +21,86 @@ sealed trait Consumable:
 
 object Consumable:
 
+  given Encoder[Consumable] = new Encoder[Consumable] {
+    final def apply(data: Consumable): Json =
+      data match
+        case HealthPotion(amount) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("amount", Json.fromInt(amount))
+          )
+
+        case LightningScroll(damage, maximumRange) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("damage", Json.fromInt(damage)),
+            ("maximumRange", Json.fromInt(maximumRange))
+          )
+
+        case FireBallScroll(damage, radius) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("damage", Json.fromInt(damage)),
+            ("radius", Json.fromInt(radius))
+          )
+
+        case ConfusionScroll(numberOfTurns) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("numberOfTurns", Json.fromInt(numberOfTurns))
+          )
+  }
+
+  given Decoder[Consumable] = new Decoder[Consumable] {
+    final def apply(c: HCursor): Decoder.Result[Consumable] =
+      c.downField("position").as[String].flatMap {
+        case HealthPotion.name =>
+          for {
+            amount <- c.downField("amount").as[Int]
+          } yield HealthPotion(amount)
+
+        case LightningScroll.name =>
+          for {
+            damage       <- c.downField("damage").as[Int]
+            maximumRange <- c.downField("maximumRange").as[Int]
+          } yield LightningScroll(damage, maximumRange)
+
+        case FireBallScroll.name =>
+          for {
+            damage <- c.downField("damage").as[Int]
+            radius <- c.downField("radius").as[Int]
+          } yield FireBallScroll(damage, radius)
+
+        case ConfusionScroll.name =>
+          for {
+            numberOfTurns <- c.downField("numberOfTurns").as[Int]
+          } yield ConfusionScroll(numberOfTurns)
+      }
+  }
+
   final case class HealthPotion(amount: Int) extends Consumable:
-    val name: String  = "Health Potion"
+    val name: String  = HealthPotion.name
     val tile: MapTile = MapTile(DfTiles.Tile.`!`, RGB(0.5, 0.0, 1.0))
+  object HealthPotion:
+    val name: String = "Health Potion"
 
   final case class LightningScroll(damage: Int, maximumRange: Int) extends Consumable:
-    val name: String  = "Lightning Scroll"
+    val name: String  = LightningScroll.name
     val tile: MapTile = MapTile(DfTiles.Tile.`!`, RGB.Cyan)
+  object LightningScroll:
+    val name: String = "Lightning Scroll"
 
   final case class FireBallScroll(damage: Int, radius: Int) extends Consumable:
-    val name: String  = "Fireball Scroll"
+    val name: String  = FireBallScroll.name
     val tile: MapTile = MapTile(DfTiles.Tile.`~`, RGB.Red)
+  object FireBallScroll:
+    val name: String = "Fireball Scroll"
 
   final case class ConfusionScroll(numberOfTurns: Int) extends Consumable:
-    val name: String  = "Confusion Scroll"
+    val name: String  = ConfusionScroll.name
     val tile: MapTile = MapTile(DfTiles.Tile.`~`, RGB.fromColorInts(207, 63, 255))
+  object ConfusionScroll:
+    val name: String = "Confusion Scroll"
 
   def useHealthPotion(healthPotion: HealthPotion, player: Player): Outcome[(Player, Boolean)] =
     val possibleAmount =

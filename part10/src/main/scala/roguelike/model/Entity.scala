@@ -7,6 +7,10 @@ import roguelike.utils.PathFinder
 import roguelike.GameEvent
 import roguelike.ColorScheme
 
+import io.circe._
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder, HCursor, Json}
+
 sealed trait Entity:
   def position: Point
   def tile: MapTile
@@ -61,6 +65,25 @@ final case class Fighter(hp: Int, maxHp: Int, defense: Int, power: Int):
 object Fighter:
   def apply(hp: Int, defense: Int, power: Int): Fighter =
     Fighter(hp, hp, defense, power)
+
+  given Encoder[Fighter] = new Encoder[Fighter] {
+    final def apply(data: Fighter): Json = Json.obj(
+      ("hp", Json.fromInt(data.hp)),
+      ("maxHp", Json.fromInt(data.maxHp)),
+      ("defense", Json.fromInt(data.defense)),
+      ("power", Json.fromInt(data.power))
+    )
+  }
+
+  given Decoder[Fighter] = new Decoder[Fighter] {
+    final def apply(c: HCursor): Decoder.Result[Fighter] =
+      for {
+        hp      <- c.downField("hp").as[Int]
+        maxHp   <- c.downField("maxHp").as[Int]
+        defense <- c.downField("defense").as[Int]
+        power   <- c.downField("power").as[Int]
+      } yield Fighter(hp, maxHp, defense, power)
+  }
 
 final case class Player(position: Point, isAlive: Boolean, fighter: Fighter, inventory: Inventory) extends Actor:
   def tile: MapTile = if isAlive then MapTile(DfTiles.Tile.`@`, RGB.Magenta) else MapTile(DfTiles.Tile.`@`, RGB.Red)
@@ -150,6 +173,27 @@ object Player:
   def initial(start: Point): Player =
     Player(start, true, Fighter(10, 1, 5), Inventory(26, Nil))
 
+  import SharedCodecs.given
+
+  given Encoder[Player] = new Encoder[Player] {
+    final def apply(data: Player): Json = Json.obj(
+      ("position", data.position.asJson),
+      ("isAlive", Json.fromBoolean(data.isAlive)),
+      ("fighter", data.fighter.asJson),
+      ("inventory", data.inventory.asJson)
+    )
+  }
+
+  given Decoder[Player] = new Decoder[Player] {
+    final def apply(c: HCursor): Decoder.Result[Player] =
+      for {
+        position  <- c.downField("position").as[Point]
+        isAlive   <- c.downField("isAlive").as[Boolean]
+        fighter   <- c.downField("fighter").as[Fighter]
+        inventory <- c.downField("width").as[Inventory]
+      } yield Player(position, isAlive, fighter, inventory)
+  }
+
 final case class Orc(
     id: Int,
     position: Point,
@@ -234,6 +278,25 @@ final case class Item(position: Point, consumable: Consumable) extends Entity:
 
   def moveTo(newPosition: Point): Item =
     this.copy(position = newPosition)
+
+object Item:
+
+  import SharedCodecs.given
+
+  given Encoder[Item] = new Encoder[Item] {
+    final def apply(data: Item): Json = Json.obj(
+      ("position", data.position.asJson),
+      ("consumable", data.consumable.asJson)
+    )
+  }
+
+  given Decoder[Item] = new Decoder[Item] {
+    final def apply(c: HCursor): Decoder.Result[Item] =
+      for {
+        position   <- c.downField("position").as[Point]
+        consumable <- c.downField("consumable").as[Consumable]
+      } yield Item(position, consumable)
+  }
 
 enum HostileState:
   case Normal extends HostileState

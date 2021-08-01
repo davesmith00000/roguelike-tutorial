@@ -248,6 +248,9 @@ final case class Model(
       )
     }
 
+  def toSaveData: ModelSaveData =
+    ModelSaveData(screenSize, player, gameMap, messageLog)
+
 object Model:
 
   val HistoryWindowSize: Size   = Size(50, 36)
@@ -270,6 +273,13 @@ object Model:
       false,
       GameState.Game,
       None
+    )
+
+  def fromSaveData(saveData: ModelSaveData): Model =
+    initial(saveData.screenSize).copy(
+      player = saveData.player,
+      gameMap = saveData.gameMap,
+      messageLog = saveData.messageLog
     )
 
   def gen(dice: Dice, screenSize: Size): Outcome[Model] =
