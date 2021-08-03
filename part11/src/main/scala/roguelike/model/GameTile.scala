@@ -28,9 +28,17 @@ object GameTile:
     val blocked: Boolean      = false
     val blockSight: Boolean   = false
 
+  case object DownStairs extends GameTile:
+    val lightMapTile: MapTile =
+      MapTile(DfTiles.Tile.`>`, RGB.fromColorInts(255, 255, 255), RGBA.fromColorInts(200, 180, 50))
+    val darkMapTile: MapTile = MapTile(DfTiles.Tile.`>`, RGB.fromColorInts(0, 0, 100), RGBA.fromColorInts(50, 50, 150))
+    val blocked: Boolean     = false
+    val blockSight: Boolean  = false
+
   val scoreAs: GameTile => Int = {
-    case Ground => 1
-    case Wall   => Int.MaxValue
+    case Ground     => 1
+    case DownStairs => 5
+    case Wall       => Int.MaxValue
   }
 
   given Encoder[GameTile] = new Encoder[GameTile] {
@@ -45,6 +53,11 @@ object GameTile:
           Json.obj(
             ("tileType", Json.fromString("g"))
           )
+
+        case DownStairs =>
+          Json.obj(
+            ("tileType", Json.fromString("s"))
+          )
   }
 
   given Decoder[GameTile] = new Decoder[GameTile] {
@@ -55,5 +68,8 @@ object GameTile:
 
         case "g" =>
           Right(Ground)
+
+        case "s" =>
+          Right(DownStairs)
       }
   }

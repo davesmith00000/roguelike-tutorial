@@ -85,9 +85,22 @@ object DungeonGen:
         tunnelTiles: List[(Point, GameTile)],
         hostiles: List[Hostile],
         items: List[Item],
-        playerStart: Point
+        playerStart: Point,
+        stairsPosition: Point
     ): Dungeon =
-      if numOfRooms == maxRooms then Dungeon(playerStart, roomTiles ++ tunnelTiles, hostiles, items)
+      if numOfRooms == maxRooms then
+        lastRoomCenter match
+          case None =>
+            Dungeon(playerStart, stairsPosition, roomTiles ++ tunnelTiles, hostiles, items)
+            
+          case Some(center) =>
+            Dungeon(
+              playerStart,
+              center,
+              roomTiles ++ tunnelTiles ++ List((center, GameTile.DownStairs)),
+              hostiles,
+              items
+            )
       else
         val w = dice.rollFromZero(roomMaxSize - roomMinSize) + roomMinSize
         val h = dice.rollFromZero(roomMaxSize - roomMinSize) + roomMinSize
@@ -97,7 +110,17 @@ object DungeonGen:
         val newRoom = Rectangle(x, y, w, h)
 
         if rooms.exists(_.overlaps(newRoom)) then
-          rec(numOfRooms + 1, lastRoomCenter, rooms, roomTiles, tunnelTiles, hostiles, items, playerStart)
+          rec(
+            numOfRooms + 1,
+            lastRoomCenter,
+            rooms,
+            roomTiles,
+            tunnelTiles,
+            hostiles,
+            items,
+            playerStart,
+            stairsPosition
+          )
         else
           val newRoomTiles = createRoom(newRoom)
           val roomCenter   = newRoom.center
@@ -127,13 +150,15 @@ object DungeonGen:
             tunnelTiles ++ newTunnelTiles,
             hostiles ++ roomHostiles,
             items ++ roomItems,
-            if numOfRooms == 0 then roomCenter else playerStart
+            if numOfRooms == 0 then roomCenter else playerStart,
+            stairsPosition
           )
 
-    rec(0, None, Nil, Nil, Nil, Nil, Nil, Point.zero)
+    rec(0, None, Nil, Nil, Nil, Nil, Nil, Point.zero, Point.zero)
 
 final case class Dungeon(
     playerStart: Point,
+    stairsPosition: Point,
     positionedTiles: List[(Point, GameTile)],
     hostiles: List[Hostile],
     items: List[Item]

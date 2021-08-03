@@ -203,8 +203,9 @@ final case class GameMap(
   def getPathTo(dice: Dice, from: Point, to: Point, additionalBlocked: List[Point]): List[Point] =
     val area = Rectangle.fromTwoPoints(from, to).expand(2)
     val filter: GameTile => Boolean = {
-      case GameTile.Ground => true
-      case _               => false
+      case GameTile.Ground     => true
+      case GameTile.DownStairs => true
+      case _                   => false
     }
     val walkable = GameMap.searchByBounds(tileMap, area, filter).map(_._2).filterNot(additionalBlocked.contains)
 

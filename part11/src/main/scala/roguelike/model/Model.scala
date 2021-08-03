@@ -15,6 +15,7 @@ import roguelike.ColorScheme
 final case class Model(
     screenSize: Size,
     player: Player,
+    stairsPosition: Point,
     lookAtTarget: Point,
     gameMap: GameMap,
     messageLog: MessageLog,
@@ -265,6 +266,7 @@ object Model:
       screenSize,
       p,
       Point.zero,
+      Point.zero,
       GameMap.initial(screenSize, Nil, Nil),
       MessageLog.Unlimited,
       HistoryViewer(HistoryWindowSize),
@@ -305,6 +307,7 @@ object Model:
         Model(
           screenSize,
           p,
+          dungeon.stairsPosition,
           Point.zero,
           gm,
           MessageLog.Unlimited,

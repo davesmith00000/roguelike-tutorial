@@ -34,11 +34,11 @@ object View:
       statusLine.withText(formatStatus(player))
     ).moveTo(position * RogueLikeGame.charSize.toPoint)
 
-  def renderNameHints(charSize: Size, mousePosition: Point, entities: List[Entity]): Group =
+  def renderNameHints(charSize: Size, mousePosition: Point, entities: List[Entity], stairsPosition: Point): Group =
     val pos    = mousePosition / charSize.toPoint
     val offset = mousePosition + Point(10)
 
-    Group(
+    val tips =
       entities.filter(_.position == pos).zipWithIndex.map {
         case (entity: Hostile, row) =>
           val tt = if entity.isAlive then toolTipAlive else toolTipDead
@@ -48,7 +48,13 @@ object View:
           val tt = toolTipNeutral
           tt.withText(entity.name.capitalize).moveTo(Point(0, row * charSize.height) + offset)
       }
-    )
+
+    val stairs =
+      if pos == stairsPosition then
+        List(toolTipNeutral.withText("Down stairs.").moveTo(Point(0, tips.length * charSize.height) + offset))
+      else Nil
+
+    Group(tips ++ stairs)
 
   def renderAreaOfEffect(charSize: Size, target: Point, gameState: GameState): Group =
     gameState match

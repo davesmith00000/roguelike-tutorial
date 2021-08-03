@@ -251,7 +251,12 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             Layer(
               BindingKey("log"),
               View.renderBar(model.player, 20, Point(0, 45)),
-              View.renderNameHints(RogueLikeGame.charSize, context.mouse.position, model.gameMap.entitiesList),
+              View.renderNameHints(
+                RogueLikeGame.charSize,
+                context.mouse.position,
+                model.gameMap.entitiesList,
+                model.stairsPosition
+              ),
               View.renderAreaOfEffect(RogueLikeGame.charSize, model.lookAtTarget, model.currentState)
             )
           )
