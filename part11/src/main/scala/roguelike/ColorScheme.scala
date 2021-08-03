@@ -12,6 +12,7 @@ object ColorScheme:
   val enemyAttack: RGB         = RGB.fromColorInts(0xff, 0xc0, 0xc0)
   val needsTarget: RGB         = RGB.fromColorInts(0x3f, 0xff, 0xff)
   val statusEffectApplied: RGB = RGB.fromColorInts(0x3f, 0xff, 0x3f)
+  val descend: RGB             = RGB.fromColorInts(0x9f, 0x3f, 0xff)
 
   val playerDie: RGB = RGB.fromColorInts(0xff, 0x30, 0x30)
   val enemyDie: RGB  = RGB.fromColorInts(0xff, 0xa0, 0x30)
