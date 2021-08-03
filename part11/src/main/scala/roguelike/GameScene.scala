@@ -162,16 +162,16 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       model.lookRight
 
     // Game controls
-    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.isRunning && model.player.isAlive =>
+    case KeyboardEvent.KeyDown(Key.UP_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveUp(context.dice)
 
-    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.currentState.isRunning && model.player.isAlive =>
+    case KeyboardEvent.KeyDown(Key.DOWN_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveDown(context.dice)
 
-    case KeyboardEvent.KeyUp(Key.LEFT_ARROW) if model.currentState.isRunning && model.player.isAlive =>
+    case KeyboardEvent.KeyDown(Key.LEFT_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveLeft(context.dice)
 
-    case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.currentState.isRunning && model.player.isAlive =>
+    case KeyboardEvent.KeyDown(Key.RIGHT_ARROW) if model.currentState.isRunning && model.player.isAlive =>
       model.moveRight(context.dice)
 
     case KeyboardEvent.KeyUp(Key.KEY_G) if model.currentState.isRunning && model.player.isAlive =>
