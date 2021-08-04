@@ -166,6 +166,9 @@ object ModelSaveDataSamples:
   val player: Player =
     Player(Point(5, 6), true, Fighter(1, 2, 3, 4), inventory)
 
+  val stairsPosition: Point =
+    Point(10, 10)
+
   val messageLog: MessageLog =
     MessageLog(
       List(
@@ -176,10 +179,15 @@ object ModelSaveDataSamples:
       None
     )
 
+  val currentLevel: Int =
+    1
+
   val saveData: ModelSaveData =
     ModelSaveData(
       size,
       player,
+      stairsPosition,
       gameMap,
-      messageLog
+      messageLog,
+      currentLevel
     )

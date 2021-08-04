@@ -13,8 +13,10 @@ import indigo.shared.IndigoLogger
 final case class ModelSaveData(
     screenSize: Size,
     player: Player,
+    stairsPosition: Point,
     gameMap: GameMap,
-    messageLog: MessageLog
+    messageLog: MessageLog,
+    currentFloor: Int
 ):
   def toJsonString: String =
     this.asJson.noSpaces
@@ -38,19 +40,23 @@ object ModelSaveData:
     final def apply(data: ModelSaveData): Json = Json.obj(
       ("screenSize", data.screenSize.asJson),
       ("player", data.player.asJson),
+      ("stairsPosition", data.stairsPosition.asJson),
       ("gameMap", data.gameMap.asJson),
-      ("messageLog", data.messageLog.asJson)
+      ("messageLog", data.messageLog.asJson),
+      ("currentFloor", data.currentFloor.asJson)
     )
   }
 
   given Decoder[ModelSaveData] = new Decoder[ModelSaveData] {
     final def apply(c: HCursor): Decoder.Result[ModelSaveData] =
       for {
-        screenSize <- c.downField("screenSize").as[Size]
-        player     <- c.downField("player").as[Player]
-        gameMap    <- c.downField("gameMap").as[GameMap]
-        messageLog <- c.downField("messageLog").as[MessageLog]
-      } yield ModelSaveData(screenSize, player, gameMap, messageLog)
+        screenSize     <- c.downField("screenSize").as[Size]
+        player         <- c.downField("player").as[Player]
+        stairsPosition <- c.downField("stairsPosition").as[Point]
+        gameMap        <- c.downField("gameMap").as[GameMap]
+        messageLog     <- c.downField("messageLog").as[MessageLog]
+        currentFloor   <- c.downField("currentFloor").as[Int]
+      } yield ModelSaveData(screenSize, player, stairsPosition, gameMap, messageLog, currentFloor)
   }
 
 object SharedCodecs:

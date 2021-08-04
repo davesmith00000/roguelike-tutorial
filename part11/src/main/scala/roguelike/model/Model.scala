@@ -252,7 +252,7 @@ final case class Model(
     }
 
   def toSaveData: ModelSaveData =
-    ModelSaveData(screenSize, player, gameMap, messageLog)
+    ModelSaveData(screenSize, player, stairsPosition, gameMap, messageLog, currentFloor)
 
 object Model:
 
