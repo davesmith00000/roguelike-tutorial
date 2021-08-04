@@ -149,16 +149,16 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             .addGlobalEvents(GameEvent.Redraw)
 
     // Looking around
-    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.lookingAround =>
+    case KeyboardEvent.KeyDown(Key.UP_ARROW) if model.currentState.lookingAround =>
       model.lookUp
 
-    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.currentState.lookingAround =>
+    case KeyboardEvent.KeyDown(Key.DOWN_ARROW) if model.currentState.lookingAround =>
       model.lookDown
 
-    case KeyboardEvent.KeyUp(Key.LEFT_ARROW) if model.currentState.lookingAround =>
+    case KeyboardEvent.KeyDown(Key.LEFT_ARROW) if model.currentState.lookingAround =>
       model.lookLeft
 
-    case KeyboardEvent.KeyUp(Key.RIGHT_ARROW) if model.currentState.lookingAround =>
+    case KeyboardEvent.KeyDown(Key.RIGHT_ARROW) if model.currentState.lookingAround =>
       model.lookRight
 
     // Game controls
