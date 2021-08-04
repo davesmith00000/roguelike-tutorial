@@ -12,7 +12,11 @@ object View:
   def formatStatus(player: Player): String =
     s"HP: ${Math.max(0, player.fighter.hp)}/${player.fighter.maxHp}"
 
-  val statusLine: Text[TerminalText] =
+  val healthStatusLine: Text[TerminalText] =
+    Text("", DfTiles.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA.Zero))
+      .moveTo(1, 2)
+
+  val dungeonLevelLine: Text[TerminalText] =
     Text("", DfTiles.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA.Zero))
       .moveTo(1, 2)
 
@@ -31,8 +35,13 @@ object View:
     Group(
       Shape.Box(Rectangle(0, 0, width, height), Fill.Color(ColorScheme.barEmpty.toRGBA)),
       Shape.Box(Rectangle(0, 0, barWidth, height), Fill.Color(ColorScheme.barFilled.toRGBA)),
-      statusLine.withText(formatStatus(player))
+      healthStatusLine.withText(formatStatus(player))
     ).moveTo(position * RogueLikeGame.charSize.toPoint)
+
+  def renderLevel(position: Point, currentFloor: Int): Text[TerminalText] =
+    healthStatusLine
+      .withText("Dungeon level: " + currentFloor.toString)
+      .moveTo(position * RogueLikeGame.charSize.toPoint)
 
   def renderNameHints(charSize: Size, mousePosition: Point, entities: List[Entity], stairsPosition: Point): Group =
     val pos    = mousePosition / charSize.toPoint

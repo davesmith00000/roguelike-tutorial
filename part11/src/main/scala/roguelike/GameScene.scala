@@ -177,6 +177,18 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     case KeyboardEvent.KeyUp(Key.KEY_G) if model.currentState.isRunning && model.player.isAlive =>
       model.pickUp
 
+    case KeyboardEvent.KeyUp(Key.PERIOD) if model.currentState.isRunning && model.player.isAlive =>
+      if model.player.position == model.stairsPosition then
+        Model
+          .genNextFloor(context.dice, model)
+          .addGlobalEvents(
+            GameEvent.Log(Message("You descend the staircase.", ColorScheme.descend)),
+            GameEvent.Redraw
+          )
+      else
+        Outcome(model)
+          .addGlobalEvents(GameEvent.Log(Message("There are no stairs here.", ColorScheme.impossible)))
+
     // Window toggles
     case KeyboardEvent.KeyUp(Key.KEY_V) if model.currentState.isRunning || model.currentState.showingHistory =>
       Outcome(model.toggleMessageHistory)
@@ -251,6 +263,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             Layer(
               BindingKey("log"),
               View.renderBar(model.player, 20, Point(0, 45)),
+              View.renderLevel(Point(0, 47), model.currentFloor),
               View.renderNameHints(
                 RogueLikeGame.charSize,
                 context.mouse.position,

@@ -74,7 +74,9 @@ object DungeonGen:
       roomMinSize: Int,
       roomMaxSize: Int,
       mapSize: Size,
-      maxMonstersPerRoom: Int
+      maxMonstersPerRoom: Int,
+      maxItemsPerRoom: Int,
+      currentFloor: Int
   ): Dungeon =
     @tailrec
     def rec(
@@ -92,7 +94,7 @@ object DungeonGen:
         lastRoomCenter match
           case None =>
             Dungeon(playerStart, stairsPosition, roomTiles ++ tunnelTiles, hostiles, items)
-            
+
           case Some(center) =>
             Dungeon(
               playerStart,
@@ -125,9 +127,9 @@ object DungeonGen:
           val newRoomTiles = createRoom(newRoom)
           val roomCenter   = newRoom.center
           val roomHostiles =
-            if numOfRooms == 0 then Nil else placeEntities(hostiles.length, dice, newRoom, MaxMonstersPerRoom)
+            if numOfRooms == 0 then Nil else placeEntities(hostiles.length, dice, newRoom, maxMonstersPerRoom)
           val roomItems =
-            if numOfRooms == 0 then Nil else placeItems(items.length, dice, newRoom, MaxItemsPerRoom, roomHostiles)
+            if numOfRooms == 0 then Nil else placeItems(items.length, dice, newRoom, maxItemsPerRoom, roomHostiles)
 
           val newTunnelTiles =
             lastRoomCenter match

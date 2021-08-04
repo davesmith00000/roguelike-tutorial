@@ -26,7 +26,8 @@ final case class Model(
     paused: Boolean,
     currentState: GameState,
     targetingWithItemAt: Option[Int],
-    loadInfo: GameLoadInfo
+    loadInfo: GameLoadInfo,
+    currentFloor: Int
 ):
   def entitiesList: List[Entity] =
     gameMap.entitiesList :+ player
@@ -276,7 +277,8 @@ object Model:
       false,
       GameState.Game,
       None,
-      GameLoadInfo(None, None)
+      GameLoadInfo(None, None),
+      0
     )
 
   def fromSaveData(saveData: ModelSaveData): Model =
@@ -295,7 +297,9 @@ object Model:
         DungeonGen.RoomMinSize,
         DungeonGen.RoomMaxSize,
         screenSize - Size(0, 5),
-        DungeonGen.MaxMonstersPerRoom
+        DungeonGen.MaxMonstersPerRoom,
+        DungeonGen.MaxItemsPerRoom,
+        0
       )
 
     val p = Player.initial(dungeon.playerStart)
@@ -318,7 +322,35 @@ object Model:
           false,
           GameState.Game,
           None,
-          GameLoadInfo(None, None)
+          GameLoadInfo(None, None),
+          0
+        )
+      }
+
+  def genNextFloor(dice: Dice, currentModel: Model): Outcome[Model] =
+    val nextFloor = currentModel.currentFloor + 1
+
+    val dungeon =
+      DungeonGen.makeMap(
+        dice,
+        DungeonGen.MaxRooms,
+        DungeonGen.RoomMinSize,
+        DungeonGen.RoomMaxSize,
+        currentModel.screenSize - Size(0, 5),
+        DungeonGen.MaxMonstersPerRoom,
+        DungeonGen.MaxItemsPerRoom,
+        nextFloor
+      )
+
+    GameMap
+      .gen(currentModel.screenSize, dungeon)
+      .updateHostiles(dice, dungeon.playerStart, true)
+      .map { gm =>
+        currentModel.copy(
+          player = currentModel.player.copy(position = dungeon.playerStart),
+          stairsPosition = dungeon.stairsPosition,
+          gameMap = gm,
+          currentFloor = nextFloor
         )
       }
 

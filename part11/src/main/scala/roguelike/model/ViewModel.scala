@@ -16,7 +16,11 @@ final case class ViewModel(terminalEntity: Option[TerminalEntity], shroud: MapTi
       TerminalEmulator(RogueLikeGame.screenSize)
         .put(model.gameMap.toExploredTiles)
         .put(model.gameMap.visibleTiles)
-        .put(model.entitiesList.map(e => (e.position, e.tile)))
+        .put(
+          model.entitiesList
+            .filterNot(_.position == model.stairsPosition)
+            .map(e => (e.position, e.tile))
+        )
 
     val log =
       model.messageLog.toTerminal(Size(RogueLikeGame.screenSize.width - 21, 5), false, 0, true)
