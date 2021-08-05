@@ -11,6 +11,7 @@ object DungeonGen:
   val MaxRooms: Int    = 30
 
   final case class Limit(floor: Int, amount: Int)
+  final case class Chance(entity: String, weight: Int)
 
   val maxItemsByFloor: List[Limit] = List(
     Limit(0, 1),
@@ -33,36 +34,113 @@ object DungeonGen:
       if limit.floor <= floor then limit.amount else num
     }
 
-  def placeEntities(entityCount: Int, dice: Dice, room: Rectangle, maxMonstersPerRoom: Int): List[Hostile] =
-    (0 until dice.roll(maxMonstersPerRoom)).toList.map { i =>
-      val x = dice.roll(room.width - 4) + room.left + 2
-      val y = dice.roll(room.height - 4) + room.top + 2
+  def itemChances: Map[Int, List[Chance]] = Map(
+    0 -> List(Chance(Consumable.HealthPotion.name, 35)),
+    2 -> List(Chance(Consumable.ConfusionScroll.name, 10)),
+    4 -> List(Chance(Consumable.LightningScroll.name, 25)),
+    6 -> List(Chance(Consumable.FireBallScroll.name, 25))
+  )
 
-      if dice.rollDouble < 0.8 then Orc.spawn(entityCount + i, Point(x, y))
-      else Troll.spawn(entityCount + i, Point(x, y))
+  def enemyChances: Map[Int, List[Chance]] = Map(
+    0 -> List(Chance(Orc.name, 80)),
+    3 -> List(Chance(Troll.name, 15)),
+    5 -> List(Chance(Troll.name, 30)),
+    7 -> List(Chance(Troll.name, 60))
+  )
 
+  def randomChoices(dice: Dice, count: Int, floor: Int, chances: Map[Int, List[Chance]]): List[String] =
+    @tailrec
+    def select(remaining: List[(Int, List[Chance])], acc: Map[String, Chance]): List[Chance] =
+      remaining match
+        case Nil =>
+          acc.toList.map(_._2)
+
+        case (flr, _) :: xs if flr > floor =>
+          select(Nil, acc)
+
+        case (_, cs) :: xs =>
+          select(xs, acc ++ cs.map(c => (c.entity, c)).toMap)
+
+    val possibilities: List[Chance] = select(chances.toList, Map())
+
+    val normalised: List[(String, Double)] =
+      val total = possibilities.map(_.weight).sum
+
+      val l = possibilities
+        .map(p => (p.entity, p.weight.toDouble / total.toDouble))
+        .sortBy(_._2)
+        .foldLeft((0.0d, List.empty[(String, Double)])) { case ((total, acc), next) =>
+          (total + next._2, acc :+ (next._1, total + next._2))
+        }
+        ._2
+
+      l.dropRight(1) ++ l.reverse.headOption.map(e => (e._1, 1.0)).toList
+
+    @tailrec
+    def pick(remaining: List[(String, Double)], roll: Double): String =
+      remaining match
+        case Nil =>
+          "" // shouldn't happen...
+
+        case (name, chance) :: xs if roll <= chance =>
+          name
+
+        case _ :: xs =>
+          pick(xs, roll)
+
+    (0 until count).toList.map { _ =>
+      pick(normalised, dice.rollDouble)
+    }
+
+  def placeEntities(floor: Int, entityCount: Int, dice: Dice, room: Rectangle, maxMonstersPerRoom: Int): List[Hostile] =
+    randomChoices(dice, maxMonstersPerRoom, floor, enemyChances).zipWithIndex.flatMap {
+      case (Orc.name, i) =>
+        val x = dice.roll(room.width - 4) + room.left + 2
+        val y = dice.roll(room.height - 4) + room.top + 2
+
+        List(Orc.spawn(entityCount + i, Point(x, y)))
+
+      case (Troll.name, i) =>
+        val x = dice.roll(room.width - 4) + room.left + 2
+        val y = dice.roll(room.height - 4) + room.top + 2
+
+        List(Troll.spawn(entityCount + i, Point(x, y)))
+
+      case _ =>
+        Nil
     }.distinct
 
   def placeItems(
+      floor: Int,
       entityCount: Int,
       dice: Dice,
       room: Rectangle,
       maxItemsPerRoom: Int,
       hostiles: List[Hostile]
   ): List[Item] =
-    (0 until dice.roll(maxItemsPerRoom)).toList.flatMap { i =>
+    def spawn(consumable: Consumable): List[Item] =
       val x   = dice.roll(room.width - 4) + room.left + 2
       val y   = dice.roll(room.height - 4) + room.top + 2
       val pos = Point(x, y)
 
-      val itemChance = dice.rollDouble
-
       if hostiles.contains(pos) then Nil
-      else if itemChance < 0.7 then List(Item(pos, Consumable.HealthPotion(4)))
-      else if itemChance < 0.8 then List(Item(pos, Consumable.FireBallScroll(12, 3)))
-      else if itemChance < 0.9 then List(Item(pos, Consumable.ConfusionScroll(10)))
-      else List(Item(pos, Consumable.LightningScroll(20, 5)))
+      else List(Item(pos, consumable))
 
+    randomChoices(dice, maxItemsPerRoom, floor, itemChances).flatMap {
+      case Consumable.HealthPotion.name =>
+        spawn(Consumable.HealthPotion(4))
+
+      case Consumable.FireBallScroll.name =>
+        spawn(Consumable.FireBallScroll(12, 3))
+
+      case Consumable.ConfusionScroll.name =>
+        spawn(Consumable.ConfusionScroll(10))
+
+      case Consumable.LightningScroll.name =>
+        spawn(Consumable.ConfusionScroll(10))
+
+      case _ =>
+        Nil
     }.distinct
 
   def createRoom(rect: Rectangle): List[(Point, GameTile)] =
@@ -148,9 +226,11 @@ object DungeonGen:
           val newRoomTiles = createRoom(newRoom)
           val roomCenter   = newRoom.center
           val roomHostiles =
-            if numOfRooms == 0 then Nil else placeEntities(hostiles.length, dice, newRoom, maxMonstersPerRoom)
+            if numOfRooms == 0 then Nil
+            else placeEntities(currentFloor, hostiles.length, dice, newRoom, maxMonstersPerRoom)
           val roomItems =
-            if numOfRooms == 0 then Nil else placeItems(items.length, dice, newRoom, maxItemsPerRoom, roomHostiles)
+            if numOfRooms == 0 then Nil
+            else placeItems(currentFloor, items.length, dice, newRoom, maxItemsPerRoom, roomHostiles)
 
           val newTunnelTiles =
             lastRoomCenter match
