@@ -6,11 +6,32 @@ import scala.annotation.tailrec
 
 object DungeonGen:
 
-  val RoomMaxSize: Int   = 10
-  val RoomMinSize: Int   = 6
-  val MaxRooms: Int      = 30
-  val MaxMonstersPerRoom = 2
-  val MaxItemsPerRoom    = 2
+  val RoomMaxSize: Int = 10
+  val RoomMinSize: Int = 6
+  val MaxRooms: Int    = 30
+
+  final case class Limit(floor: Int, amount: Int)
+
+  val maxItemsByFloor: List[Limit] = List(
+    Limit(0, 1),
+    Limit(3, 2)
+  )
+
+  val maxMonstersByFloor: List[Limit] = List(
+    Limit(0, 2),
+    Limit(3, 3),
+    Limit(5, 5)
+  )
+
+  def maxItemsPerRoom(floor: Int): Int =
+    maxItemsByFloor.foldLeft(2) { case (num, limit) =>
+      if limit.floor <= floor then limit.amount else num
+    }
+
+  def maxMonstersPerRoom(floor: Int): Int =
+    maxMonstersByFloor.foldLeft(2) { case (num, limit) =>
+      if limit.floor <= floor then limit.amount else num
+    }
 
   def placeEntities(entityCount: Int, dice: Dice, room: Rectangle, maxMonstersPerRoom: Int): List[Hostile] =
     (0 until dice.roll(maxMonstersPerRoom)).toList.map { i =>

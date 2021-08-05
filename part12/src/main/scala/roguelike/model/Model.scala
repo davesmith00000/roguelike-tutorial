@@ -329,8 +329,8 @@ object Model:
         DungeonGen.RoomMinSize,
         DungeonGen.RoomMaxSize,
         screenSize - Size(0, 5),
-        DungeonGen.MaxMonstersPerRoom,
-        DungeonGen.MaxItemsPerRoom,
+        DungeonGen.maxMonstersPerRoom(0),
+        DungeonGen.maxItemsPerRoom(0),
         0
       )
 
@@ -371,8 +371,8 @@ object Model:
         DungeonGen.RoomMinSize,
         DungeonGen.RoomMaxSize,
         currentModel.screenSize - Size(0, 5),
-        DungeonGen.MaxMonstersPerRoom,
-        DungeonGen.MaxItemsPerRoom,
+        DungeonGen.maxMonstersPerRoom(nextFloor),
+        DungeonGen.maxItemsPerRoom(nextFloor),
         nextFloor
       )
 
