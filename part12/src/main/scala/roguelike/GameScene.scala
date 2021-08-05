@@ -114,14 +114,14 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       ).addGlobalEvents(GameEvent.Redraw)
 
     // Inventory window
-    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.showingInventory =>
+    case KeyboardEvent.KeyDown(Key.UP_ARROW) if model.currentState.showingInventory =>
       Outcome(
         model.copy(
           inventoryWindow = model.inventoryWindow.scrollUp
         )
       ).addGlobalEvents(GameEvent.Redraw)
 
-    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.currentState.showingInventory =>
+    case KeyboardEvent.KeyDown(Key.DOWN_ARROW) if model.currentState.showingInventory =>
       Outcome(
         model.copy(
           inventoryWindow = model.inventoryWindow.scrollDown(model.player.inventory.items.length)
@@ -144,14 +144,14 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             .addGlobalEvents(GameEvent.Redraw)
 
     // Drop window
-    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.showingDropMenu =>
+    case KeyboardEvent.KeyDown(Key.UP_ARROW) if model.currentState.showingDropMenu =>
       Outcome(
         model.copy(
           dropWindow = model.dropWindow.scrollUp
         )
       ).addGlobalEvents(GameEvent.Redraw)
 
-    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.currentState.showingDropMenu =>
+    case KeyboardEvent.KeyDown(Key.DOWN_ARROW) if model.currentState.showingDropMenu =>
       Outcome(
         model.copy(
           dropWindow = model.dropWindow.scrollDown(model.player.inventory.items.length)
