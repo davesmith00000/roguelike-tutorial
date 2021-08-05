@@ -14,6 +14,7 @@ enum GameEvent extends GlobalEvent:
 
   // Hostile events
   case HostileMeleeAttack(attackerName: String, power: Int) extends GameEvent
+  case HostileGiveXP(amount: Int) extends GameEvent
 
   // System events
   case Log(message: Message) extends GameEvent

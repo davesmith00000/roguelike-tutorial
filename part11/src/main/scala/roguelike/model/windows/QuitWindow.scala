@@ -18,9 +18,9 @@ final case class QuitWindow(size: Size, window: TerminalEmulator) extends Window
 
     val term =
       TerminalEmulator(innerSize)
-        .putLine(Point(0, 1), " [ 1 ] Save", useable, RGBA.Black)
-        .putLine(Point(0, 2), " [ 2 ] Save and Quit", useable, RGBA.Black)
-        .putLine(Point(0, 3), " [ 3 ] Quit", RGB.White, RGBA.Black)
+        .putLine(Point(0, 1), "[1] Save", useable, RGBA.Black)
+        .putLine(Point(0, 2), "[2] Save and Quit", useable, RGBA.Black)
+        .putLine(Point(0, 3), "[3] Quit", RGB.White, RGBA.Black)
 
     window.inset(term, Point(1, 1))
 

@@ -42,7 +42,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
 
     // Window close keys
     case KeyboardEvent.KeyUp(Key.ESCAPE) | KeyboardEvent.KeyUp(Key.SHIFT) | KeyboardEvent.KeyUp(Key.CTRL) |
-        KeyboardEvent.KeyUp(Key.ALT) if !model.currentState.isRunning =>
+        KeyboardEvent.KeyUp(Key.ALT) if !model.currentState.isRunning || !model.currentState.showingLevelUp =>
       Outcome(model.closeAllWindows)
         .addGlobalEvents(GameEvent.Redraw)
 
@@ -66,15 +66,47 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
     case KeyboardEvent.KeyUp(Key.KEY_3) if model.currentState.showingQuit =>
       Outcome(model).addGlobalEvents(SceneEvent.JumpTo(MainMenuScene.name))
 
+    // Level up window
+    // Constitution
+    case KeyboardEvent.KeyUp(Key.KEY_1) if model.currentState.showingLevelUp =>
+      model.player
+        .increaseMaxHp(20)
+        .map { p =>
+          model.copy(player = p).toggleLevelUp
+        }
+        .addGlobalEvents(GameEvent.Redraw)
+
+    // Strength
+    case KeyboardEvent.KeyUp(Key.KEY_2) if model.currentState.showingLevelUp =>
+      model.player
+        .increasePower(1)
+        .map { p =>
+          model.copy(player = p).toggleLevelUp
+        }
+        .addGlobalEvents(GameEvent.Redraw)
+
+    // Agility
+    case KeyboardEvent.KeyUp(Key.KEY_3) if model.currentState.showingLevelUp =>
+      model.player
+        .increaseDefense(1)
+        .map { p =>
+          model.copy(player = p).toggleLevelUp
+        }
+        .addGlobalEvents(GameEvent.Redraw)
+
+    // Invalid level up selection
+    case KeyboardEvent.KeyUp(_) if model.currentState.showingLevelUp =>
+      Outcome(model).addGlobalEvents(GameEvent.Log(Message("Invalid, please press 1, 2, or 3.", ColorScheme.invalid)))
+
     // History window
-    case KeyboardEvent.KeyUp(Key.UP_ARROW) if model.currentState.showingHistory =>
+    case KeyboardEvent.KeyDown(Key.UP_ARROW) if model.currentState.showingHistory =>
       Outcome(
         model.copy(
           historyViewer = model.historyViewer.scrollUp
         )
       ).addGlobalEvents(GameEvent.Redraw)
 
-    case KeyboardEvent.KeyUp(Key.DOWN_ARROW) if model.currentState.showingHistory =>
+    case KeyboardEvent.KeyDown(Key.DOWN_ARROW) if model.currentState.showingHistory =>
       Outcome(
         model.copy(
           historyViewer = model.historyViewer.scrollDown(model.messageLog.logLength)
@@ -206,6 +238,10 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       Outcome(model.toggleQuit)
         .addGlobalEvents(GameEvent.Redraw)
 
+    case KeyboardEvent.KeyUp(Key.KEY_C) if model.currentState.isRunning || model.currentState.showingCharacter =>
+      Outcome(model.toggleCharacter)
+        .addGlobalEvents(GameEvent.Redraw)
+
     // Look Around
     case KeyboardEvent.KeyUp(Key.FORWARD_SLASH) if model.currentState.isRunning || model.currentState.lookingAround =>
       Outcome(model.toggleLookAround(0))
@@ -227,14 +263,14 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       model: Model,
       viewModel: ViewModel
   ): GlobalEvent => Outcome[ViewModel] =
-    case _: KeyboardEvent =>
-      viewModel.redrawTerminal(model)
+    case _: KeyboardEvent if viewModel.lastRedraw < context.running =>
+      viewModel.redrawTerminal(model, context.running)
 
-    case GameEvent.Redraw =>
-      viewModel.redrawTerminal(model)
+    case GameEvent.Redraw | GameEvent.PlayerTurnEnd if viewModel.lastRedraw < context.running =>
+      viewModel.redrawTerminal(model, context.running)
 
-    case _: GameEvent.Log =>
-      viewModel.redrawTerminal(model)
+    case _: GameEvent.Log if viewModel.lastRedraw < context.running =>
+      viewModel.redrawTerminal(model, context.running)
 
     case _ =>
       Outcome(viewModel)

@@ -32,6 +32,7 @@ sealed trait Hostile extends Actor:
   def isConfused: Boolean
   def confuseFor(turns: Int): Outcome[Hostile]
   def nextState: Hostile
+  def xpGiven: Int
 
   def takeDamage(amount: Int): Outcome[Hostile] =
     val f = fighter.takeDamage(amount)
@@ -40,13 +41,19 @@ sealed trait Hostile extends Actor:
         .withFighter(f)
         .markAsDead(if f.hp > 0 then false else true)
     ).addGlobalEvents(
-      if f.hp <= 0 then List(GameEvent.Log(Message(s"You killed a $name", ColorScheme.enemyDie))) else Nil
+      if f.hp <= 0 then
+        List(
+          GameEvent.Log(Message(s"You killed a $name", ColorScheme.enemyDie)),
+          GameEvent.HostileGiveXP(xpGiven),
+          GameEvent.Redraw
+        )
+      else Nil
     )
 
 object Hostile:
 
   import SharedCodecs.given
-  
+
   given Encoder[Hostile] = new Encoder[Hostile] {
     final def apply(data: Hostile): Json = Json.obj(
       ("name", data.name.asJson),
@@ -127,7 +134,8 @@ object Fighter:
       } yield Fighter(hp, maxHp, defense, power)
   }
 
-final case class Player(position: Point, isAlive: Boolean, fighter: Fighter, inventory: Inventory) extends Actor:
+final case class Player(position: Point, isAlive: Boolean, fighter: Fighter, inventory: Inventory, level: Int, xp: Int)
+    extends Actor:
   def tile: MapTile = if isAlive then MapTile(DfTiles.Tile.`@`, RGB.Magenta) else MapTile(DfTiles.Tile.`@`, RGB.Red)
   val blocksMovement: Boolean = false
   val name: String            = "Player"
@@ -211,9 +219,59 @@ final case class Player(position: Point, isAlive: Boolean, fighter: Fighter, inv
       fighter = f
     )
 
+  val experienceToNextLevel: Int =
+    Player.LevelUpBase + level * Player.LevelUpFactor
+
+  def addXp(additionalXp: Int): Outcome[Player] =
+    if xp == 0 then Outcome(this)
+    else
+      val next    = xp + additionalXp
+      val levelUp = next > experienceToNextLevel
+
+      Outcome(
+        this.copy(
+          xp = if levelUp then next - experienceToNextLevel else next,
+          level = if levelUp then level + 1 else level
+        )
+      ).addGlobalEvents(GameEvent.Log(Message(s"You gain $additionalXp experience points.", RGB.White)))
+        .createGlobalEvents(p =>
+          if levelUp then List(GameEvent.Log(Message(s"You advance to level ${p.level}!", RGB.White))) else Nil
+        )
+
+  def increaseMaxHp(amount: Int): Outcome[Player] =
+    Outcome(
+      this.copy(
+        fighter = fighter.copy(
+          hp = fighter.hp + amount,
+          maxHp = fighter.maxHp + amount
+        )
+      )
+    ).addGlobalEvents(GameEvent.Log(Message("Your health improves!", RGB.White)))
+
+  def increasePower(amount: Int): Outcome[Player] =
+    Outcome(
+      this.copy(
+        fighter = fighter.copy(
+          power = fighter.power + amount
+        )
+      )
+    ).addGlobalEvents(GameEvent.Log(Message("You feel stronger!", RGB.White)))
+
+  def increaseDefense(amount: Int): Outcome[Player] =
+    Outcome(
+      this.copy(
+        fighter = fighter.copy(
+          defense = fighter.defense + amount
+        )
+      )
+    ).addGlobalEvents(GameEvent.Log(Message("Your movements are getting swifter!", RGB.White)))
+
 object Player:
+  val LevelUpBase: Int   = 200
+  val LevelUpFactor: Int = 150
+
   def initial(start: Point): Player =
-    Player(start, true, Fighter(10, 1, 5), Inventory(26, Nil))
+    Player(start, true, Fighter(10, 1, 5), Inventory(26, Nil), 1, LevelUpBase)
 
   import SharedCodecs.given
 
@@ -222,7 +280,9 @@ object Player:
       ("position", data.position.asJson),
       ("isAlive", Json.fromBoolean(data.isAlive)),
       ("fighter", data.fighter.asJson),
-      ("inventory", data.inventory.asJson)
+      ("inventory", data.inventory.asJson),
+      ("level", data.level.asJson),
+      ("xp", data.xp.asJson)
     )
   }
 
@@ -233,7 +293,9 @@ object Player:
         isAlive   <- c.downField("isAlive").as[Boolean]
         fighter   <- c.downField("fighter").as[Fighter]
         inventory <- c.downField("inventory").as[Inventory]
-      } yield Player(position, isAlive, fighter, inventory)
+        level     <- c.downField("level").as[Int]
+        xp        <- c.downField("xp").as[Int]
+      } yield Player(position, isAlive, fighter, inventory, level, xp)
   }
 
 final case class Orc(
@@ -249,6 +311,7 @@ final case class Orc(
     else MapTile(DfTiles.Tile.`%`, RGB(1.0, 0.6, 1.0))
   val blocksMovement: Boolean = isAlive
   val name: String            = Orc.name
+  val xpGiven: Int            = 35
 
   def moveBy(amount: Point, gameMap: GameMap): Outcome[Orc] =
     Outcome(this.copy(position = position + amount))
@@ -289,6 +352,7 @@ final case class Troll(
     if isAlive then MapTile(DfTiles.Tile.`T`, RGB.fromColorInts(0, 127, 0)) else MapTile(DfTiles.Tile.`%`, RGB.Magenta)
   val blocksMovement: Boolean = isAlive
   val name: String            = Troll.name
+  val xpGiven: Int            = 100
 
   def moveBy(amount: Point, gameMap: GameMap): Outcome[Troll] =
     Outcome(this.copy(position = position + amount))

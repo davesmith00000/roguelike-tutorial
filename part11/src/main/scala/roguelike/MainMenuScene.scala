@@ -67,7 +67,7 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
       viewModel: ViewModel
   ): GlobalEvent => Outcome[ViewModel] =
     case KeyboardEvent.KeyUp(Key.KEY_N) =>
-      viewModel.redrawTerminal(model)
+      viewModel.redrawTerminal(model, context.running)
 
     case _ =>
       Outcome(viewModel)
@@ -87,8 +87,8 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
           .scaleBy((RogueLikeGame.viewportSize / Size(160, 100)).toVector),
         TerminalEmulator(RogueLikeGame.screenSize)
           .putLine(Point(2, 20), "TOMBS OF THE ANCIENT KINGS", RGB.Yellow, RGBA.Black)
-          .putLine(Point(2, 22), " [ n ] Play a new game", RGB.White, RGBA.Black)
-          .putLine(Point(2, 23), " [ c ] Continue last game", loadColor, RGBA.Black)
+          .putLine(Point(2, 22), "[n] Play a new game", RGB.White, RGBA.Black)
+          .putLine(Point(2, 23), "[c] Continue last game", loadColor, RGBA.Black)
           .putLine(Point(2, 48), "By Dave Smith", RGB.Yellow, RGBA.Black)
           .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
       )

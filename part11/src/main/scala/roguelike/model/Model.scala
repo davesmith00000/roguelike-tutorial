@@ -11,6 +11,8 @@ import roguelike.model.windows.InventoryWindow
 import roguelike.model.windows.DropWindow
 import roguelike.model.windows.QuitWindow
 import roguelike.ColorScheme
+import roguelike.model.windows.LevelUpWindow
+import roguelike.model.windows.CharacterWindow
 
 final case class Model(
     screenSize: Size,
@@ -23,6 +25,8 @@ final case class Model(
     inventoryWindow: InventoryWindow,
     dropWindow: DropWindow,
     quitWindow: QuitWindow,
+    levelUpWindow: LevelUpWindow,
+    characterWindow: CharacterWindow,
     paused: Boolean,
     currentState: GameState,
     targetingWithItemAt: Option[Int],
@@ -30,7 +34,8 @@ final case class Model(
     currentFloor: Int
 ):
   def entitiesList: List[Entity] =
-    gameMap.entitiesList :+ player
+    gameMap.entitiesList
+      .filterNot(_.position == stairsPosition) :+ player
 
   def closeAllWindows: Model =
     this.copy(
@@ -70,6 +75,18 @@ final case class Model(
     val show = !currentState.showingQuit
     this.copy(
       currentState = if show then GameState.Quit else GameState.Game
+    )
+
+  def toggleLevelUp: Model =
+    val show = !currentState.showingLevelUp
+    this.copy(
+      currentState = if show then GameState.LevelUp else GameState.Game
+    )
+
+  def toggleCharacter: Model =
+    val show = !currentState.showingCharacter
+    this.copy(
+      currentState = if show then GameState.Character else GameState.Game
     )
 
   def update(dice: Dice): GameEvent => Outcome[Model] =
@@ -149,6 +166,17 @@ final case class Model(
           player = p
         )
       ).addGlobalEvents(msgs)
+
+    case GameEvent.HostileGiveXP(amount) =>
+      player
+        .addXp(amount)
+        .map { p =>
+          this.copy(
+            player = p,
+            currentState = if p.level > player.level then GameState.LevelUp else GameState.Game
+          )
+        }
+        .addGlobalEvents(GameEvent.Redraw)
 
     case GameEvent.PlayerAttack(name, power, id) =>
       gameMap.hostiles.collectFirst {
@@ -274,6 +302,8 @@ object Model:
       InventoryWindow(InventoryWindowSize),
       DropWindow(DropWindowSize),
       QuitWindow.create,
+      LevelUpWindow.create,
+      CharacterWindow.create,
       false,
       GameState.Game,
       None,
@@ -284,9 +314,11 @@ object Model:
   def fromSaveData(saveData: ModelSaveData): Model =
     initial(saveData.screenSize).copy(
       player = saveData.player,
+      stairsPosition = saveData.stairsPosition,
       gameMap = saveData.gameMap,
       messageLog = saveData.messageLog,
-      loadInfo = GameLoadInfo(None, Option(saveData))
+      loadInfo = GameLoadInfo(None, Option(saveData)),
+      currentFloor = saveData.currentFloor
     )
 
   def gen(dice: Dice, screenSize: Size): Outcome[Model] =
@@ -319,6 +351,8 @@ object Model:
           InventoryWindow(InventoryWindowSize),
           DropWindow(DropWindowSize),
           QuitWindow.create,
+          LevelUpWindow.create,
+          CharacterWindow.create,
           false,
           GameState.Game,
           None,
@@ -361,6 +395,8 @@ enum GameState:
   case Drop extends GameState
   case LookAround(radius: Int) extends GameState
   case Quit extends GameState
+  case LevelUp extends GameState
+  case Character extends GameState
 
   def showingHistory: Boolean =
     this match
@@ -391,6 +427,16 @@ enum GameState:
     this match
       case GameState.Quit => true
       case _              => false
+
+  def showingLevelUp: Boolean =
+    this match
+      case GameState.LevelUp => true
+      case _                 => false
+
+  def showingCharacter: Boolean =
+    this match
+      case GameState.Character => true
+      case _                   => false
 
 final case class GameLoadInfo(loadingTimeOut: Option[Seconds], loadedData: Option[ModelSaveData]):
   def updateTimeout(delta: Seconds): GameLoadInfo =

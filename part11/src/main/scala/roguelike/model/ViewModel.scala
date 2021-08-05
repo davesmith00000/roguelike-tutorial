@@ -9,16 +9,15 @@ import roguelike.RogueLikeGame
 import roguelike.terminal.TerminalEmulator
 import roguelike.Assets
 
-final case class ViewModel(terminalEntity: Option[TerminalEntity], shroud: MapTile):
+final case class ViewModel(terminalEntity: Option[TerminalEntity], shroud: MapTile, lastRedraw: Seconds):
 
-  def redrawTerminal(model: Model): Outcome[ViewModel] =
+  def redrawTerminal(model: Model, currentTime: Seconds): Outcome[ViewModel] =
     val term =
       TerminalEmulator(RogueLikeGame.screenSize)
         .put(model.gameMap.toExploredTiles)
         .put(model.gameMap.visibleTiles)
         .put(
           model.entitiesList
-            .filterNot(_.position == model.stairsPosition)
             .map(e => (e.position, e.tile))
         )
 
@@ -79,6 +78,22 @@ final case class ViewModel(terminalEntity: Option[TerminalEntity], shroud: MapTi
               ((RogueLikeGame.screenSize - model.quitWindow.size) / 2).toPoint
             )
 
+        case GameState.LevelUp =>
+          term
+            .inset(log, Point(21, 45))
+            .inset(
+              model.levelUpWindow.toTerminal(model.player.fighter),
+              ((RogueLikeGame.screenSize - model.levelUpWindow.size) / 2).toPoint
+            )
+
+        case GameState.Character =>
+          term
+            .inset(log, Point(21, 45))
+            .inset(
+              model.characterWindow.toTerminal(model.player),
+              Point.zero
+            )
+
     Outcome(
       this.copy(
         terminalEntity = Option(
@@ -92,5 +107,6 @@ object ViewModel:
   def initial: ViewModel =
     ViewModel(
       None,
-      MapTile(DfTiles.Tile.SPACE)
+      MapTile(DfTiles.Tile.SPACE),
+      Seconds(-1)
     )
