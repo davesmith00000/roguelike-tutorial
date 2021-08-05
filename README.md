@@ -20,7 +20,7 @@ Parts|Controls
 8|_As above, plus:_ Hit the 'i' key to show inventory and 'd' to show the "drop" menu. Use up and down arrows to scroll in both, the a-z keys to choose an item to consume/drop, and shift|ctrl|alt|esc to close any windows.
 9|_As above, plus:_ Hit the "/" key to enter "look around" mode and "/" or "Esc" to leave. When using a confusion or fireball scroll, you will enter look around mode to find a target, press "Enter" to select it.
 10|_As above, plus:_ Hit "n" to start a new game or "c" to continue a saved game on the main menu. In game, hit "q" to bring up the quit menu, choose / press "1", "2", or "3" to save your game, save and quit, or quit to main menu respectively. When you die, you can still hit "q" to bring up the menu and return to the main menu.
-11|_As above, plus:_ Hit "c" to show/hide the character stats window, when standing on stairs, press "." to go down a level. In the level up menu, choose the stat to increase with 1, 2, or 3 keys.
+11 to 12|_As above, plus:_ Hit "c" to show/hide the character stats window, when standing on stairs, press "." to go down a level. In the level up menu, choose the stat to increase with 1, 2, or 3 keys.
 
 ### Table of Contents
 
@@ -37,5 +37,5 @@ Part|Title|Screenshot(s)|Play!
 9|Ranged Scrolls and Targeting|![Part 9](part9/roguelike_part9.gif "Part 9")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part9/)
 10|Saving and loading|![Part 10](part10/roguelike_part10.gif "Part 10")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part10/)
 11|Delving into the Dungeon|![Part 11](part11/roguelike_part11.gif "Part 11")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part11/)
-12|||_Coming soon..._
+12|Increasing Difficulty|![Part 12](part12/roguelike_part12.gif "Part 12")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part12/)
 13|||_Coming soon..._
