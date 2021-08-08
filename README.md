@@ -38,4 +38,4 @@ Part|Title|Screenshot(s)|Play!
 10|Saving and loading|![Part 10](part10/roguelike_part10.gif "Part 10")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part10/)
 11|Delving into the Dungeon|![Part 11](part11/roguelike_part11.gif "Part 11")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part11/)
 12|Increasing Difficulty|![Part 12](part12/roguelike_part12.gif "Part 12")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part12/)
-13|||_Coming soon..._
+13|Gearing up|![Part 13](part13/roguelike_part13.gif "Part 13")|[Click to play!](https://davesmith00000.github.io/roguelike-tutorial/part13/)
