@@ -235,7 +235,7 @@ object Player:
   val LevelUpFactor: Int = 150
 
   def initial(start: Point): Player =
-    Player(start, true, Fighter(10, 1, 5), Inventory(26, Nil), 1, LevelUpBase, Equipment.initial)
+    Player(start, true, Fighter(30, 1, 2), Inventory(26, Nil), 1, LevelUpBase, Equipment.initial)
 
   import SharedCodecs.given
 
@@ -304,7 +304,7 @@ object Orc:
   val name: String = "Orc"
 
   def spawn(id: Int, start: Point): Orc =
-    Orc(id, start, true, Fighter(1, 0, 2), Nil, HostileState.Normal)
+    Orc(id, start, true, Fighter(10, 0, 3), Nil, HostileState.Normal)
 
 final case class Troll(
     id: Int,
@@ -345,7 +345,7 @@ object Troll:
   val name: String = "Troll"
 
   def spawn(id: Int, start: Point): Troll =
-    Troll(id, start, true, Fighter(2, 0, 3), Nil, HostileState.Normal)
+    Troll(id, start, true, Fighter(16, 1, 4), Nil, HostileState.Normal)
 
 final case class Item(position: Point, consumable: Consumable) extends Entity:
   def tile: MapTile           = consumable.tile
