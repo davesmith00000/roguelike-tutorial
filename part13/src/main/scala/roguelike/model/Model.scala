@@ -289,8 +289,8 @@ object Model:
   val DropWindowSize: Size      = Size(30, 10)
   val QuitWindowSize: Size      = Size(30, 10)
 
-  def initial(screenSize: Size): Model =
-    val p = Player.initial(Point.zero)
+  def initial(dice: Dice, screenSize: Size): Model =
+    val p = Player.initial(dice, Point.zero)
     Model(
       screenSize,
       p,
@@ -312,7 +312,8 @@ object Model:
     )
 
   def fromSaveData(saveData: ModelSaveData): Model =
-    initial(saveData.screenSize).copy(
+    // Can use Dice.fromSeed(0) here since player is overwritten with saved data.
+    initial(Dice.fromSeed(0), saveData.screenSize).copy(
       player = saveData.player,
       stairsPosition = saveData.stairsPosition,
       gameMap = saveData.gameMap,
@@ -334,7 +335,7 @@ object Model:
         0
       )
 
-    val p = Player.initial(dungeon.playerStart)
+    val p = Player.initial(dice, dungeon.playerStart)
 
     GameMap
       .gen(screenSize, dungeon)

@@ -3,6 +3,7 @@ package roguelike.model
 import indigo.shared.datatypes.Size
 import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.RGB
+import indigo.shared.dice.Dice
 import indigoextras.trees.QuadTree
 
 import io.circe._
@@ -164,7 +165,18 @@ object ModelSaveDataSamples:
     Size(80, 50)
 
   val player: Player =
-    Player(Point(5, 6), true, Fighter(1, 2, 3, 4), inventory, 2, 350, Equipment.initial)
+    Player(
+      Point(5, 6),
+      true,
+      Fighter(1, 2, 3, 4),
+      inventory,
+      2,
+      350,
+      Equipment(
+        Option(Consumable.Dagger.create(Dice.fromSeed(0))),
+        Option(Consumable.LeatherArmor.create(Dice.fromSeed(1)))
+      )
+    )
 
   val stairsPosition: Point =
     Point(10, 10)

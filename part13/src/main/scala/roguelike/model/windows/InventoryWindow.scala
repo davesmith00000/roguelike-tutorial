@@ -6,6 +6,10 @@ import indigo.shared.datatypes.Size
 import indigo.shared.datatypes.RGB
 import indigo.shared.datatypes.RGBA
 import roguelike.model.Inventory
+import roguelike.model.Equipment
+import roguelike.model.Weapon
+import roguelike.model.Armour
+import roguelike.model.Item
 
 final case class InventoryWindow(size: Size, position: Int, window: TerminalEmulator) extends ScrollingWindow:
 
@@ -16,13 +20,22 @@ final case class InventoryWindow(size: Size, position: Int, window: TerminalEmul
   def scrollDown(lineCount: Int): InventoryWindow =
     withPosition(ScrollingWindow.nextScrollDown(size.height - 2, lineCount, position))
 
-  def toTerminal(inventory: Inventory): TerminalEmulator =
+  def toTerminal(inventory: Inventory, equipment: Equipment): TerminalEmulator =
     val innerSize = size - 2
 
     val term =
       if inventory.items.length > 0 then
         inventory.items
-          .map(_.name)
+          .map {
+            case Item(_, w: Weapon) if equipment.itemIsEquipped(w) =>
+              w.name + " (E)"
+
+            case Item(_, a: Armour) if equipment.itemIsEquipped(a) =>
+              a.name + " (E)"
+
+            case item =>
+              item.name
+          }
           .zip(Window.letters)
           .drop(position)
           .take(innerSize.height)

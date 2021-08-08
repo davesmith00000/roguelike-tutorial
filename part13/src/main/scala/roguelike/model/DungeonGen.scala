@@ -140,16 +140,16 @@ object DungeonGen:
         spawn(Consumable.LightningScroll(20, 5))
 
       case Consumable.Dagger.name =>
-        spawn(Consumable.Dagger(2))
+        spawn(Consumable.Dagger.create(dice))
 
       case Consumable.Sword.name =>
-        spawn(Consumable.Sword(4))
+        spawn(Consumable.Sword.create(dice))
 
       case Consumable.LeatherArmor.name =>
-        spawn(Consumable.LeatherArmor(1))
+        spawn(Consumable.LeatherArmor.create(dice))
 
       case Consumable.ChainMail.name =>
-        spawn(Consumable.ChainMail(3))
+        spawn(Consumable.ChainMail.create(dice))
 
       case _ =>
         Nil

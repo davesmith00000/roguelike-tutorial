@@ -61,21 +61,25 @@ final case class Inventory(capacity: Int, items: List[Item]):
         Outcome((this, player))
           .addGlobalEvents(GameEvent.TargetUsingItem(itemAt, radius))
 
-      // TODO!
-      case Some(Item(_, Consumable.Dagger(powerBonus))) =>
-        Outcome((this, player))
+      case Some(Item(_, w @ Consumable.Dagger(_, _))) =>
+        player.equip(w).map { p =>
+          (this, p)
+        }
 
-      // TODO!
-      case Some(Item(_, Consumable.Sword(powerBonus))) =>
-        Outcome((this, player))
+      case Some(Item(_, w @ Consumable.Sword(_, _))) =>
+        player.equip(w).map { p =>
+          (this, p)
+        }
 
-      // TODO!
-      case Some(Item(_, Consumable.LeatherArmor(powerBonus))) =>
-        Outcome((this, player))
+      case Some(Item(_, a @ Consumable.LeatherArmor(_, _))) =>
+        player.equip(a).map { p =>
+          (this, p)
+        }
 
-      // TODO!
-      case Some(Item(_, Consumable.ChainMail(powerBonus))) =>
-        Outcome((this, player))
+      case Some(Item(_, a @ Consumable.ChainMail(_, _))) =>
+        player.equip(a).map { p =>
+          (this, p)
+        }
 
   def consumeTargeted(
       itemAt: Int,
@@ -110,16 +114,16 @@ final case class Inventory(capacity: Int, items: List[Item]):
           else (this, player)
         }
 
-      case Some(Item(_, Consumable.Dagger(_))) =>
+      case Some(Item(_, Consumable.Dagger(_, _))) =>
         Outcome((this, player))
 
-      case Some(Item(_, Consumable.Sword(_))) =>
+      case Some(Item(_, Consumable.Sword(_, _))) =>
         Outcome((this, player))
 
-      case Some(Item(_, Consumable.LeatherArmor(_))) =>
+      case Some(Item(_, Consumable.LeatherArmor(_, _))) =>
         Outcome((this, player))
 
-      case Some(Item(_, Consumable.ChainMail(_))) =>
+      case Some(Item(_, Consumable.ChainMail(_, _))) =>
         Outcome((this, player))
 
   def drop(itemAt: Int): Outcome[(Inventory, Option[Item])] =

@@ -125,14 +125,31 @@ final case class Player(
     else
       inventory
         .drop(itemAt)
-        .map {
+        .flatMap {
           case (inv, None) =>
-            (this.copy(inventory = inv), None)
+            Outcome(
+              (this.copy(inventory = inv), None)
+            )
+
+          case (inv, Some(item @ Item(_, w: Weapon))) =>
+            equipment.unequip(w).map { eqip =>
+              (this.copy(inventory = inv, equipment = eqip), Option(item.moveTo(position)))
+            }
+
+          case (inv, Some(item @ Item(_, a: Armour))) =>
+            equipment.unequip(a).map { eqip =>
+              (this.copy(inventory = inv, equipment = eqip), Option(item.moveTo(position)))
+            }
 
           case (inv, Some(item)) =>
-            (this.copy(inventory = inv), Option(item.moveTo(position)))
+            Outcome(
+              (this.copy(inventory = inv), Option(item.moveTo(position)))
+            )
 
         }
+
+  def equip(newEquipment: Weapon | Armour): Outcome[Player] =
+    equipment.equip(newEquipment).map(e => this.copy(equipment = e))
 
   def pickUp(worldItems: List[Item]): Outcome[(Player, List[Item])] =
     worldItems.find(_.position == position) match
@@ -234,8 +251,19 @@ object Player:
   val LevelUpBase: Int   = 200
   val LevelUpFactor: Int = 150
 
-  def initial(start: Point): Player =
-    Player(start, true, Fighter(30, 1, 2), Inventory(26, Nil), 1, LevelUpBase, Equipment.initial)
+  def initial(dice: Dice, start: Point): Player =
+    val weapon = Consumable.Dagger.create(dice)
+    val armour = Consumable.LeatherArmor.create(dice)
+
+    Player(
+      start,
+      true,
+      Fighter(30, 1, 2),
+      Inventory(26, List(Item(Point.zero, weapon), Item(Point.zero, armour))),
+      1,
+      LevelUpBase,
+      Equipment(Option(weapon), Option(armour))
+    )
 
   import SharedCodecs.given
 

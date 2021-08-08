@@ -2,6 +2,7 @@ package roguelike.model
 
 import indigo.Outcome
 import indigo.RGB
+import indigo.Dice
 
 import io.circe._
 import io.circe.syntax._
@@ -19,10 +20,10 @@ final case class Equipment(weapon: Option[Weapon], armour: Option[Armour]):
   def itemIsEquipped(equipment: Weapon | Armour): Boolean =
     equipment match
       case w: Weapon =>
-        weapon.map(_.name == w.name).getOrElse(false)
+        weapon.map(_.id == w.id).getOrElse(false)
 
       case a: Armour =>
-        armour.map(_.name == a.name).getOrElse(false)
+        armour.map(_.id == a.id).getOrElse(false)
 
   def equip(equipment: Weapon | Armour): Outcome[Equipment] =
     equipment match
@@ -33,6 +34,17 @@ final case class Equipment(weapon: Option[Weapon], armour: Option[Armour]):
       case a: Armour =>
         Outcome(this.copy(armour = Option(a)))
           .addGlobalEvents(GameEvent.Log(Message(s"You equip the ${a.name}.", RGB.White)))
+
+  def unequip(equipment: Weapon | Armour): Outcome[Equipment] =
+    equipment match
+      case w: Weapon if itemIsEquipped(w) =>
+        unequipWeapon
+
+      case a: Armour if itemIsEquipped(a) =>
+        unequipArmour
+
+      case _ =>
+        Outcome(this)
 
   def unequipArmour: Outcome[Equipment] =
     val msg =
@@ -45,7 +57,7 @@ final case class Equipment(weapon: Option[Weapon], armour: Option[Armour]):
 
   def unequipWeapon: Outcome[Equipment] =
     val msg =
-      armour match
+      weapon match
         case None    => Nil
         case Some(w) => List(GameEvent.Log(Message(s"You remove the ${w.name}.", RGB.White)))
 
@@ -53,9 +65,6 @@ final case class Equipment(weapon: Option[Weapon], armour: Option[Armour]):
       .addGlobalEvents(msg)
 
 object Equipment:
-  val initial: Equipment =
-    Equipment(Option(Consumable.Dagger.default), Option(Consumable.LeatherArmor.default))
-
   given Encoder[Equipment] = new Encoder[Equipment] {
     final def apply(data: Equipment): Json = Json.obj(
       ("weapon", data.weapon.asJson),

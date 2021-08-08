@@ -41,7 +41,7 @@ final case class ViewModel(terminalEntity: Option[TerminalEntity], shroud: MapTi
           term
             .inset(log, Point(21, 45))
             .inset(
-              model.inventoryWindow.toTerminal(model.player.inventory),
+              model.inventoryWindow.toTerminal(model.player.inventory, model.player.equipment),
               ((RogueLikeGame.screenSize - model.inventoryWindow.size) / 2).toPoint
             )
 

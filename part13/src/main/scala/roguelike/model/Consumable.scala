@@ -6,6 +6,7 @@ import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.RGB
 import roguelike.ColorScheme
 import indigo.shared.Outcome
+import indigo.shared.datatypes.BindingKey
 import roguelike.GameEvent
 
 import io.circe._
@@ -14,12 +15,14 @@ import io.circe.{Decoder, Encoder, HCursor, Json}
 
 import scala.annotation.tailrec
 import roguelike.model.Consumable.ConfusionScroll
+import indigo.shared.dice.Dice
 
 sealed trait Consumable:
   def name: String
   def tile: MapTile
 
 sealed trait Weapon extends Consumable:
+  def id: BindingKey
   def powerBonus: Int
 
 object Weapon:
@@ -27,15 +30,17 @@ object Weapon:
   given Encoder[Weapon] = new Encoder[Weapon] {
     final def apply(data: Weapon): Json =
       data match
-        case Consumable.Dagger(powerBonus) =>
+        case Consumable.Dagger(id, powerBonus) =>
           Json.obj(
             ("name", Json.fromString(data.name)),
+            ("id", Json.fromString(id.toString)),
             ("powerBonus", Json.fromInt(powerBonus))
           )
 
-        case Consumable.Sword(powerBonus) =>
+        case Consumable.Sword(id, powerBonus) =>
           Json.obj(
             ("name", Json.fromString(data.name)),
+            ("id", Json.fromString(id.toString)),
             ("powerBonus", Json.fromInt(powerBonus))
           )
   }
@@ -45,17 +50,20 @@ object Weapon:
       c.downField("name").as[String].flatMap {
         case Consumable.Dagger.name =>
           for {
+            id         <- c.downField("id").as[String]
             powerBonus <- c.downField("powerBonus").as[Int]
-          } yield Consumable.Dagger(powerBonus)
+          } yield Consumable.Dagger(BindingKey(id), powerBonus)
 
         case Consumable.Sword.name =>
           for {
+            id         <- c.downField("id").as[String]
             powerBonus <- c.downField("powerBonus").as[Int]
-          } yield Consumable.Sword(powerBonus)
+          } yield Consumable.Sword(BindingKey(id), powerBonus)
       }
   }
 
 sealed trait Armour extends Consumable:
+  def id: BindingKey
   def defenseBonus: Int
 
 object Armour:
@@ -63,15 +71,17 @@ object Armour:
   given Encoder[Armour] = new Encoder[Armour] {
     final def apply(data: Armour): Json =
       data match
-        case Consumable.LeatherArmor(defenseBonus) =>
+        case Consumable.LeatherArmor(id, defenseBonus) =>
           Json.obj(
             ("name", Json.fromString(data.name)),
+            ("id", Json.fromString(id.toString)),
             ("defenseBonus", Json.fromInt(defenseBonus))
           )
 
-        case Consumable.ChainMail(defenseBonus) =>
+        case Consumable.ChainMail(id, defenseBonus) =>
           Json.obj(
             ("name", Json.fromString(data.name)),
+            ("id", Json.fromString(id.toString)),
             ("defenseBonus", Json.fromInt(defenseBonus))
           )
   }
@@ -81,13 +91,15 @@ object Armour:
       c.downField("name").as[String].flatMap {
         case Consumable.LeatherArmor.name =>
           for {
+            id           <- c.downField("id").as[String]
             defenseBonus <- c.downField("defenseBonus").as[Int]
-          } yield Consumable.LeatherArmor(defenseBonus)
+          } yield Consumable.LeatherArmor(BindingKey(id), defenseBonus)
 
         case Consumable.ChainMail.name =>
           for {
+            id           <- c.downField("id").as[String]
             defenseBonus <- c.downField("defenseBonus").as[Int]
-          } yield Consumable.ChainMail(defenseBonus)
+          } yield Consumable.ChainMail(BindingKey(id), defenseBonus)
       }
   }
 
@@ -122,27 +134,31 @@ object Consumable:
             ("numberOfTurns", Json.fromInt(numberOfTurns))
           )
 
-        case Dagger(powerBonus) =>
+        case Dagger(id, powerBonus) =>
           Json.obj(
             ("name", Json.fromString(data.name)),
+            ("id", Json.fromString(id.toString)),
             ("powerBonus", Json.fromInt(powerBonus))
           )
 
-        case Sword(powerBonus) =>
+        case Sword(id, powerBonus) =>
           Json.obj(
             ("name", Json.fromString(data.name)),
+            ("id", Json.fromString(id.toString)),
             ("powerBonus", Json.fromInt(powerBonus))
           )
 
-        case LeatherArmor(defenseBonus) =>
+        case LeatherArmor(id, defenseBonus) =>
           Json.obj(
             ("name", Json.fromString(data.name)),
+            ("id", Json.fromString(id.toString)),
             ("defenseBonus", Json.fromInt(defenseBonus))
           )
 
-        case ChainMail(defenseBonus) =>
+        case ChainMail(id, defenseBonus) =>
           Json.obj(
             ("name", Json.fromString(data.name)),
+            ("id", Json.fromString(id.toString)),
             ("defenseBonus", Json.fromInt(defenseBonus))
           )
   }
@@ -174,23 +190,27 @@ object Consumable:
 
         case Dagger.name =>
           for {
+            id         <- c.downField("id").as[String]
             powerBonus <- c.downField("powerBonus").as[Int]
-          } yield Dagger(powerBonus)
+          } yield Dagger(BindingKey(id), powerBonus)
 
         case Sword.name =>
           for {
+            id         <- c.downField("id").as[String]
             powerBonus <- c.downField("powerBonus").as[Int]
-          } yield Sword(powerBonus)
+          } yield Sword(BindingKey(id), powerBonus)
 
         case LeatherArmor.name =>
           for {
+            id           <- c.downField("id").as[String]
             defenseBonus <- c.downField("defenseBonus").as[Int]
-          } yield LeatherArmor(defenseBonus)
+          } yield LeatherArmor(BindingKey(id), defenseBonus)
 
         case ChainMail.name =>
           for {
+            id           <- c.downField("id").as[String]
             defenseBonus <- c.downField("defenseBonus").as[Int]
-          } yield ChainMail(defenseBonus)
+          } yield ChainMail(BindingKey(id), defenseBonus)
       }
   }
 
@@ -222,31 +242,33 @@ object Consumable:
 
   // Equipment
 
-  final case class Dagger(powerBonus: Int) extends Weapon:
+  final case class Dagger(id: BindingKey, powerBonus: Int) extends Weapon:
     val name: String  = Dagger.name
     val tile: MapTile = MapTile(DfTiles.Tile.`/`, RGB.fromColorInts(0, 191, 255))
   object Dagger:
-    val name: String    = "Dagger"
-    val default: Dagger = Dagger(2)
+    val name: String               = "Dagger"
+    def create(dice: Dice): Dagger = Dagger(BindingKey.fromDice(dice), 2)
 
-  final case class Sword(powerBonus: Int) extends Weapon:
+  final case class Sword(id: BindingKey, powerBonus: Int) extends Weapon:
     val name: String  = Sword.name
     val tile: MapTile = MapTile(DfTiles.Tile.`/`, RGB.fromColorInts(0, 191, 255))
   object Sword:
-    val name: String = "Sword"
+    val name: String              = "Sword"
+    def create(dice: Dice): Sword = Sword(BindingKey.fromDice(dice), 4)
 
-  final case class LeatherArmor(defenseBonus: Int) extends Armour:
+  final case class LeatherArmor(id: BindingKey, defenseBonus: Int) extends Armour:
     val name: String  = LeatherArmor.name
     val tile: MapTile = MapTile(DfTiles.Tile.`[`, RGB.fromColorInts(139, 69, 19))
   object LeatherArmor:
-    val name: String          = "Leather Armor"
-    val default: LeatherArmor = LeatherArmor(1)
+    val name: String                     = "Leather Armor"
+    def create(dice: Dice): LeatherArmor = LeatherArmor(BindingKey.fromDice(dice), 1)
 
-  final case class ChainMail(defenseBonus: Int) extends Armour:
+  final case class ChainMail(id: BindingKey, defenseBonus: Int) extends Armour:
     val name: String  = ChainMail.name
     val tile: MapTile = MapTile(DfTiles.Tile.`[`, RGB.fromColorInts(139, 69, 19))
   object ChainMail:
-    val name: String = "Chain Mail"
+    val name: String                  = "Chain Mail"
+    def create(dice: Dice): ChainMail = ChainMail(BindingKey.fromDice(dice), 3)
 
   def useHealthPotion(healthPotion: HealthPotion, player: Player): Outcome[(Player, Boolean)] =
     val possibleAmount =
