@@ -147,7 +147,7 @@ final case class Model(
                 .addGlobalEvents(GameEvent.PlayerTurnEnd)
 
     case GameEvent.HostileMeleeAttack(name, power) =>
-      val damage = Math.max(0, power - player.fighter.defense)
+      val damage = Math.max(0, power - (player.fighter.defense + player.equipment.defenseBonus))
 
       val attackMessage =
         GameEvent.Log(

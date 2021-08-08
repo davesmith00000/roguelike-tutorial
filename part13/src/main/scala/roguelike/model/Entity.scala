@@ -154,7 +154,7 @@ final case class Player(
       case Some(target) =>
         Outcome(this)
           .addGlobalEvents(
-            GameEvent.PlayerAttack(name, fighter.power, target.id),
+            GameEvent.PlayerAttack(name, (fighter.power + equipment.powerBonus), target.id),
             GameEvent.PlayerTurnEnd
           )
 
