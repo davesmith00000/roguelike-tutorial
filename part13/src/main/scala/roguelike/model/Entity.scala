@@ -91,51 +91,15 @@ object Hostile:
       }
   }
 
-/** Fighter class
-  * @param hp
-  *   hp represents the entity’s hit points
-  * @param maxHp
-  *   is the maximum hp allowed
-  * @param defense
-  *   defense is how much taken damage will be reduced
-  * @param power
-  *   power is the entity’s raw attack power
-  */
-final case class Fighter(hp: Int, maxHp: Int, defense: Int, power: Int):
-  def withHp(value: Int): Fighter =
-    this.copy(hp = Math.max(0, Math.min(value, maxHp)))
-
-  def takeDamage(amount: Int): Fighter =
-    this.copy(hp = hp - amount)
-
-  def heal(amount: Int): Fighter =
-    this.copy(hp = hp + amount)
-
-object Fighter:
-  def apply(hp: Int, defense: Int, power: Int): Fighter =
-    Fighter(hp, hp, defense, power)
-
-  given Encoder[Fighter] = new Encoder[Fighter] {
-    final def apply(data: Fighter): Json = Json.obj(
-      ("hp", Json.fromInt(data.hp)),
-      ("maxHp", Json.fromInt(data.maxHp)),
-      ("defense", Json.fromInt(data.defense)),
-      ("power", Json.fromInt(data.power))
-    )
-  }
-
-  given Decoder[Fighter] = new Decoder[Fighter] {
-    final def apply(c: HCursor): Decoder.Result[Fighter] =
-      for {
-        hp      <- c.downField("hp").as[Int]
-        maxHp   <- c.downField("maxHp").as[Int]
-        defense <- c.downField("defense").as[Int]
-        power   <- c.downField("power").as[Int]
-      } yield Fighter(hp, maxHp, defense, power)
-  }
-
-final case class Player(position: Point, isAlive: Boolean, fighter: Fighter, inventory: Inventory, level: Int, xp: Int)
-    extends Actor:
+final case class Player(
+    position: Point,
+    isAlive: Boolean,
+    fighter: Fighter,
+    inventory: Inventory,
+    level: Int,
+    xp: Int,
+    equipment: Equipment
+) extends Actor:
   def tile: MapTile = if isAlive then MapTile(DfTiles.Tile.`@`, RGB.Magenta) else MapTile(DfTiles.Tile.`@`, RGB.Red)
   val blocksMovement: Boolean = false
   val name: String            = "Player"
@@ -271,7 +235,7 @@ object Player:
   val LevelUpFactor: Int = 150
 
   def initial(start: Point): Player =
-    Player(start, true, Fighter(10, 1, 5), Inventory(26, Nil), 1, LevelUpBase)
+    Player(start, true, Fighter(10, 1, 5), Inventory(26, Nil), 1, LevelUpBase, Equipment.initial)
 
   import SharedCodecs.given
 
@@ -282,7 +246,8 @@ object Player:
       ("fighter", data.fighter.asJson),
       ("inventory", data.inventory.asJson),
       ("level", data.level.asJson),
-      ("xp", data.xp.asJson)
+      ("xp", data.xp.asJson),
+      ("equipment", data.equipment.asJson)
     )
   }
 
@@ -295,7 +260,8 @@ object Player:
         inventory <- c.downField("inventory").as[Inventory]
         level     <- c.downField("level").as[Int]
         xp        <- c.downField("xp").as[Int]
-      } yield Player(position, isAlive, fighter, inventory, level, xp)
+        equipment <- c.downField("equipment").as[Equipment]
+      } yield Player(position, isAlive, fighter, inventory, level, xp, equipment)
   }
 
 final case class Orc(
@@ -406,47 +372,4 @@ object Item:
         position   <- c.downField("position").as[Point]
         consumable <- c.downField("consumable").as[Consumable]
       } yield Item(position, consumable)
-  }
-
-enum HostileState:
-  case Normal extends HostileState
-  case Confused(remaining: Int) extends HostileState
-
-  def isConfused: Boolean =
-    this match
-      case Normal      => false
-      case Confused(_) => true
-
-  def next: HostileState =
-    this match
-      case Normal      => Normal
-      case Confused(0) => Normal
-      case Confused(i) => Confused(i - 1)
-
-object HostileState:
-
-  given Encoder[HostileState] = new Encoder[HostileState] {
-    final def apply(data: HostileState): Json =
-      data match
-        case Normal =>
-          Json.obj(
-            ("state", Json.fromString("normal"))
-          )
-
-        case Confused(remaining) =>
-          Json.obj(
-            ("state", Json.fromString("confused")),
-            ("remaining", Json.fromInt(remaining))
-          )
-  }
-
-  given Decoder[HostileState] = new Decoder[HostileState] {
-    final def apply(c: HCursor): Decoder.Result[HostileState] =
-      c.downField("state").as[String].flatMap {
-        case "normal" =>
-          Right(Normal)
-
-        case "confused" =>
-          c.downField("remaining").as[Int].map(Confused.apply)
-      }
   }

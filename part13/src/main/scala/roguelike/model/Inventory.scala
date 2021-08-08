@@ -61,6 +61,22 @@ final case class Inventory(capacity: Int, items: List[Item]):
         Outcome((this, player))
           .addGlobalEvents(GameEvent.TargetUsingItem(itemAt, radius))
 
+      // TODO!
+      case Some(Item(_, Consumable.Dagger(powerBonus))) =>
+        Outcome((this, player))
+
+      // TODO!
+      case Some(Item(_, Consumable.Sword(powerBonus))) =>
+        Outcome((this, player))
+
+      // TODO!
+      case Some(Item(_, Consumable.LeatherArmor(powerBonus))) =>
+        Outcome((this, player))
+
+      // TODO!
+      case Some(Item(_, Consumable.ChainMail(powerBonus))) =>
+        Outcome((this, player))
+
   def consumeTargeted(
       itemAt: Int,
       player: Player,
@@ -93,6 +109,18 @@ final case class Inventory(capacity: Int, items: List[Item]):
           if consumed then (this.copy(items = remove(itemAt, items)), player)
           else (this, player)
         }
+
+      case Some(Item(_, Consumable.Dagger(_))) =>
+        Outcome((this, player))
+
+      case Some(Item(_, Consumable.Sword(_))) =>
+        Outcome((this, player))
+
+      case Some(Item(_, Consumable.LeatherArmor(_))) =>
+        Outcome((this, player))
+
+      case Some(Item(_, Consumable.ChainMail(_))) =>
+        Outcome((this, player))
 
   def drop(itemAt: Int): Outcome[(Inventory, Option[Item])] =
     items.lift(itemAt) match

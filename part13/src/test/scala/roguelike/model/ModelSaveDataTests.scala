@@ -164,7 +164,7 @@ object ModelSaveDataSamples:
     Size(80, 50)
 
   val player: Player =
-    Player(Point(5, 6), true, Fighter(1, 2, 3, 4), inventory, 2, 350)
+    Player(Point(5, 6), true, Fighter(1, 2, 3, 4), inventory, 2, 350, Equipment.initial)
 
   val stairsPosition: Point =
     Point(10, 10)

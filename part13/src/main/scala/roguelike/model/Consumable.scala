@@ -19,6 +19,78 @@ sealed trait Consumable:
   def name: String
   def tile: MapTile
 
+sealed trait Weapon extends Consumable:
+  def powerBonus: Int
+
+object Weapon:
+
+  given Encoder[Weapon] = new Encoder[Weapon] {
+    final def apply(data: Weapon): Json =
+      data match
+        case Consumable.Dagger(powerBonus) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("powerBonus", Json.fromInt(powerBonus))
+          )
+
+        case Consumable.Sword(powerBonus) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("powerBonus", Json.fromInt(powerBonus))
+          )
+  }
+
+  given Decoder[Weapon] = new Decoder[Weapon] {
+    final def apply(c: HCursor): Decoder.Result[Weapon] =
+      c.downField("name").as[String].flatMap {
+        case Consumable.Dagger.name =>
+          for {
+            powerBonus <- c.downField("powerBonus").as[Int]
+          } yield Consumable.Dagger(powerBonus)
+
+        case Consumable.Sword.name =>
+          for {
+            powerBonus <- c.downField("powerBonus").as[Int]
+          } yield Consumable.Sword(powerBonus)
+      }
+  }
+
+sealed trait Armour extends Consumable:
+  def defenseBonus: Int
+
+object Armour:
+
+  given Encoder[Armour] = new Encoder[Armour] {
+    final def apply(data: Armour): Json =
+      data match
+        case Consumable.LeatherArmor(defenseBonus) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("defenseBonus", Json.fromInt(defenseBonus))
+          )
+
+        case Consumable.ChainMail(defenseBonus) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("defenseBonus", Json.fromInt(defenseBonus))
+          )
+  }
+
+  given Decoder[Armour] = new Decoder[Armour] {
+    final def apply(c: HCursor): Decoder.Result[Armour] =
+      c.downField("name").as[String].flatMap {
+        case Consumable.LeatherArmor.name =>
+          for {
+            defenseBonus <- c.downField("defenseBonus").as[Int]
+          } yield Consumable.LeatherArmor(defenseBonus)
+
+        case Consumable.ChainMail.name =>
+          for {
+            defenseBonus <- c.downField("defenseBonus").as[Int]
+          } yield Consumable.ChainMail(defenseBonus)
+      }
+  }
+
 object Consumable:
 
   given Encoder[Consumable] = new Encoder[Consumable] {
@@ -49,6 +121,30 @@ object Consumable:
             ("name", Json.fromString(data.name)),
             ("numberOfTurns", Json.fromInt(numberOfTurns))
           )
+
+        case Dagger(powerBonus) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("powerBonus", Json.fromInt(powerBonus))
+          )
+
+        case Sword(powerBonus) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("powerBonus", Json.fromInt(powerBonus))
+          )
+
+        case LeatherArmor(defenseBonus) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("defenseBonus", Json.fromInt(defenseBonus))
+          )
+
+        case ChainMail(defenseBonus) =>
+          Json.obj(
+            ("name", Json.fromString(data.name)),
+            ("defenseBonus", Json.fromInt(defenseBonus))
+          )
   }
 
   given Decoder[Consumable] = new Decoder[Consumable] {
@@ -75,8 +171,30 @@ object Consumable:
           for {
             numberOfTurns <- c.downField("numberOfTurns").as[Int]
           } yield ConfusionScroll(numberOfTurns)
+
+        case Dagger.name =>
+          for {
+            powerBonus <- c.downField("powerBonus").as[Int]
+          } yield Dagger(powerBonus)
+
+        case Sword.name =>
+          for {
+            powerBonus <- c.downField("powerBonus").as[Int]
+          } yield Sword(powerBonus)
+
+        case LeatherArmor.name =>
+          for {
+            defenseBonus <- c.downField("defenseBonus").as[Int]
+          } yield LeatherArmor(defenseBonus)
+
+        case ChainMail.name =>
+          for {
+            defenseBonus <- c.downField("defenseBonus").as[Int]
+          } yield ChainMail(defenseBonus)
       }
   }
+
+  // Potions and spells
 
   final case class HealthPotion(amount: Int) extends Consumable:
     val name: String  = HealthPotion.name
@@ -101,6 +219,34 @@ object Consumable:
     val tile: MapTile = MapTile(DfTiles.Tile.`~`, RGB.fromColorInts(207, 63, 255))
   object ConfusionScroll:
     val name: String = "Confusion Scroll"
+
+  // Equipment
+
+  final case class Dagger(powerBonus: Int) extends Weapon:
+    val name: String  = Dagger.name
+    val tile: MapTile = MapTile(DfTiles.Tile.`/`, RGB.fromColorInts(0, 191, 255))
+  object Dagger:
+    val name: String    = "Dagger"
+    val default: Dagger = Dagger(2)
+
+  final case class Sword(powerBonus: Int) extends Weapon:
+    val name: String  = Sword.name
+    val tile: MapTile = MapTile(DfTiles.Tile.`/`, RGB.fromColorInts(0, 191, 255))
+  object Sword:
+    val name: String = "Sword"
+
+  final case class LeatherArmor(defenseBonus: Int) extends Armour:
+    val name: String  = LeatherArmor.name
+    val tile: MapTile = MapTile(DfTiles.Tile.`[`, RGB.fromColorInts(139, 69, 19))
+  object LeatherArmor:
+    val name: String          = "Leather Armor"
+    val default: LeatherArmor = LeatherArmor(1)
+
+  final case class ChainMail(defenseBonus: Int) extends Armour:
+    val name: String  = ChainMail.name
+    val tile: MapTile = MapTile(DfTiles.Tile.`[`, RGB.fromColorInts(139, 69, 19))
+  object ChainMail:
+    val name: String = "Chain Mail"
 
   def useHealthPotion(healthPotion: HealthPotion, player: Player): Outcome[(Player, Boolean)] =
     val possibleAmount =

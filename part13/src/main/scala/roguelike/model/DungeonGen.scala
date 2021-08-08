@@ -37,8 +37,8 @@ object DungeonGen:
   def itemChances: Map[Int, List[Chance]] = Map(
     0 -> List(Chance(Consumable.HealthPotion.name, 35)),
     2 -> List(Chance(Consumable.ConfusionScroll.name, 10)),
-    4 -> List(Chance(Consumable.LightningScroll.name, 25)),
-    6 -> List(Chance(Consumable.FireBallScroll.name, 25))
+    4 -> List(Chance(Consumable.LightningScroll.name, 25), Chance(Consumable.Sword.name, 5)),
+    6 -> List(Chance(Consumable.FireBallScroll.name, 25), Chance(Consumable.ChainMail.name, 15))
   )
 
   def enemyChances: Map[Int, List[Chance]] = Map(
@@ -137,7 +137,19 @@ object DungeonGen:
         spawn(Consumable.ConfusionScroll(10))
 
       case Consumable.LightningScroll.name =>
-        spawn(Consumable.ConfusionScroll(10))
+        spawn(Consumable.LightningScroll(20, 5))
+
+      case Consumable.Dagger.name =>
+        spawn(Consumable.Dagger(2))
+
+      case Consumable.Sword.name =>
+        spawn(Consumable.Sword(4))
+
+      case Consumable.LeatherArmor.name =>
+        spawn(Consumable.LeatherArmor(1))
+
+      case Consumable.ChainMail.name =>
+        spawn(Consumable.ChainMail(3))
 
       case _ =>
         Nil

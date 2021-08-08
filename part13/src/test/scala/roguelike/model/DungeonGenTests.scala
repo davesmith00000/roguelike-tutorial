@@ -50,7 +50,8 @@ class DungeonGenTests extends munit.FunSuite {
     val possibilities = List(
       Consumable.HealthPotion.name,
       Consumable.ConfusionScroll.name,
-      Consumable.LightningScroll.name
+      Consumable.LightningScroll.name,
+      Consumable.Sword.name
     )
 
     assert(actual.length == count)
@@ -71,7 +72,9 @@ class DungeonGenTests extends munit.FunSuite {
       Consumable.HealthPotion.name,
       Consumable.ConfusionScroll.name,
       Consumable.LightningScroll.name,
-      Consumable.FireBallScroll.name
+      Consumable.FireBallScroll.name,
+      Consumable.Sword.name,
+      Consumable.ChainMail.name
     )
 
     assert(actual.length == count)
