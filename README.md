@@ -10,7 +10,7 @@ Everything is being built with [Indigo](https://indigoengine.io/) and I'm evolvi
 
 ## Completed Tutorial Parts
 
-### Controls (so far...)
+### Accumulated Controls
 
 Parts|Controls
 ---|---
@@ -20,7 +20,7 @@ Parts|Controls
 8|_As above, plus:_ Hit the 'i' key to show inventory and 'd' to show the "drop" menu. Use up and down arrows to scroll in both, the a-z keys to choose an item to consume/drop, and shift|ctrl|alt|esc to close any windows.
 9|_As above, plus:_ Hit the "/" key to enter "look around" mode and "/" or "Esc" to leave. When using a confusion or fireball scroll, you will enter look around mode to find a target, press "Enter" to select it.
 10|_As above, plus:_ Hit "n" to start a new game or "c" to continue a saved game on the main menu. In game, hit "q" to bring up the quit menu, choose / press "1", "2", or "3" to save your game, save and quit, or quit to main menu respectively. When you die, you can still hit "q" to bring up the menu and return to the main menu.
-11 to 12|_As above, plus:_ Hit "c" to show/hide the character stats window, when standing on stairs, press "." to go down a level. In the level up menu, choose the stat to increase with 1, 2, or 3 keys.
+11 to 13|_As above, plus:_ Hit "c" to show/hide the character stats window, when standing on stairs, press "." to go down a level. In the level up menu, choose the stat to increase with 1, 2, or 3 keys.
 
 ### Table of Contents
 
