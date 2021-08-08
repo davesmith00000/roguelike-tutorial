@@ -12,13 +12,21 @@ final case class CharacterWindow(size: Size, window: TerminalEmulator) extends W
   def toTerminal(player: Player): TerminalEmulator =
     val innerSize = size - 2
 
+    val powerBonus: String =
+      if player.equipment.powerBonus == 0 then ""
+      else s" + ${player.equipment.powerBonus}"
+
+    val defenseBonus: String =
+      if player.equipment.defenseBonus == 0 then ""
+      else s" + ${player.equipment.defenseBonus}"
+
     val term =
       TerminalEmulator(innerSize)
         .putLine(Point(0, 1), s"Level: ${player.level}", RGB.White, RGBA.Black)
         .putLine(Point(0, 2), s"XP: ${player.xp}", RGB.White, RGBA.Black)
         .putLine(Point(0, 3), s"XP for next level: ${player.experienceToNextLevel}", RGB.White, RGBA.Black)
-        .putLine(Point(0, 4), s"Attack: ${player.fighter.power}", RGB.White, RGBA.Black)
-        .putLine(Point(0, 5), s"Defense: ${player.fighter.defense}", RGB.White, RGBA.Black)
+        .putLine(Point(0, 4), s"Attack: ${player.fighter.power}$powerBonus", RGB.White, RGBA.Black)
+        .putLine(Point(0, 5), s"Defense: ${player.fighter.defense}$defenseBonus", RGB.White, RGBA.Black)
 
     window.inset(term, Point(1, 1))
 
