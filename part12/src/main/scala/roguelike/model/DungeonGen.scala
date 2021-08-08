@@ -137,7 +137,7 @@ object DungeonGen:
         spawn(Consumable.ConfusionScroll(10))
 
       case Consumable.LightningScroll.name =>
-        spawn(Consumable.ConfusionScroll(10))
+        spawn(Consumable.LightningScroll(20, 5))
 
       case _ =>
         Nil
