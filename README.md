@@ -4,6 +4,18 @@ This is an attempt to convert the python [Roguelike tutorial](http://rogueliketu
 
 I'm following the spirit of the tutorials rather than the letter, since Indigo is an FP engine and the python version uses a lot of mutable constructs. Each part achieves the same goals, and where possible I've mimicked the algorithms and processes.
 
+## This is not a game
+
+There are 13 parts to the tutorial (2020 version), all of which are presented below.
+
+The final result of all this work is not a very good game. It isn't well balanced. It has no ending. The mechanics are limited. The code brilliantly well written - by the end I was just pleased to be finished!
+
+All I've done it try and produce each section reasonably faithfully, but even there I've occasionally just made it up as I went along.
+
+What this _might_ be, is the start of something. There are obvious improvements that could be made like giving the code a good refactoring, improving the rendering speed and reducing the system requirements. But even in it's current state.. it has promise, because... it's fun!
+
+Maybe next year I'll start from where I left off. Or maybe you will? :-)
+
 ## Join in!
 
 Everything is being built with [Indigo](https://indigoengine.io/) and I'm evolving a [***starter kit***](https://github.com/PurpleKingdomGames/indigo-roguelike-starterkit) that you can use.
