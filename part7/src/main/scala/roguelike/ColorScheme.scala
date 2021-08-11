@@ -9,3 +9,5 @@ object ColorScheme:
   val barText: RGB   = RGB.White
   val barFilled: RGB = RGB.fromHexString("006000")
   val barEmpty: RGB  = RGB.fromHexString("401010")
+
+  val healthRecovered: RGB = RGB.fromColorInts(0x0, 0xFF, 0x0)
