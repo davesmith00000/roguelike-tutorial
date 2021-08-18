@@ -4,6 +4,8 @@ This is an attempt to convert the python [Roguelike tutorial](http://rogueliketu
 
 I'm following the spirit of the tutorials rather than the letter, since Indigo is an FP engine and the python version uses a lot of mutable constructs. Each part achieves the same goals, and where possible I've mimicked the algorithms and processes.
 
+> The ["RoguelikeDev Does The Complete Roguelike Tutorial"](https://www.reddit.com/r/roguelikedev/comments/o5x585/roguelikedev_does_the_complete_roguelike_tutorial/) is now over for 2021! In celebration of making it to the finish line, [I've written up a brief post-mortem of the experience.](https://indigoengine.io/blog/2021/08/17/roguelike-post-mortem)
+
 ## This is not a game
 
 There are 13 parts to the tutorial (2020 version), all of which are presented below.
