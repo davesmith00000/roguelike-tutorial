@@ -9,10 +9,10 @@ lazy val roguelike =
     .settings(
       name := "roguelike",
       version := "0.0.1",
-      scalaVersion := "3.0.0",
+      scalaVersion := "3.1.0",
       organization := "roguelike",
       libraryDependencies ++= Seq(
-        "org.scalameta" %%% "munit" % "0.7.26" % Test
+        "org.scalameta" %%% "munit" % "0.7.29" % Test
       ),
       testFrameworks += new TestFramework("munit.Framework"),
       showCursor := true,
@@ -21,9 +21,9 @@ lazy val roguelike =
       windowStartWidth := 80 * 10,
       windowStartHeight := 50 * 10,
       libraryDependencies ++= Seq(
-        "io.indigoengine" %%% "indigo-json-circe" % "0.8.2",
-        "io.indigoengine" %%% "indigo"            % "0.8.2",
-        "io.indigoengine" %%% "indigo-extras"     % "0.8.2"
+        "io.indigoengine" %%% "indigo-json-circe" % "0.10.0",
+        "io.indigoengine" %%% "indigo"            % "0.10.0",
+        "io.indigoengine" %%% "indigo-extras"     % "0.10.0"
       )
       // scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) } // required for parcel, but will break indigoRun & indigoBuild
     )
