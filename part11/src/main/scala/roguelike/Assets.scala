@@ -8,20 +8,9 @@ object Assets:
   val menuBackground: AssetName = AssetName("menu_background")
 
   val assets: Set[AssetType] =
-    Required.assets ++ Set(
+    Set(
       AssetType.Image(tileMap, AssetPath("assets/" + tileMap.toString + ".png")),
       AssetType.Image(menuBackground, AssetPath("assets/" + menuBackground.toString + ".png"))
     )
-
-  object Required:
-    val mapFragShader  = AssetName("map frag")
-    val textFragShader = AssetName("text frag")
-
-    val assets: Set[AssetType] =
-      Set(
-        AssetType.Text(textFragShader, AssetPath("assets/shaders/text.frag")),
-        AssetType.Text(mapFragShader, AssetPath("assets/shaders/map.frag"))
-      )
-  end Required
 
 end Assets

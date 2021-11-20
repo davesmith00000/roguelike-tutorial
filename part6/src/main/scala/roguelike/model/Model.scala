@@ -6,6 +6,8 @@ import roguelike.GameEvent
 
 import indigoextras.trees.QuadTree
 
+import io.indigoengine.roguelike.starterkit.*
+
 final case class Model(
     screenSize: Size,
     player: Player,

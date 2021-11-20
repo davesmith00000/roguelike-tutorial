@@ -4,7 +4,7 @@ import indigo._
 import indigo.scenes._
 import scala.scalajs.js.annotation.JSExportTopLevel
 
-import roguelike.terminal.{TerminalEntity, TerminalText}
+import io.indigoengine.roguelike.starterkit.*
 import roguelike.model.Model
 import roguelike.model.ViewModel
 
@@ -32,11 +32,11 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
             .withFrameRate(30)
             .withViewport(screenSize.width * charSize.width, screenSize.height * charSize.height)
         )
-        .withFonts(DfTiles.Fonts.fontInfo)
+        .withFonts(RoguelikeTiles.Size10x10.Fonts.fontInfo)
         .withAssets(Assets.assets)
         .withShaders(
-          TerminalEntity.shader(Assets.Required.mapFragShader),
-          TerminalText.shader(Assets.Required.textFragShader)
+          TerminalEntity.shader(4000),
+          TerminalText.standardShader
         )
     ).addGlobalEvents(RegenerateLevel)
 

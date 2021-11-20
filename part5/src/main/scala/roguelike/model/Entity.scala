@@ -1,8 +1,8 @@
 package roguelike.model
 
 import indigo._
-import roguelike.terminal.MapTile
-import roguelike.DfTiles
+
+import io.indigoengine.roguelike.starterkit.*
 
 sealed trait Entity:
   def position: Point
@@ -15,7 +15,7 @@ sealed trait Entity:
     moveBy(Point(x, y), gameMap)
 
 final case class Player(position: Point) extends Entity:
-  val tile: MapTile           = MapTile(DfTiles.Tile.`@`, RGB.Magenta)
+  val tile: MapTile           = MapTile(Tile.`@`, RGB.Magenta)
   val blocksMovement: Boolean = false
   val name: String            = "Player"
 
@@ -36,7 +36,7 @@ final case class Player(position: Point) extends Entity:
         this.copy(position = position + amount)
 
 final case class Orc(position: Point) extends Entity:
-  val tile: MapTile           = MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63))
+  val tile: MapTile           = MapTile(Tile.`o`, RGB.fromColorInts(63, 127, 63))
   val blocksMovement: Boolean = true
   val name: String            = "Orc"
 
@@ -44,7 +44,7 @@ final case class Orc(position: Point) extends Entity:
     this.copy(position = position + amount)
 
 final case class Troll(position: Point) extends Entity:
-  val tile: MapTile           = MapTile(DfTiles.Tile.`T`, RGB.fromColorInts(0, 127, 0))
+  val tile: MapTile           = MapTile(Tile.`T`, RGB.fromColorInts(0, 127, 0))
   val blocksMovement: Boolean = true
   val name: String            = "Troll"
 

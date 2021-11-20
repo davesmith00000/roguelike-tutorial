@@ -14,6 +14,8 @@ import roguelike.ColorScheme
 import roguelike.model.windows.LevelUpWindow
 import roguelike.model.windows.CharacterWindow
 
+import io.indigoengine.roguelike.starterkit.*
+
 final case class Model(
     screenSize: Size,
     player: Player,

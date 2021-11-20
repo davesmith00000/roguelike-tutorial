@@ -2,7 +2,7 @@ package roguelike.model
 
 import indigo._
 
-import roguelike.terminal.TerminalEmulator
+import io.indigoengine.roguelike.starterkit.*
 
 final case class ViewModel(background: TerminalEmulator)
 

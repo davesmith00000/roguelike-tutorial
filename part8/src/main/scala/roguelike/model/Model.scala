@@ -10,6 +10,8 @@ import roguelike.model.windows.HistoryViewer
 import roguelike.model.windows.InventoryWindow
 import roguelike.model.windows.DropWindow
 
+import io.indigoengine.roguelike.starterkit.*
+
 final case class Model(
     screenSize: Size,
     player: Player,

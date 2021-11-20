@@ -2,6 +2,8 @@ package roguelike.model
 
 import indigo._
 
+import io.indigoengine.roguelike.starterkit.*
+
 final case class Model(screen: Size, player: Player)
 object Model:
   def initial(screenSize: Size): Model =

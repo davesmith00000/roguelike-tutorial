@@ -2,7 +2,7 @@ package roguelike
 
 import indigo._
 import roguelike.model.Player
-import roguelike.terminal.TerminalText
+import io.indigoengine.roguelike.starterkit.*
 import roguelike.model.Entity
 import roguelike.model.Hostile
 import roguelike.model.GameState
@@ -13,15 +13,15 @@ object View:
     s"HP: ${Math.max(0, player.fighter.hp)}/${player.fighter.maxHp}"
 
   val statusLine: Text[TerminalText] =
-    Text("", DfTiles.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA.Zero))
+    Text("", RoguelikeTiles.Size10x10.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA.Zero))
       .moveTo(1, 2)
 
   val toolTipNeutral: Text[TerminalText] =
-    Text("", DfTiles.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA(0.3, 0.3, 0.3, 1.0)))
+    Text("", RoguelikeTiles.Size10x10.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA(0.3, 0.3, 0.3, 1.0)))
   val toolTipAlive: Text[TerminalText] =
-    Text("", DfTiles.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA.Blue))
+    Text("", RoguelikeTiles.Size10x10.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA.Blue))
   val toolTipDead: Text[TerminalText] =
-    Text("", DfTiles.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA.Red))
+    Text("", RoguelikeTiles.Size10x10.Fonts.fontKey, TerminalText(Assets.tileMap, RGB.White, RGBA.Red))
 
   def renderBar(player: Player, totalWidth: Int, position: Point): Group =
     val height   = RogueLikeGame.charSize.height + 4

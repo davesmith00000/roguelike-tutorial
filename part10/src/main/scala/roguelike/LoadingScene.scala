@@ -3,10 +3,7 @@ package roguelike
 import indigo._
 import indigo.scenes._
 
-import roguelike.terminal.TerminalText
-import roguelike.terminal.MapTile
-import roguelike.terminal.TerminalEmulator
-import roguelike.terminal.TerminalEntity
+import io.indigoengine.roguelike.starterkit.*
 
 import roguelike.model.Model
 import roguelike.model.ViewModel
@@ -90,6 +87,6 @@ object LoadingScene extends Scene[Unit, Model, ViewModel]:
           .scaleBy((RogueLikeGame.viewportSize / Size(160, 100)).toVector),
         TerminalEmulator(RogueLikeGame.screenSize)
           .putLine(Point(2, 48), "Loading...", RGB.White, RGBA.Black)
-          .draw(Assets.tileMap, RogueLikeGame.charSize, shroud)
+          .draw(Assets.tileMap, RogueLikeGame.charSize, shroud, 4000)
       )
     )

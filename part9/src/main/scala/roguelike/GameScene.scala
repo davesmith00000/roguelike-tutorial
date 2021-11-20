@@ -3,10 +3,7 @@ package roguelike
 import indigo._
 import indigo.scenes._
 
-import roguelike.terminal.TerminalText
-import roguelike.terminal.MapTile
-import roguelike.terminal.TerminalEmulator
-import roguelike.terminal.TerminalEntity
+import io.indigoengine.roguelike.starterkit.*
 
 import roguelike.model.Model
 import roguelike.model.ViewModel
@@ -255,7 +252,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
             case None =>
               term
                 .inset(log, Point(21, 45))
-                .put(model.lookAtTarget, MapTile(DfTiles.Tile.DARK_SHADE, RGB.White, RGBA(0.7, 0.7, 0.7)))
+                .put(model.lookAtTarget, MapTile(Tile.DARK_SHADE, RGB.White, RGBA(0.7, 0.7, 0.7)))
 
             case Some(tile) =>
               term
@@ -266,7 +263,7 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
       viewModel.copy(
         terminalEntity = Option(
           withWindows
-            .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
+            .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud, 4000)
         )
       )
     )

@@ -1,6 +1,6 @@
 package roguelike.model
 
-import roguelike.terminal.TerminalEmulator
+import io.indigoengine.roguelike.starterkit.*
 import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.Size
 import indigo.shared.datatypes.RGB

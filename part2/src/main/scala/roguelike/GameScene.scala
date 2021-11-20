@@ -3,9 +3,7 @@ package roguelike
 import indigo._
 import indigo.scenes._
 
-import roguelike.terminal.TerminalText
-import roguelike.terminal.MapTile
-import roguelike.terminal.TerminalEmulator
+import io.indigoengine.roguelike.starterkit.*
 
 import roguelike.model.Model
 import roguelike.model.GameTile
@@ -62,6 +60,6 @@ object GameScene extends Scene[Unit, Model, Unit]:
         terminal
           .put(model.gameMap.toPositionedTiles)
           .put(model.entitiesList.map(e => (e.position, e.tile)))
-          .draw(Assets.tileMap, RogueLikeGame.charSize, GameTile.Ground.mapTile)
+          .draw(Assets.tileMap, RogueLikeGame.charSize, GameTile.Ground.mapTile, 4000)
       )
     )

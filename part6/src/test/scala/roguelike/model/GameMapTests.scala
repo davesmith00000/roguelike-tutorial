@@ -35,16 +35,19 @@ class GameMapTests extends munit.FunSuite {
       Point(3, 0),
       Point(2, 1),
       Point(2, 0)
-    ).map(_ + Point(17,21))
+    ).map(_ + Point(17, 21))
 
   test("getPathTo") {
     val actual =
       GameMap.getPathTo(Dice.fromSeed(0), Point(20, 23), Point(19, 26), walkable, Rectangle(Point(17, 21), Size(5, 7)))
 
-    val expected =
-      List(Point(20,23), Point(19,23), Point(19,24), Point(19,25), Point(19,26))
+    val possiblePaths: List[List[Point]] =
+      List(
+        List(Point(20, 23), Point(19, 23), Point(19, 24), Point(19, 25), Point(19, 26)),
+        List(Point(20, 23), Point(20, 24), Point(20, 25), Point(19, 25), Point(19, 26))
+      )
 
-    assertEquals(actual, expected)
+    assert(possiblePaths.contains(actual))
   }
 
 }

@@ -3,10 +3,7 @@ package roguelike
 import indigo._
 import indigo.scenes._
 
-import roguelike.terminal.TerminalText
-import roguelike.terminal.MapTile
-import roguelike.terminal.TerminalEmulator
-import roguelike.terminal.TerminalEntity
+import io.indigoengine.roguelike.starterkit.*
 
 import roguelike.model.Model
 import roguelike.model.ViewModel
@@ -85,6 +82,6 @@ object GameScene extends Scene[Unit, Model, ViewModel]:
         SceneUpdateFragment(
           viewModel.background
             .combine(entities)
-            .draw(Assets.tileMap, RogueLikeGame.charSize, GameTile.DarkWall.mapTile)
+            .draw(Assets.tileMap, RogueLikeGame.charSize, GameTile.DarkWall.mapTile, 4000)
         )
       )

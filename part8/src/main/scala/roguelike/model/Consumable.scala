@@ -1,7 +1,7 @@
 package roguelike.model
 
-import roguelike.terminal.MapTile
-import roguelike.DfTiles
+
+import io.indigoengine.roguelike.starterkit.*
 import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.RGB
 import roguelike.ColorScheme
@@ -16,7 +16,7 @@ object Consumable:
 
   final case class HealthPotion(amount: Int) extends Consumable:
     val name: String  = "Health Potion"
-    val tile: MapTile = MapTile(DfTiles.Tile.`!`, RGB(0.5, 0.0, 1.0))
+    val tile: MapTile = MapTile(Tile.`!`, RGB(0.5, 0.0, 1.0))
 
     def action(player: Player): Outcome[ConsumeAttempt] =
       val possibleAmount =

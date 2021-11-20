@@ -1,12 +1,13 @@
 package roguelike.model
 
 import indigo._
-import roguelike.terminal.MapTile
-import roguelike.DfTiles
+
 import indigoextras.trees.QuadTree
 import indigoextras.trees.QuadTree.{QuadBranch, QuadEmpty, QuadLeaf}
 import indigoextras.geometry.Vertex
 import scala.annotation.tailrec
+
+import io.indigoengine.roguelike.starterkit.*
 
 final case class Model(screen: Size, player: Player, entities: List[Entity], gameMap: GameMap):
   def entitiesList: List[Entity] =
@@ -31,7 +32,7 @@ sealed trait Entity:
     moveBy(Point(x, y), gameMap)
 
 final case class Player(position: Point) extends Entity:
-  val tile: MapTile = MapTile(DfTiles.Tile.`@`, RGB.Magenta)
+  val tile: MapTile = MapTile(Tile.`@`, RGB.Magenta)
 
   def moveBy(amount: Point, gameMap: GameMap): Player =
     gameMap.lookUp(position + amount) match
@@ -58,7 +59,7 @@ object Player:
     Player(screenSize.toPoint / 2)
 
 final case class NPC(position: Point) extends Entity:
-  val tile: MapTile = MapTile(DfTiles.Tile.WHITE_SMILING_FACE, RGB.Cyan)
+  val tile: MapTile = MapTile(Tile.WHITE_SMILING_FACE, RGB.Cyan)
 
   def moveBy(amount: Point, gameMap: GameMap): NPC =
     this.copy(position = position + amount)
@@ -71,12 +72,12 @@ sealed trait GameTile:
 
 object GameTile:
   case object DarkWall extends GameTile:
-    val mapTile: MapTile    = MapTile(DfTiles.Tile.DARK_SHADE, RGB(0.9, 0, 0.0))
+    val mapTile: MapTile    = MapTile(Tile.DARK_SHADE, RGB(0.9, 0, 0.0))
     val blocked: Boolean    = true
     val blockSight: Boolean = true
 
   case object Ground extends GameTile:
-    val mapTile: MapTile    = MapTile(DfTiles.Tile.LIGHT_SHADE, RGB(0.1, 0.1, 0.4))
+    val mapTile: MapTile    = MapTile(Tile.LIGHT_SHADE, RGB(0.1, 0.1, 0.4))
     val blocked: Boolean    = false
     val blockSight: Boolean = false
 

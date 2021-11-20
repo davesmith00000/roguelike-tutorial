@@ -4,6 +4,8 @@ import indigo._
 
 import indigoextras.trees.QuadTree
 
+import io.indigoengine.roguelike.starterkit.*
+
 final case class Model(screenSize: Size, player: Player, entities: List[Entity], gameMap: GameMap):
   def entitiesList: List[Entity] =
     player :: entities.filter(e => gameMap.visible.contains(e.position))

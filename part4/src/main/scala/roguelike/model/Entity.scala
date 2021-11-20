@@ -1,8 +1,8 @@
 package roguelike.model
 
 import indigo._
-import roguelike.terminal.MapTile
-import roguelike.DfTiles
+
+import io.indigoengine.roguelike.starterkit.*
 
 sealed trait Entity:
   def position: Point
@@ -13,7 +13,7 @@ sealed trait Entity:
     moveBy(Point(x, y), gameMap)
 
 final case class Player(position: Point) extends Entity:
-  val tile: MapTile = MapTile(DfTiles.Tile.`@`, RGB.Magenta)
+  val tile: MapTile = MapTile(Tile.`@`, RGB.Magenta)
 
   def moveBy(amount: Point, gameMap: GameMap): Player =
     gameMap.lookUp(position + amount) match
@@ -36,7 +36,7 @@ final case class Player(position: Point) extends Entity:
     moveBy(Point(1, 0), gameMap)
 
 final case class NPC(position: Point) extends Entity:
-  val tile: MapTile = MapTile(DfTiles.Tile.WHITE_SMILING_FACE, RGB.Cyan)
+  val tile: MapTile = MapTile(Tile.WHITE_SMILING_FACE, RGB.Cyan)
 
   def moveBy(amount: Point, gameMap: GameMap): NPC =
     this.copy(position = position + amount)

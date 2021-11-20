@@ -2,11 +2,8 @@ package roguelike.model
 
 import indigo._
 
-import roguelike.terminal.TerminalEntity
-import roguelike.terminal.MapTile
-import roguelike.DfTiles
 import roguelike.RogueLikeGame
-import roguelike.terminal.TerminalEmulator
+import io.indigoengine.roguelike.starterkit.*
 import roguelike.Assets
 
 final case class ViewModel(terminalEntity: Option[TerminalEntity], shroud: MapTile):
@@ -60,7 +57,7 @@ final case class ViewModel(terminalEntity: Option[TerminalEntity], shroud: MapTi
             case None =>
               term
                 .inset(log, Point(21, 45))
-                .put(model.lookAtTarget, MapTile(DfTiles.Tile.DARK_SHADE, RGB.White, RGBA(0.7, 0.7, 0.7)))
+                .put(model.lookAtTarget, MapTile(Tile.DARK_SHADE, RGB.White, RGBA(0.7, 0.7, 0.7)))
 
             case Some(tile) =>
               term
@@ -79,7 +76,7 @@ final case class ViewModel(terminalEntity: Option[TerminalEntity], shroud: MapTi
       this.copy(
         terminalEntity = Option(
           withWindows
-            .draw(Assets.tileMap, RogueLikeGame.charSize, this.shroud)
+            .draw(Assets.tileMap, RogueLikeGame.charSize, this.shroud, 4000)
         )
       )
     )
@@ -88,5 +85,5 @@ object ViewModel:
   def initial: ViewModel =
     ViewModel(
       None,
-      MapTile(DfTiles.Tile.SPACE)
+      MapTile(Tile.SPACE)
     )

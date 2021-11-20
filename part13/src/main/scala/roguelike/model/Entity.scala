@@ -1,9 +1,9 @@
 package roguelike.model
 
 import indigo._
-import roguelike.terminal.MapTile
-import roguelike.DfTiles
-import roguelike.utils.PathFinder
+
+import io.indigoengine.roguelike.starterkit.*
+
 import roguelike.GameEvent
 import roguelike.ColorScheme
 
@@ -100,7 +100,7 @@ final case class Player(
     xp: Int,
     equipment: Equipment
 ) extends Actor:
-  def tile: MapTile = if isAlive then MapTile(DfTiles.Tile.`@`, RGB.Magenta) else MapTile(DfTiles.Tile.`@`, RGB.Red)
+  def tile: MapTile = if isAlive then MapTile(Tile.`@`, RGB.Magenta) else MapTile(Tile.`@`, RGB.Red)
   val blocksMovement: Boolean = false
   val name: String            = "Player"
 
@@ -301,8 +301,8 @@ final case class Orc(
     state: HostileState
 ) extends Hostile:
   def tile: MapTile =
-    if isAlive then MapTile(DfTiles.Tile.`o`, RGB.fromColorInts(63, 127, 63))
-    else MapTile(DfTiles.Tile.`%`, RGB(1.0, 0.6, 1.0))
+    if isAlive then MapTile(Tile.`o`, RGB.fromColorInts(63, 127, 63))
+    else MapTile(Tile.`%`, RGB(1.0, 0.6, 1.0))
   val blocksMovement: Boolean = isAlive
   val name: String            = Orc.name
   val xpGiven: Int            = 35
@@ -343,7 +343,7 @@ final case class Troll(
     state: HostileState
 ) extends Hostile:
   def tile: MapTile =
-    if isAlive then MapTile(DfTiles.Tile.`T`, RGB.fromColorInts(0, 127, 0)) else MapTile(DfTiles.Tile.`%`, RGB.Magenta)
+    if isAlive then MapTile(Tile.`T`, RGB.fromColorInts(0, 127, 0)) else MapTile(Tile.`%`, RGB.Magenta)
   val blocksMovement: Boolean = isAlive
   val name: String            = Troll.name
   val xpGiven: Int            = 100

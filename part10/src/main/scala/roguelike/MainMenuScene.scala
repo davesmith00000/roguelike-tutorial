@@ -3,10 +3,7 @@ package roguelike
 import indigo._
 import indigo.scenes._
 
-import roguelike.terminal.TerminalText
-import roguelike.terminal.MapTile
-import roguelike.terminal.TerminalEmulator
-import roguelike.terminal.TerminalEntity
+import io.indigoengine.roguelike.starterkit.*
 
 import roguelike.model.Model
 import roguelike.model.ViewModel
@@ -90,6 +87,6 @@ object MainMenuScene extends Scene[Unit, Model, ViewModel]:
           .putLine(Point(2, 22), " [ n ] Play a new game", RGB.White, RGBA.Black)
           .putLine(Point(2, 23), " [ c ] Continue last game", loadColor, RGBA.Black)
           .putLine(Point(2, 48), "By Dave Smith", RGB.Yellow, RGBA.Black)
-          .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud)
+          .draw(Assets.tileMap, RogueLikeGame.charSize, viewModel.shroud, 4000)
       )
     )

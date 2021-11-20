@@ -20,7 +20,9 @@ Maybe next year I'll start from where I left off. Or maybe you will? :-)
 
 ## Join in!
 
-Everything is being built with [Indigo](https://indigoengine.io/) and I'm evolving a [***starter kit***](https://github.com/PurpleKingdomGames/indigo-roguelike-starterkit) that you can use.
+Everything is being built with [Indigo](https://indigoengine.io/) and I've made a [***roguelike starter kit***](https://github.com/PurpleKingdomGames/roguelike-starterkit) especially for use with Indigo, that you can use.
+
+To follow along, you'll need to do a local publish of the starter kit, instructions on on the [repo's README.](https://github.com/PurpleKingdomGames/roguelike-starterkit)
 
 ## Completed Tutorial Parts
 

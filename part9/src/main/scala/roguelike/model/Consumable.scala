@@ -1,7 +1,6 @@
 package roguelike.model
 
-import roguelike.terminal.MapTile
-import roguelike.DfTiles
+import io.indigoengine.roguelike.starterkit.*
 import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.RGB
 import roguelike.ColorScheme
@@ -18,19 +17,19 @@ object Consumable:
 
   final case class HealthPotion(amount: Int) extends Consumable:
     val name: String  = "Health Potion"
-    val tile: MapTile = MapTile(DfTiles.Tile.`!`, RGB(0.5, 0.0, 1.0))
+    val tile: MapTile = MapTile(Tile.`!`, RGB(0.5, 0.0, 1.0))
 
   final case class LightningScroll(damage: Int, maximumRange: Int) extends Consumable:
     val name: String  = "Lightning Scroll"
-    val tile: MapTile = MapTile(DfTiles.Tile.`!`, RGB.Cyan)
+    val tile: MapTile = MapTile(Tile.`!`, RGB.Cyan)
 
   final case class FireBallScroll(damage: Int, radius: Int) extends Consumable:
     val name: String  = "Fireball Scroll"
-    val tile: MapTile = MapTile(DfTiles.Tile.`~`, RGB.Red)
+    val tile: MapTile = MapTile(Tile.`~`, RGB.Red)
 
   final case class ConfusionScroll(numberOfTurns: Int) extends Consumable:
     val name: String  = "Confusion Scroll"
-    val tile: MapTile = MapTile(DfTiles.Tile.`~`, RGB.fromColorInts(207, 63, 255))
+    val tile: MapTile = MapTile(Tile.`~`, RGB.fromColorInts(207, 63, 255))
 
   def useHealthPotion(healthPotion: HealthPotion, player: Player): Outcome[(Player, Boolean)] =
     val possibleAmount =

@@ -2,12 +2,11 @@ package roguelike.model
 
 import indigo.shared.datatypes.RGB
 import indigo.shared.datatypes.RGBA
-import roguelike.terminal.TerminalEntity
+
 import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.Size
-import roguelike.terminal.TerminalEmulator
-import roguelike.terminal.MapTile
-import roguelike.DfTiles
+import io.indigoengine.roguelike.starterkit.*
+
 import roguelike.Assets
 import roguelike.RogueLikeGame
 import roguelike.ColorScheme
@@ -158,5 +157,5 @@ object MessageLog:
       startOffset: Int
   ): TerminalEntity =
     logToTerminal(size, messages, reversed, startOffset, true)
-      .draw(Assets.tileMap, RogueLikeGame.charSize, MapTile(DfTiles.Tile.SPACE))
+      .draw(Assets.tileMap, RogueLikeGame.charSize, MapTile(Tile.SPACE), 4000)
       .moveTo(position)

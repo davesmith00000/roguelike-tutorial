@@ -10,6 +10,8 @@ import io.circe.{Decoder, Encoder, HCursor, Json}
 import io.circe.parser.decode
 import indigo.shared.IndigoLogger
 
+import io.indigoengine.roguelike.starterkit.*
+
 final case class ModelSaveData(
     screenSize: Size,
     player: Player,

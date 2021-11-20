@@ -1,8 +1,8 @@
 package roguelike.model
 
 import indigo._
-import roguelike.terminal.MapTile
-import roguelike.DfTiles
+
+import io.indigoengine.roguelike.starterkit.*
 
 import indigoextras.trees.QuadTree
 import indigoextras.trees.QuadTree.{QuadBranch, QuadEmpty, QuadLeaf}
