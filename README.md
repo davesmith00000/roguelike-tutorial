@@ -6,6 +6,16 @@ I'm following the spirit of the tutorials rather than the letter, since Indigo i
 
 > The ["RoguelikeDev Does The Complete Roguelike Tutorial"](https://www.reddit.com/r/roguelikedev/comments/o5x585/roguelikedev_does_the_complete_roguelike_tutorial/) is now over for 2021! In celebration of making it to the finish line, [I've written up a brief post-mortem of the experience.](https://indigoengine.io/blog/2021/08/17/roguelike-post-mortem)
 
+***UPDATE 27/11/2021 - A Fresh Perspective:*** For my own interest, I began revisiting the final code base that came out of my attempts to follow the tutorial. Couple of things I've noticed:
+
+1. By the end, I really was just trying to finish the tutorials, so some of the code is not great.
+
+2. One way in which I am following the tutorial fairly accurately (as I recall) is in the data modeling - maybe not identical by not thinking about it too hard because I was in a rush. The more I've tried to unpick the modeling to make it work with more functional code, the more I wish I'd thought about all this the first time around. It sort of looks ok, but it quickly unravels into a bit of a mess.
+
+My advice would be to take the game model as a guideline only. These are the general things you'll need to think about... player, equipment, inventory, etc. But decide for yourself how they ought to relate to one another.
+
+For example: In this code base the `Equipment` holds a weird link to the `Inventory` to know which inventory items are equipped. But from a data modeling perspective, if it's equipped... should it be in the inventory at all? If not, what happens to equipment management in terms of UI/UX?
+
 ## This is not a game
 
 There are 13 parts to the tutorial (2020 version), all of which are presented below.
