@@ -5,6 +5,9 @@ import indigo.scenes._
 import io.indigoengine.roguelike.starterkit.*
 import roguelike.model.Model
 import roguelike.model.ViewModel
+import roguelike.scenes.GameScene
+import roguelike.scenes.LoadingScene
+import roguelike.scenes.MainMenuScene
 
 import scala.scalajs.js.annotation.JSExportTopLevel
 

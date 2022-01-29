@@ -1,9 +1,11 @@
-package roguelike
+package roguelike.scenes
 
 import indigo._
 import indigo.scenes._
 import io.indigoengine.roguelike.starterkit.*
+import roguelike.Assets
 import roguelike.GameEvent
+import roguelike.RogueLikeGame
 import roguelike.model.GameState
 import roguelike.model.GameTile
 import roguelike.model.Message

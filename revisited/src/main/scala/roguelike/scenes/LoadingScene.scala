@@ -1,9 +1,11 @@
-package roguelike
+package roguelike.scenes
 
 import indigo._
 import indigo.scenes._
 import io.indigoengine.roguelike.starterkit.*
+import roguelike.Assets
 import roguelike.GameEvent
+import roguelike.RogueLikeGame
 import roguelike.model.GameLoadInfo
 import roguelike.model.GameState
 import roguelike.model.GameTile
@@ -22,10 +24,13 @@ object LoadingScene extends Scene[Unit, Model, ViewModel]:
     SceneName("loading scene")
 
   val modelLens: Lens[Model, GameLoadInfo] =
-    Lens(_.loadInfo, (m, t) => m.copy(loadInfo = t))
+    Lens(
+      _.loadInfo,
+      (m, t) => m.copy(loadInfo = t)
+    )
 
   val viewModelLens: Lens[ViewModel, MapTile] =
-    Lens.readOnly(_.shroud)
+    Lens.readOnly((vm: ViewModel) => vm.shroud)
 
   val eventFilters: EventFilters =
     EventFilters.Permissive
@@ -82,8 +87,7 @@ object LoadingScene extends Scene[Unit, Model, ViewModel]:
           RogueLikeGame.viewportSize.width,
           RogueLikeGame.viewportSize.height,
           Material.Bitmap(Assets.menuBackground)
-        )
-          .scaleBy((RogueLikeGame.viewportSize / Size(160, 100)).toVector),
+        ).scaleBy((RogueLikeGame.viewportSize / Size(160, 100)).toVector),
         TerminalEmulator(RogueLikeGame.screenSize)
           .putLine(Point(2, 48), "Loading...", RGB.White, RGBA.Black)
           .draw(Assets.tileMap, RogueLikeGame.charSize, shroud, 4000)
