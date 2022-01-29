@@ -2,11 +2,11 @@ package roguelike
 
 import indigo._
 import indigo.scenes._
-import scala.scalajs.js.annotation.JSExportTopLevel
-
 import io.indigoengine.roguelike.starterkit.*
 import roguelike.model.Model
 import roguelike.model.ViewModel
+
+import scala.scalajs.js.annotation.JSExportTopLevel
 
 @JSExportTopLevel("IndigoGame")
 object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
@@ -22,15 +22,13 @@ object RogueLikeGame extends IndigoGame[Unit, Unit, Model, ViewModel]:
     NonEmptyList(LoadingScene, MainMenuScene, GameScene)
 
   val eventFilters: EventFilters =
-    EventFilters.Permissive
+    EventFilters.BlockAll
 
   def boot(flags: Map[String, String]): Outcome[BootResult[Unit]] =
     Outcome(
       BootResult
         .noData(
           GameConfig.default
-            .withMagnification(1)
-            .withFrameRate(30)
             .withViewport(viewportSize.width, viewportSize.height)
         )
         .withFonts(RoguelikeTiles.Size10x10.Fonts.fontInfo)

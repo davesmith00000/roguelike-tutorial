@@ -2,15 +2,13 @@ package roguelike
 
 import indigo._
 import indigo.scenes._
-
 import io.indigoengine.roguelike.starterkit.*
-
+import roguelike.GameEvent
+import roguelike.model.GameState
+import roguelike.model.GameTile
+import roguelike.model.Message
 import roguelike.model.Model
 import roguelike.model.ViewModel
-import roguelike.model.GameTile
-import roguelike.GameEvent
-import roguelike.model.Message
-import roguelike.model.GameState
 import roguelike.model.windows.Window
 
 object MainMenuScene extends Scene[Unit, Model, ViewModel]:

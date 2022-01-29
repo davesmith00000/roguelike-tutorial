@@ -1,15 +1,15 @@
 package roguelike.model.windows
 
-import io.indigoengine.roguelike.starterkit.*
 import indigo.shared.datatypes.Point
-import indigo.shared.datatypes.Size
 import indigo.shared.datatypes.RGB
 import indigo.shared.datatypes.RGBA
-import roguelike.model.Inventory
-import roguelike.model.Equipment
-import roguelike.model.Weapon
+import indigo.shared.datatypes.Size
+import io.indigoengine.roguelike.starterkit.*
 import roguelike.model.Armour
+import roguelike.model.Equipment
+import roguelike.model.Inventory
 import roguelike.model.Item
+import roguelike.model.Weapon
 
 final case class InventoryWindow(
     size: Size,

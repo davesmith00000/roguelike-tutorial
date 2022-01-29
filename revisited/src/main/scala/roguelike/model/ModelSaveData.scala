@@ -1,15 +1,16 @@
 package roguelike.model
 
-import indigo.shared.datatypes.Size
+import indigo.shared.IndigoLogger
 import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.RGB
-
+import indigo.shared.datatypes.Size
+import io.circe.Decoder
+import io.circe.Encoder
+import io.circe.HCursor
+import io.circe.Json
 import io.circe._
-import io.circe.syntax._
-import io.circe.{Decoder, Encoder, HCursor, Json}
 import io.circe.parser.decode
-import indigo.shared.IndigoLogger
-
+import io.circe.syntax._
 import io.indigoengine.roguelike.starterkit.*
 
 final case class ModelSaveData(

@@ -1,19 +1,19 @@
 package roguelike.model
 
+import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.RGB
 import indigo.shared.datatypes.RGBA
-
-import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.Size
-import io.indigoengine.roguelike.starterkit.*
-
-import roguelike.Assets
-import roguelike.RogueLikeGame
-import roguelike.ColorScheme
-
+import io.circe.Decoder
+import io.circe.Encoder
+import io.circe.HCursor
+import io.circe.Json
 import io.circe._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.indigoengine.roguelike.starterkit.*
+import roguelike.Assets
+import roguelike.ColorScheme
+import roguelike.RogueLikeGame
 
 final case class Message(
     text: String,

@@ -1,8 +1,7 @@
 package roguelike
 
-import indigo.shared.events.GlobalEvent
-
 import indigo.Point
+import indigo.shared.events.GlobalEvent
 import roguelike.model.Message
 
 enum GameEvent extends GlobalEvent:

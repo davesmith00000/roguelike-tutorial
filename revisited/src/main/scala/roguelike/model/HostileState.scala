@@ -1,8 +1,11 @@
 package roguelike.model
 
+import io.circe.Decoder
+import io.circe.Encoder
+import io.circe.HCursor
+import io.circe.Json
 import io.circe._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, HCursor, Json}
 
 enum HostileState:
   case Normal                   extends HostileState

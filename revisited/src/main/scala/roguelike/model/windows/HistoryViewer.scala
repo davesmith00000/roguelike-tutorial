@@ -1,8 +1,8 @@
 package roguelike.model.windows
 
-import io.indigoengine.roguelike.starterkit.*
 import indigo.shared.datatypes.Point
 import indigo.shared.datatypes.Size
+import io.indigoengine.roguelike.starterkit.*
 import roguelike.model.MessageLog
 
 final case class HistoryViewer(

@@ -1,10 +1,10 @@
 package roguelike.model.windows
 
-import io.indigoengine.roguelike.starterkit.*
 import indigo.shared.datatypes.Point
-import indigo.shared.datatypes.Size
 import indigo.shared.datatypes.RGB
 import indigo.shared.datatypes.RGBA
+import indigo.shared.datatypes.Size
+import io.indigoengine.roguelike.starterkit.*
 import roguelike.model.Inventory
 
 final case class DropWindow(size: Size, position: Int, window: TerminalEmulator)

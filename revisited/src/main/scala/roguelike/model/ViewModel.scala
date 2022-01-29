@@ -1,10 +1,9 @@
 package roguelike.model
 
 import indigo._
-
 import io.indigoengine.roguelike.starterkit.*
-import roguelike.RogueLikeGame
 import roguelike.Assets
+import roguelike.RogueLikeGame
 
 final case class ViewModel(
     terminalEntity: Option[TerminalEntity],

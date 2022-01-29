@@ -1,12 +1,14 @@
 package roguelike.model
 
+import indigo.Dice
 import indigo.Outcome
 import indigo.RGB
-import indigo.Dice
-
+import io.circe.Decoder
+import io.circe.Encoder
+import io.circe.HCursor
+import io.circe.Json
 import io.circe._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, HCursor, Json}
 import roguelike.GameEvent
 
 final case class Equipment(weapon: Option[Weapon], armour: Option[Armour]):

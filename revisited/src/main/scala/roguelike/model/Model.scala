@@ -1,20 +1,17 @@
 package roguelike.model
 
 import indigo._
-
-import roguelike.GameEvent
-
 import indigoextras.trees.QuadTree
+import io.indigoengine.roguelike.starterkit.*
+import roguelike.ColorScheme
+import roguelike.GameEvent
 import roguelike.RogueLikeGame
+import roguelike.model.windows.CharacterWindow
+import roguelike.model.windows.DropWindow
 import roguelike.model.windows.HistoryViewer
 import roguelike.model.windows.InventoryWindow
-import roguelike.model.windows.DropWindow
-import roguelike.model.windows.QuitWindow
-import roguelike.ColorScheme
 import roguelike.model.windows.LevelUpWindow
-import roguelike.model.windows.CharacterWindow
-
-import io.indigoengine.roguelike.starterkit.*
+import roguelike.model.windows.QuitWindow
 
 final case class Model(
     screenSize: Size,

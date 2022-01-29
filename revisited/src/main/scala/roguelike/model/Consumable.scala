@@ -1,20 +1,22 @@
 package roguelike.model
 
-import io.indigoengine.roguelike.starterkit.*
-import indigo.shared.datatypes.Point
-import indigo.shared.datatypes.RGB
-import roguelike.ColorScheme
 import indigo.shared.Outcome
 import indigo.shared.datatypes.BindingKey
-import roguelike.GameEvent
-
+import indigo.shared.datatypes.Point
+import indigo.shared.datatypes.RGB
+import indigo.shared.dice.Dice
+import io.circe.Decoder
+import io.circe.Encoder
+import io.circe.HCursor
+import io.circe.Json
 import io.circe._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.indigoengine.roguelike.starterkit.*
+import roguelike.ColorScheme
+import roguelike.GameEvent
+import roguelike.model.Consumable.ConfusionScroll
 
 import scala.annotation.tailrec
-import roguelike.model.Consumable.ConfusionScroll
-import indigo.shared.dice.Dice
 
 sealed trait Consumable:
   def name: String

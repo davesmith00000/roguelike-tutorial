@@ -1,11 +1,11 @@
 package roguelike
 
 import indigo._
-import roguelike.model.Player
 import io.indigoengine.roguelike.starterkit.*
 import roguelike.model.Entity
-import roguelike.model.Hostile
 import roguelike.model.GameState
+import roguelike.model.Hostile
+import roguelike.model.Player
 
 object View:
 

@@ -1,12 +1,13 @@
 package roguelike.model
 
 import indigo._
-
-import io.indigoengine.roguelike.starterkit.*
-
+import io.circe.Decoder
+import io.circe.Encoder
+import io.circe.HCursor
+import io.circe.Json
 import io.circe._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.indigoengine.roguelike.starterkit.*
 
 sealed trait GameTile:
   def lightMapTile: MapTile

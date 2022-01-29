@@ -1,18 +1,20 @@
 package roguelike.model
 
 import indigo._
-
-import io.indigoengine.roguelike.starterkit.*
-import roguelike.GameEvent
-
-import indigoextras.trees.QuadTree
-import indigoextras.trees.QuadTree.{QuadBranch, QuadEmpty, QuadLeaf}
-import indigoextras.geometry.Vertex
 import indigoextras.geometry.BoundingBox
-
+import indigoextras.geometry.Vertex
+import indigoextras.trees.QuadTree
+import indigoextras.trees.QuadTree.QuadBranch
+import indigoextras.trees.QuadTree.QuadEmpty
+import indigoextras.trees.QuadTree.QuadLeaf
+import io.circe.Decoder
+import io.circe.Encoder
+import io.circe.HCursor
+import io.circe.Json
 import io.circe._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.indigoengine.roguelike.starterkit.*
+import roguelike.GameEvent
 
 import scala.annotation.tailrec
 
